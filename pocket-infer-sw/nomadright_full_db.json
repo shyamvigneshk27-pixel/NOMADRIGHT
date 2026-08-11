@@ -1,0 +1,2798 @@
+{
+  "database_version": "1.0",
+  "last_updated": "2026-08-10",
+  "note": "Keyword arrays are used for partial-match extraction from ASR text. The system checks if ANY keyword from the array appears in the normalized query. All scheme_id values are foreign keys referencing the schemes table. scheme_code is the long DB-style id (matches nomadright_kb.db's scheme_id / constants.DB_SCHEME_ID_*, e.g. 'PDS_ONORC_001'); short_code is the short form used throughout the rest of the codebase (entities.py's EntityMap.scheme_code, constants.SCHEME_CODE_*, e.g. 'PDS').",
+  "schemes": [
+    {
+      "scheme_id": 1,
+      "scheme_code": "PDS_ONORC_001",
+      "scheme_name": "PDS / One Nation One Ration Card",
+      "short_name": "Ration Card",
+      "category": "food",
+      "helpline": "14445",
+      "alt_helpline": "1967",
+      "portal_url": "https://impds.nic.in",
+      "keywords": [
+        "ration",
+        "rashan",
+        "anaj",
+        "chawal",
+        "rice",
+        "wheat",
+        "gehu",
+        "onorc",
+        "fps",
+        "fair price",
+        "khana",
+        "naaj",
+        "anna",
+        "bhojan",
+        "sabsidi",
+        "subsidy",
+        "ration card",
+        "khane ka card",
+        "mora card",
+        "khiaa card"
+      ],
+      "short_code": "PDS"
+    },
+    {
+      "scheme_id": 2,
+      "scheme_code": "PMJAY_001",
+      "scheme_name": "Ayushman Bharat PM-JAY",
+      "short_name": "Ayushman / Health Card",
+      "category": "health",
+      "helpline": "14555",
+      "alt_helpline": null,
+      "portal_url": "https://pmjay.gov.in",
+      "keywords": [
+        "ayushman",
+        "hospital",
+        "doctor",
+        "dawai",
+        "dawa",
+        "health",
+        "bimari",
+        "ilaaj",
+        "treatment",
+        "pmjay",
+        "jan arogya",
+        "medical",
+        "operation",
+        "surgery",
+        "swasthya",
+        "chikitsa",
+        "dawakhana",
+        "health card",
+        "golden card",
+        "arogya",
+        "nurse",
+        "inject",
+        "admit",
+        "emergency",
+        "pregnant",
+        "delivery",
+        "cancer",
+        "dialysis"
+      ],
+      "short_code": "PMJAY"
+    },
+    {
+      "scheme_id": 3,
+      "scheme_code": "ESHRAM_OSH_001",
+      "scheme_name": "e-Shram + OSH Code 2020",
+      "short_name": "e-Shram / Labour Rights",
+      "category": "labour_rights",
+      "helpline": "14434",
+      "alt_helpline": "1800-891-8888",
+      "portal_url": "https://eshram.gov.in",
+      "keywords": [
+        "eshram",
+        "e-shram",
+        "shram",
+        "uan",
+        "labour card",
+        "mazdoor card",
+        "shramik",
+        "mazdoor",
+        "majdoori",
+        "thekedar",
+        "oshc",
+        "osh code",
+        "shram suvidha",
+        "universal account number"
+      ],
+      "short_code": "ESHRAM"
+    },
+    {
+      "scheme_id": 4,
+      "scheme_code": "BOCW_001",
+      "scheme_name": "BOCW Welfare",
+      "short_name": "Construction Worker Card",
+      "category": "construction_welfare",
+      "helpline": "1800-891-8888",
+      "alt_helpline": null,
+      "portal_url": "https://labour.gov.in/bocw",
+      "keywords": [
+        "bocw",
+        "construction",
+        "nirman",
+        "building",
+        "banai",
+        "mason",
+        "mistri",
+        "raj mistri",
+        "carpenter",
+        "badhai",
+        "plumber",
+        "painter",
+        "rang",
+        "welder",
+        "labour card",
+        "nirman card",
+        "shramik card",
+        "site",
+        "cement",
+        "bricks",
+        "eent",
+        "scaffolding",
+        "contractor card",
+        "mahabocw",
+        "bocwwb",
+        "labour board",
+        "welfare board",
+        "shramik kalyan"
+      ],
+      "short_code": "BOCW"
+    },
+    {
+      "scheme_id": 5,
+      "scheme_code": "MGNREGS_001",
+      "short_code": "MGNREGS",
+      "scheme_name": "Mahatma Gandhi National Rural Employment Guarantee Scheme (MGNREGS)",
+      "short_name": "Job Card",
+      "category": "employment",
+      "helpline": "UNKNOWN",
+      "alt_helpline": "UNKNOWN",
+      "portal_url": "https://nrega.nic.in",
+      "keywords": [
+        "mgnrega",
+        "mgnregs",
+        "nrega",
+        "job card",
+        "100 din",
+        "100 days",
+        "job card kaam",
+        "gram panchayat kaam",
+        "rozgar",
+        "employment guarantee",
+        "gramin rozgar",
+        "vb-g ram g",
+        "ram g",
+        "gaon ka kaam",
+        "mazdoori kaam",
+        "unskilled work",
+        "manual work",
+        "rural employment"
+      ]
+    }
+  ],
+  "eligibility": [
+    {
+      "id": 1,
+      "scheme_id": 1,
+      "criterion": "Must be an existing NFSA ration card holder (AAY or PHH category)",
+      "is_mandatory": true,
+      "keywords": [
+        "ration card hai",
+        "card hai",
+        "card milega",
+        "card chahiye",
+        "eligible",
+        "layak",
+        "milega"
+      ],
+      "source": "NFSA 2013, Section 3"
+    },
+    {
+      "id": 2,
+      "scheme_id": 1,
+      "criterion": "Aadhaar number must be linked (seeded) with the ration card",
+      "is_mandatory": true,
+      "keywords": [
+        "aadhaar link",
+        "aadhaar joda",
+        "linked",
+        "seeded",
+        "link kaise",
+        "aadhaar card"
+      ],
+      "source": "DFPD, impds.nic.in"
+    },
+    {
+      "id": 3,
+      "scheme_id": 1,
+      "criterion": "Any NFSA beneficiary can use ONORC in any of 36 states — no new card needed",
+      "is_mandatory": false,
+      "keywords": [
+        "doosre state",
+        "naya city",
+        "new place",
+        "tamil nadu",
+        "gujarat",
+        "dusri jagah",
+        "migrate",
+        "jaa raha",
+        "kisi bhi jagah",
+        "any state"
+      ],
+      "source": "impds.nic.in"
+    },
+    {
+      "id": 4,
+      "scheme_id": 2,
+      "criterion": "Families identified in SECC 2011 data — rural deprivation OR urban occupational categories",
+      "is_mandatory": true,
+      "keywords": [
+        "eligible",
+        "milega",
+        "kaun ko milta",
+        "humko milega",
+        "main eligible",
+        "qualify"
+      ],
+      "source": "NHA, SECC 2011"
+    },
+    {
+      "id": 5,
+      "scheme_id": 2,
+      "criterion": "Urban workers in 11 occupational categories including construction, domestic, street vendor, transport, security guard, washer, tailor",
+      "is_mandatory": true,
+      "keywords": [
+        "construction worker",
+        "mistri",
+        "domestic",
+        "driver",
+        "vendor",
+        "hawker",
+        "sweeper",
+        "security guard",
+        "tailor",
+        "safai",
+        "kaamwali"
+      ],
+      "source": "SECC 2011 Occupational Categories"
+    },
+    {
+      "id": 6,
+      "scheme_id": 2,
+      "criterion": "All senior citizens aged 70+ are eligible regardless of income",
+      "is_mandatory": false,
+      "keywords": [
+        "budhapa",
+        "old age",
+        "70 saal",
+        "70 years",
+        "bujurg",
+        "mata pita",
+        "parents"
+      ],
+      "source": "PIB September 2024"
+    },
+    {
+      "id": 7,
+      "scheme_id": 3,
+      "criterion": "Any unorganised worker aged 16-59 years who is NOT in EPFO or ESIC",
+      "is_mandatory": true,
+      "keywords": [
+        "register kar sakta",
+        "kaun register",
+        "eligible",
+        "unorganised",
+        "asangathit",
+        "informal"
+      ],
+      "source": "eshram.gov.in"
+    },
+    {
+      "id": 8,
+      "scheme_id": 3,
+      "criterion": "For OSH Code protection: any worker who migrated from one state to another for work",
+      "is_mandatory": true,
+      "keywords": [
+        "migrate",
+        "doosre state",
+        "bahar gaya",
+        "kaam ke liye aaya",
+        "interstate",
+        "naya state"
+      ],
+      "source": "OSH Code 2020, Chapter XIII"
+    },
+    {
+      "id": 9,
+      "scheme_id": 4,
+      "criterion": "Must be a construction worker aged 18-60 with at least 90 days of construction work in last 12 months",
+      "is_mandatory": true,
+      "keywords": [
+        "90 din",
+        "90 days",
+        "kitne din",
+        "construction",
+        "nirman",
+        "banai ka kaam",
+        "site pe",
+        "work proof"
+      ],
+      "source": "BOCW Act 1996, Section 12"
+    },
+    {
+      "id": 10,
+      "scheme_id": 4,
+      "criterion": "Interstate migrant construction workers are eligible — register with the BOCW Board of the STATE WHERE YOU ARE CURRENTLY WORKING",
+      "is_mandatory": true,
+      "keywords": [
+        "kahan register",
+        "kaunsa state",
+        "destination state",
+        "jahan kaam kar raha",
+        "yahan register",
+        "is state mein"
+      ],
+      "source": "Supreme Court 2018 Order"
+    },
+    {
+      "id": 11,
+      "scheme_id": 5,
+      "criterion": "Any adult member (18 years or above) of a rural household, willing to do unskilled manual work.",
+      "is_mandatory": true,
+      "keywords": [
+        "18 saal",
+        "adult",
+        "rural household",
+        "gaon mein rehta",
+        "unskilled kaam",
+        "eligible",
+        "layak",
+        "milega"
+      ],
+      "source": "nrega.nic.in, MGNREGA 2005"
+    },
+    {
+      "id": 12,
+      "scheme_id": 5,
+      "criterion": "Applicant must reside in a rural area (urban households are not covered).",
+      "is_mandatory": true,
+      "keywords": [
+        "rural area",
+        "gaon",
+        "village",
+        "urban nahi",
+        "city nahi"
+      ],
+      "source": "nrega.nic.in"
+    },
+    {
+      "id": 13,
+      "scheme_id": 5,
+      "criterion": "Household must register with the local Gram Panchayat and obtain a Job Card before demanding work.",
+      "is_mandatory": true,
+      "keywords": [
+        "gram panchayat register",
+        "job card banwana",
+        "panchayat mein register"
+      ],
+      "source": "nrega.nic.in"
+    }
+  ],
+  "beneficiary_categories": [
+    {
+      "id": 1,
+      "scheme_id": 1,
+      "category_name": "Antyodaya Anna Yojana (AAY)",
+      "description": "Poorest of the poor — entitled to 35 kg of free food grain per household per month",
+      "keywords": [
+        "garib",
+        "poorest",
+        "aay",
+        "antyodaya",
+        "sabse garib",
+        "35 kg"
+      ]
+    },
+    {
+      "id": 2,
+      "scheme_id": 1,
+      "category_name": "Priority Household (PHH)",
+      "description": "NFSA beneficiary households — entitled to 5 kg of free food grain per person per month",
+      "keywords": [
+        "priority",
+        "phh",
+        "5 kg",
+        "per person",
+        "pratyek vyakti"
+      ]
+    },
+    {
+      "id": 3,
+      "scheme_id": 1,
+      "category_name": "Migrant Workers",
+      "description": "NFSA cardholders who have migrated to another state for work — can use ration at any FPS with Aadhaar authentication",
+      "keywords": [
+        "migrant",
+        "bahar gaya",
+        "kaam pe gaya",
+        "doosre state",
+        "naye jagah",
+        "pravasi mazdoor"
+      ]
+    },
+    {
+      "id": 4,
+      "scheme_id": 2,
+      "category_name": "Rural SECC 2011 Deprivation Households",
+      "description": "Rural households with at least one of 7 deprivation criteria — no adult 16-59, SC/ST, landless labourers, disabled members, no shelter",
+      "keywords": [
+        "gaon",
+        "rural",
+        "village",
+        "khet",
+        "zameen nahi",
+        "SC ST",
+        "disabled",
+        "viklang"
+      ]
+    },
+    {
+      "id": 5,
+      "scheme_id": 2,
+      "category_name": "Urban Occupational Workers",
+      "description": "Construction workers, domestic workers, street vendors, transport workers, security guards, sweepers, tailors, electricians in urban areas",
+      "keywords": [
+        "shahr",
+        "city",
+        "urban",
+        "construction",
+        "domestic",
+        "vendor",
+        "driver",
+        "security",
+        "sweeper"
+      ]
+    },
+    {
+      "id": 6,
+      "scheme_id": 2,
+      "category_name": "Senior Citizens 70+",
+      "description": "All citizens aged 70 and above regardless of income — get additional Rs 5 lakh top-up cover",
+      "keywords": [
+        "70 saal",
+        "70+",
+        "budhapa",
+        "bujurg",
+        "old",
+        "extra cover",
+        "top-up"
+      ]
+    },
+    {
+      "id": 7,
+      "scheme_id": 3,
+      "category_name": "Construction Workers",
+      "description": "Largest category of migrant workers — masons, carpenters, plumbers, painters, labourers",
+      "keywords": [
+        "mason",
+        "mistri",
+        "carpenter",
+        "badhai",
+        "plumber",
+        "painter",
+        "labourer",
+        "mazdoor"
+      ]
+    },
+    {
+      "id": 8,
+      "scheme_id": 3,
+      "category_name": "Domestic Workers",
+      "description": "Maids, cooks, babysitters, security guards working in private households",
+      "keywords": [
+        "maid",
+        "cook",
+        "khaana banana",
+        "ghar ka kaam",
+        "bai",
+        "servant",
+        "domestic"
+      ]
+    },
+    {
+      "id": 9,
+      "scheme_id": 4,
+      "category_name": "Building Construction Workers",
+      "description": "All workers at building construction sites — masons, carpenters, plumbers, welders, painters, labourers, helpers",
+      "keywords": [
+        "building",
+        "imarat",
+        "ghar banao",
+        "road",
+        "bridge",
+        "pul",
+        "site worker"
+      ]
+    },
+    {
+      "id": 10,
+      "scheme_id": 5,
+      "category_name": "Rural Households",
+      "description": "Any household residing in rural areas whose adult members are willing to do unskilled manual work.",
+      "keywords": [
+        "rural household",
+        "gaon ka parivar",
+        "gramin"
+      ]
+    },
+    {
+      "id": 11,
+      "scheme_id": 5,
+      "category_name": "Women",
+      "description": "One-third of MGNREGA beneficiaries are required to be women; the scheme actively prioritises women's participation.",
+      "keywords": [
+        "mahila",
+        "women",
+        "aurat",
+        "one third women"
+      ]
+    },
+    {
+      "id": 12,
+      "scheme_id": 5,
+      "category_name": "SC/ST households",
+      "description": "The scheme specifically encourages participation of Scheduled Caste and Scheduled Tribe households.",
+      "keywords": [
+        "sc st",
+        "scheduled caste",
+        "scheduled tribe",
+        "dalit adivasi"
+      ]
+    }
+  ],
+  "benefits": [
+    {
+      "id": 1,
+      "scheme_id": 1,
+      "benefit_name": "Free food grains nationwide",
+      "description": "Free food grains (rice, wheat) from any Fair Price Shop in any state — 5 kg per person/month (PHH) or 35 kg per household/month (AAY). Free since January 2023.",
+      "amount": "Free (Rs 0)",
+      "keywords": [
+        "free anaj",
+        "muft anaj",
+        "free chawal",
+        "free gehu",
+        "kitna milega",
+        "kya milega",
+        "ration kitna",
+        "how much grain",
+        "food kya milega"
+      ],
+      "source": "PMGKAY, dfpd.gov.in"
+    },
+    {
+      "id": 2,
+      "scheme_id": 1,
+      "benefit_name": "Pan-India portability",
+      "description": "Same ration card works in all 36 states and UTs — no new card needed when migrating",
+      "amount": null,
+      "keywords": [
+        "portability",
+        "kisi bhi state",
+        "any state",
+        "poora india",
+        "transfer",
+        "change state",
+        "naya state mein chalega"
+      ],
+      "source": "impds.nic.in"
+    },
+    {
+      "id": 3,
+      "scheme_id": 1,
+      "benefit_name": "Partial collection by split family",
+      "description": "Worker can collect part of ration at destination city. Family at home can collect remaining balance at home FPS.",
+      "amount": null,
+      "keywords": [
+        "family",
+        "ghar pe",
+        "baaki ration",
+        "baki anaj",
+        "wife collect",
+        "ghar wale le sakte",
+        "balance"
+      ],
+      "source": "myscheme.gov.in"
+    },
+    {
+      "id": 4,
+      "scheme_id": 2,
+      "benefit_name": "Rs 5 lakh health insurance per family per year",
+      "description": "Rs 5,00,000 per family per year for hospital treatment — covers surgery, medicine, pre and post hospitalisation",
+      "amount": "Rs 5,00,000/family/year",
+      "keywords": [
+        "5 lakh",
+        "kitna cover",
+        "insurance kitna",
+        "kitna milega",
+        "paanch lakh",
+        "five lakh",
+        "coverage amount",
+        "how much"
+      ],
+      "source": "nha.gov.in"
+    },
+    {
+      "id": 5,
+      "scheme_id": 2,
+      "benefit_name": "Cashless treatment at empanelled hospitals",
+      "description": "No cash payment needed at any empanelled public or private hospital. Show Aadhaar, get treatment.",
+      "amount": "Free (cashless)",
+      "keywords": [
+        "free treatment",
+        "cashless",
+        "paise nahi",
+        "free hospital",
+        "muft ilaaj",
+        "no payment",
+        "paisa nahi lagega",
+        "cash nahi dena"
+      ],
+      "source": "nha.gov.in"
+    },
+    {
+      "id": 6,
+      "scheme_id": 2,
+      "benefit_name": "Pre-existing conditions covered from day one",
+      "description": "All existing medical conditions are covered from the first day — no waiting period",
+      "amount": null,
+      "keywords": [
+        "pehle se bimari",
+        "purani bimari",
+        "waiting period",
+        "waiting",
+        "pahle se",
+        "old disease",
+        "pre-existing",
+        "pahle bimari thi"
+      ],
+      "source": "nha.gov.in"
+    },
+    {
+      "id": 7,
+      "scheme_id": 2,
+      "benefit_name": "Over 1900 procedures covered",
+      "description": "More than 1,900 medical procedures including surgeries, dialysis, cancer treatment, heart surgery, bone operations",
+      "amount": null,
+      "keywords": [
+        "operation",
+        "surgery",
+        "cancer",
+        "heart",
+        "kidney",
+        "dialysis",
+        "bone",
+        "kaunsi bimari",
+        "kya cover",
+        "which disease"
+      ],
+      "source": "nha.gov.in"
+    },
+    {
+      "id": 8,
+      "scheme_id": 3,
+      "benefit_name": "Rs 2 lakh accident insurance via PMSBY",
+      "description": "Rs 2 lakh for accidental death or permanent total disability. Rs 1 lakh for partial disability. Auto-linked when you register on e-Shram.",
+      "amount": "Rs 2,00,000 (death/full disability), Rs 1,00,000 (partial)",
+      "keywords": [
+        "accident",
+        "durghatna",
+        "mar gaya",
+        "injury",
+        "insure",
+        "insurance",
+        "accident money",
+        "death",
+        "mrityu",
+        "haath tuta",
+        "pair tuta",
+        "disabled"
+      ],
+      "source": "eshram.gov.in, jansuraksha.gov.in"
+    },
+    {
+      "id": 9,
+      "scheme_id": 3,
+      "benefit_name": "UAN card — pan-India worker identity",
+      "description": "12-digit Universal Account Number card valid across all states. Single identity for accessing 50+ government schemes.",
+      "amount": null,
+      "keywords": [
+        "uan",
+        "card banana",
+        "identity",
+        "pehchaan",
+        "sarkari card",
+        "register karna",
+        "50 scheme",
+        "kitne scheme"
+      ],
+      "source": "eshram.gov.in"
+    },
+    {
+      "id": 10,
+      "scheme_id": 3,
+      "benefit_name": "Equal wages as local workers",
+      "description": "Under OSH Code 2020, contractor must pay migrant workers at least the minimum wage of the destination state — same as local workers. No wage discrimination allowed.",
+      "amount": "Destination state minimum wage",
+      "keywords": [
+        "wages",
+        "salary",
+        "paisa",
+        "kitna milna chahiye",
+        "minimum wage",
+        "payment",
+        "tarkha",
+        "paise nahi de raha",
+        "kam paisa",
+        "cheating"
+      ],
+      "source": "OSH Code 2020, Section 135"
+    },
+    {
+      "id": 11,
+      "scheme_id": 3,
+      "benefit_name": "Displacement allowance from contractor",
+      "description": "Contractor must pay displacement allowance — 50% of monthly wages or Rs 75 whichever is higher — when recruiting a migrant worker from their home state.",
+      "amount": "50% of monthly wages or Rs 75 (whichever higher)",
+      "keywords": [
+        "displacement",
+        "allowance",
+        "aane ka paisa",
+        "travel allowance",
+        "bhatta",
+        "travel kharcha",
+        "shifting"
+      ],
+      "source": "OSH Code 2020, Section 137"
+    },
+    {
+      "id": 12,
+      "scheme_id": 3,
+      "benefit_name": "Free return travel by contractor",
+      "description": "Contractor-recruited migrants are entitled to free travel from home to worksite and back after the work period ends.",
+      "amount": "Actual travel cost",
+      "keywords": [
+        "return ticket",
+        "ghar jane ka paisa",
+        "travel",
+        "kharcha",
+        "contractor ticket",
+        "wapas",
+        "vapas",
+        "return",
+        "ghar"
+      ],
+      "source": "OSH Code 2020, Section 136"
+    },
+    {
+      "id": 13,
+      "scheme_id": 4,
+      "benefit_name": "Accident insurance (death / disability)",
+      "description": "BOCW Board pays Rs 1 lakh to Rs 5 lakh (varies by state) as lump sum to nominee in case of accidental death at construction site. Partial disability gets proportional amount.",
+      "amount": "Rs 1,00,000 to Rs 5,00,000 (state-dependent)",
+      "keywords": [
+        "accident",
+        "durghatna",
+        "gir gaya",
+        "injury",
+        "death",
+        "mrityu",
+        "insurance",
+        "insure",
+        "scaffold fall",
+        "building se gira"
+      ],
+      "source": "BOCW Act 1996, Section 22"
+    },
+    {
+      "id": 14,
+      "scheme_id": 4,
+      "benefit_name": "Children's education scholarships",
+      "description": "Annual scholarship for children of registered BOCW workers from Class 1 to professional courses. Amount varies by state — up to Rs 25,000/year for professional courses.",
+      "amount": "Rs 1,000 to Rs 25,000/year (state-dependent)",
+      "keywords": [
+        "scholarship",
+        "bacchon ki padhai",
+        "beti padhai",
+        "school fees",
+        "college fees",
+        "education",
+        "padhai",
+        "school",
+        "college",
+        "fees maafi"
+      ],
+      "source": "State BOCW Board schemes"
+    },
+    {
+      "id": 15,
+      "scheme_id": 4,
+      "benefit_name": "Daughter's marriage assistance",
+      "description": "One-time financial assistance for marriage of registered worker's daughter — Rs 25,000 to Rs 55,000 depending on state.",
+      "amount": "Rs 25,000 to Rs 55,000 (state-dependent)",
+      "keywords": [
+        "beti ki shaadi",
+        "daughter marriage",
+        "shaadi paisa",
+        "vivah sahayata",
+        "marriage money",
+        "shadi",
+        "shaadi"
+      ],
+      "source": "State BOCW Board schemes"
+    },
+    {
+      "id": 16,
+      "scheme_id": 4,
+      "benefit_name": "Pension after age 60",
+      "description": "Monthly pension of Rs 1,000 to Rs 3,000 after age 60 for workers who were registered with BOCW Board during their working years.",
+      "amount": "Rs 1,000 to Rs 3,000/month after age 60",
+      "keywords": [
+        "pension",
+        "budhapa",
+        "old age",
+        "after 60",
+        "60 ke baad",
+        "monthly paisa",
+        "retirement",
+        "60 ke baad",
+        "60 saal ke baad",
+        "pension milegi",
+        "old age pension",
+        "budhapa pension"
+      ],
+      "source": "BOCW Act 1996, Section 22"
+    },
+    {
+      "id": 17,
+      "scheme_id": 4,
+      "benefit_name": "Medical assistance for hospitalisation",
+      "description": "Financial assistance for hospitalisation of worker and immediate family. Amount varies by state.",
+      "amount": "Varies by state",
+      "keywords": [
+        "hospital",
+        "medical",
+        "ilaaj",
+        "bimari",
+        "medical paisa",
+        "treatment paisa"
+      ],
+      "source": "BOCW Act 1996, Section 22"
+    },
+    {
+      "id": 18,
+      "scheme_id": 5,
+      "benefit_name": "Guaranteed wage employment",
+      "description": "Legal guarantee of at least 100 days of wage employment per household per financial year (125 days under VB-G RAM G from July 2026).",
+      "amount": "100 days/year (125 days from July 2026)",
+      "keywords": [
+        "100 din kaam",
+        "100 days work",
+        "kitne din kaam",
+        "guarantee kaam",
+        "employment guarantee"
+      ],
+      "source": "MGNREGA 2005, pib.gov.in"
+    },
+    {
+      "id": 19,
+      "scheme_id": 5,
+      "benefit_name": "Unemployment allowance",
+      "description": "If work is not provided within 15 days of a written application, the applicant is entitled to an unemployment allowance from the State Government - at least one-fourth the wage rate for the first 30 days, one-half thereafter.",
+      "amount": "1/4 to 1/2 of wage rate",
+      "keywords": [
+        "unemployment allowance",
+        "kaam nahi mila",
+        "15 din",
+        "berozgari bhatta"
+      ],
+      "source": "MGNREGA 2005, Section 7"
+    },
+    {
+      "id": 20,
+      "scheme_id": 5,
+      "benefit_name": "Daily wage via DBT",
+      "description": "Wages paid directly to the worker's Aadhaar-linked bank/post office account by Direct Benefit Transfer. Minimum interim base wage Rs 300/day from July 2026 under VB-G RAM G.",
+      "amount": "Rs 300/day minimum (from July 2026)",
+      "keywords": [
+        "wage kitna",
+        "mazdoori kitni",
+        "daily wage",
+        "kitna paisa milega",
+        "300 rupees"
+      ],
+      "source": "pib.gov.in, Ministry of Rural Development"
+    }
+  ],
+  "documents": [
+    {
+      "id": 1,
+      "scheme_id": 1,
+      "document_name": "Aadhaar Card",
+      "is_mandatory": true,
+      "description": "For biometric authentication at ePoS device at Fair Price Shop",
+      "keywords": [
+        "aadhaar",
+        "aadhar",
+        "uid",
+        "biometric",
+        "fingerprint",
+        "identity proof"
+      ],
+      "source": "myscheme.gov.in"
+    },
+    {
+      "id": 2,
+      "scheme_id": 1,
+      "document_name": "Ration Card",
+      "is_mandatory": true,
+      "description": "Existing NFSA ration card issued by home state government",
+      "keywords": [
+        "ration card",
+        "rashan card",
+        "card number",
+        "card dikhao"
+      ],
+      "source": "myscheme.gov.in"
+    },
+    {
+      "id": 3,
+      "scheme_id": 2,
+      "document_name": "Aadhaar Card",
+      "is_mandatory": true,
+      "description": "Primary identity document for eligibility verification at hospital",
+      "keywords": [
+        "aadhaar",
+        "aadhar",
+        "id proof",
+        "identity"
+      ],
+      "source": "pmjay.gov.in"
+    },
+    {
+      "id": 4,
+      "scheme_id": 2,
+      "document_name": "Ayushman Card / PM-JAY e-Card",
+      "is_mandatory": false,
+      "description": "Health card issued under PM-JAY — can be generated at any empanelled hospital on the spot using Aadhaar",
+      "keywords": [
+        "golden card",
+        "ayushman card",
+        "health card",
+        "pmjay card",
+        "e-card",
+        "card nahi hai",
+        "bina card"
+      ],
+      "source": "pmjay.gov.in"
+    },
+    {
+      "id": 5,
+      "scheme_id": 3,
+      "document_name": "Aadhaar Card",
+      "is_mandatory": true,
+      "description": "Mandatory for OTP-based registration on e-Shram portal",
+      "keywords": [
+        "aadhaar",
+        "aadhar",
+        "mandatory",
+        "zaruri"
+      ],
+      "source": "eshram.gov.in"
+    },
+    {
+      "id": 6,
+      "scheme_id": 3,
+      "document_name": "Aadhaar-linked Mobile Number",
+      "is_mandatory": true,
+      "description": "Mobile number registered with Aadhaar to receive OTP for e-Shram registration",
+      "keywords": [
+        "mobile",
+        "phone",
+        "number",
+        "otp",
+        "sim",
+        "mobile number",
+        "phone number",
+        "aadhaar mobile"
+      ],
+      "source": "eshram.gov.in"
+    },
+    {
+      "id": 7,
+      "scheme_id": 3,
+      "document_name": "Bank Account Details",
+      "is_mandatory": true,
+      "description": "Bank account number and IFSC code for direct benefit transfer of insurance claims",
+      "keywords": [
+        "bank account",
+        "bank",
+        "ifsc",
+        "account number",
+        "passbook",
+        "jan dhan"
+      ],
+      "source": "eshram.gov.in"
+    },
+    {
+      "id": 8,
+      "scheme_id": 4,
+      "document_name": "Aadhaar Card",
+      "is_mandatory": true,
+      "description": "Primary identity document for BOCW registration",
+      "keywords": [
+        "aadhaar",
+        "aadhar"
+      ],
+      "source": "State BOCW Board"
+    },
+    {
+      "id": 9,
+      "scheme_id": 4,
+      "document_name": "90-Day Work Certificate",
+      "is_mandatory": true,
+      "description": "Certificate from contractor or supervisor confirming at least 90 days of construction work in last 12 months. Self-declaration accepted in some states if contractor refuses.",
+      "keywords": [
+        "work certificate",
+        "certificate",
+        "contractor signature",
+        "proof of work",
+        "90 din ka proof",
+        "kaam ka saboot",
+        "thekedar certificate"
+      ],
+      "source": "BOCW Act 1996, Section 12"
+    },
+    {
+      "id": 10,
+      "scheme_id": 4,
+      "document_name": "Bank Passbook",
+      "is_mandatory": true,
+      "description": "Bank account for direct transfer of BOCW welfare benefits",
+      "keywords": [
+        "bank",
+        "passbook",
+        "account",
+        "bank account",
+        "paisa transfer"
+      ],
+      "source": "State BOCW Board"
+    },
+    {
+      "id": 11,
+      "scheme_id": 4,
+      "document_name": "Passport-size Photographs",
+      "is_mandatory": true,
+      "description": "2-4 recent passport photographs as required by the state BOCW board",
+      "keywords": [
+        "photo",
+        "photograph",
+        "passport photo",
+        "tasveer"
+      ],
+      "source": "State BOCW Board"
+    },
+    {
+      "id": 12,
+      "scheme_id": 5,
+      "document_name": "Aadhaar Card",
+      "is_mandatory": true,
+      "description": "Aadhaar of the family head and all adult members - mandatory for identity verification and DBT wage payment.",
+      "keywords": [
+        "aadhaar",
+        "aadhar",
+        "uid",
+        "identity proof"
+      ],
+      "source": "nrega.nic.in"
+    },
+    {
+      "id": 13,
+      "scheme_id": 5,
+      "document_name": "Bank / Post Office Passbook",
+      "is_mandatory": true,
+      "description": "Aadhaar-linked bank or post office account passbook, needed so wages can be paid directly via DBT.",
+      "keywords": [
+        "bank passbook",
+        "khata",
+        "account details",
+        "bank account",
+        "post office"
+      ],
+      "source": "nrega.nic.in"
+    },
+    {
+      "id": 14,
+      "scheme_id": 5,
+      "document_name": "Proof of Residence",
+      "is_mandatory": true,
+      "description": "Ration card, voter ID, or electricity bill establishing rural residence.",
+      "keywords": [
+        "residence proof",
+        "address proof",
+        "ration card",
+        "voter id"
+      ],
+      "source": "nrega.nic.in"
+    }
+  ],
+  "application_steps": [
+    {
+      "id": 1,
+      "scheme_id": 1,
+      "mode": "offline",
+      "step_number": 1,
+      "instruction": "Check if your Aadhaar is linked to your ration card. If not, visit any CSC or Food & Civil Supplies office — it is free.",
+      "keywords": [
+        "aadhaar link",
+        "link kaise",
+        "link check",
+        "kaise pata kare"
+      ],
+      "source": "myscheme.gov.in"
+    },
+    {
+      "id": 2,
+      "scheme_id": 1,
+      "mode": "offline",
+      "step_number": 2,
+      "instruction": "Go to any ePoS-enabled Fair Price Shop (FPS) in the state you are in. Show your Aadhaar number or ration card number.",
+      "keywords": [
+        "fps kahan",
+        "fair price shop kahan",
+        "ration shop kahan",
+        "where to go",
+        "kahan jaana"
+      ],
+      "source": "myscheme.gov.in"
+    },
+    {
+      "id": 3,
+      "scheme_id": 1,
+      "mode": "offline",
+      "step_number": 3,
+      "instruction": "Give your fingerprint on the ePoS biometric device at the shop. Upon successful authentication, collect your free food grains.",
+      "keywords": [
+        "fingerprint",
+        "biometric",
+        "angutha lagao",
+        "ungli",
+        "authentication",
+        "scan"
+      ],
+      "source": "myscheme.gov.in"
+    },
+    {
+      "id": 4,
+      "scheme_id": 2,
+      "mode": "offline",
+      "step_number": 1,
+      "instruction": "Go to any empanelled government or private hospital. Look for the Ayushman Mitra desk at the hospital entrance or billing counter.",
+      "keywords": [
+        "hospital kahan",
+        "kaunsa hospital",
+        "empanelled",
+        "nearest hospital",
+        "which hospital",
+        "kahan jaana"
+      ],
+      "source": "pmjay.gov.in"
+    },
+    {
+      "id": 5,
+      "scheme_id": 2,
+      "mode": "offline",
+      "step_number": 2,
+      "instruction": "Show your Aadhaar card to the Ayushman Mitra. They will verify your eligibility in the PM-JAY database and generate your Ayushman Card if you don't already have one.",
+      "keywords": [
+        "aadhaar dikhao",
+        "verification",
+        "check karo",
+        "eligible check",
+        "card banao",
+        "card nahi hai",
+        "bina card"
+      ],
+      "source": "pmjay.gov.in"
+    },
+    {
+      "id": 6,
+      "scheme_id": 2,
+      "mode": "offline",
+      "step_number": 3,
+      "instruction": "After eligibility is verified, get admitted for cashless treatment. No money needs to be paid upfront. The hospital claims directly from the government.",
+      "keywords": [
+        "admit",
+        "cashless",
+        "paise nahi dena",
+        "free",
+        "treatment start",
+        "no payment"
+      ],
+      "source": "pmjay.gov.in"
+    },
+    {
+      "id": 7,
+      "scheme_id": 3,
+      "mode": "offline",
+      "step_number": 1,
+      "instruction": "Go to the nearest Common Service Centre (CSC) with your Aadhaar card and bank passbook. Registration on e-Shram is completely FREE.",
+      "keywords": [
+        "csc",
+        "common service centre",
+        "registration",
+        "register karna",
+        "kahan register",
+        "free registration"
+      ],
+      "source": "eshram.gov.in"
+    },
+    {
+      "id": 8,
+      "scheme_id": 3,
+      "mode": "offline",
+      "step_number": 2,
+      "instruction": "The CSC operator will register you on the e-Shram portal. You will receive a 12-digit UAN (Universal Account Number) and an e-Shram card.",
+      "keywords": [
+        "uan milega",
+        "card milega",
+        "12 digit",
+        "uan number",
+        "registration complete"
+      ],
+      "source": "eshram.gov.in"
+    },
+    {
+      "id": 9,
+      "scheme_id": 3,
+      "mode": "complaint",
+      "step_number": 1,
+      "instruction": "For wage theft or rights violations, go to the nearest District Labour Office (Shram Suvidha Kendra) with your e-Shram UAN card and file a complaint. The contractor can have their licence cancelled.",
+      "keywords": [
+        "complaint",
+        "shikayat",
+        "paisa nahi diya",
+        "rights violation",
+        "thekedar ne",
+        "shram suvidha",
+        "labour office",
+        "FIR"
+      ],
+      "source": "OSH Code 2020, Ministry of Labour"
+    },
+    {
+      "id": 10,
+      "scheme_id": 4,
+      "mode": "offline",
+      "step_number": 1,
+      "instruction": "Get a 90-day work certificate from your contractor or site supervisor. If contractor refuses, use a self-declaration form or get a certificate from a labour NGO.",
+      "keywords": [
+        "certificate kaise",
+        "contractor se certificate",
+        "90 din",
+        "work proof",
+        "thekedar nahi de raha",
+        "certificate milega kaise"
+      ],
+      "source": "BOCW Act 1996"
+    },
+    {
+      "id": 11,
+      "scheme_id": 4,
+      "mode": "offline",
+      "step_number": 2,
+      "instruction": "Visit the nearest CSC or District Labour Office with Aadhaar, work certificate, bank passbook, and 2 passport photos. Fill BOCW Form IV. Pay Rs 25-50 registration fee (free in some states).",
+      "keywords": [
+        "csc jaana",
+        "labour office",
+        "form fill",
+        "registration fee",
+        "kitna lagega",
+        "form IV",
+        "kahan register"
+      ],
+      "source": "BOCW Act 1996, Section 12"
+    },
+    {
+      "id": 12,
+      "scheme_id": 4,
+      "mode": "offline",
+      "step_number": 3,
+      "instruction": "Register with the BOCW Board of the STATE WHERE YOU ARE CURRENTLY WORKING — not your home state. You can register in both states.",
+      "keywords": [
+        "kaunsa state",
+        "home state",
+        "yahan register",
+        "wahan register",
+        "destination state",
+        "jahan kaam kar raha"
+      ],
+      "source": "Supreme Court 2018 Order"
+    },
+    {
+      "id": 13,
+      "scheme_id": 5,
+      "mode": "offline",
+      "step_number": 1,
+      "instruction": "Visit your local Gram Panchayat office and request a Job Card application form (free of cost), or apply on plain paper.",
+      "keywords": [
+        "job card kaise banaye",
+        "gram panchayat jao",
+        "application form"
+      ],
+      "source": "nrega.nic.in"
+    },
+    {
+      "id": 14,
+      "scheme_id": 5,
+      "mode": "offline",
+      "step_number": 2,
+      "instruction": "Submit names, ages, and Aadhaar details of all adult household members willing to do unskilled manual work; Job Card is issued within 15 days after verification.",
+      "keywords": [
+        "job card 15 din",
+        "verification",
+        "job card milega kab"
+      ],
+      "source": "nrega.nic.in"
+    },
+    {
+      "id": 15,
+      "scheme_id": 5,
+      "mode": "offline",
+      "step_number": 3,
+      "instruction": "To demand work: submit a written application to the Gram Panchayat specifying when and for how long you need work (minimum 14 days continuous).",
+      "keywords": [
+        "kaam maango",
+        "kaam ke liye application",
+        "demand work",
+        "14 din kaam"
+      ],
+      "source": "MGNREGA 2005"
+    },
+    {
+      "id": 16,
+      "scheme_id": 5,
+      "mode": "online",
+      "step_number": 1,
+      "instruction": "Register and apply for a Job Card via the UMANG mobile app (search 'MGNREGA').",
+      "keywords": [
+        "umang app",
+        "online job card",
+        "mobile app se apply"
+      ],
+      "source": "umang.gov.in"
+    }
+  ],
+  "faq": [
+    {
+      "id": 1,
+      "scheme_id": 1,
+      "intent_tag": "pds_portability",
+      "question_keywords": [
+        "ration card chalega",
+        "dusre state",
+        "kisi bhi jagah",
+        "card work",
+        "any state",
+        "naye jagah",
+        "doosra shahar",
+        "transfer",
+        "migrate",
+        "nayi jagah",
+        "poora india",
+        "anywhere",
+        "ration card chalega",
+        "card chalega",
+        "chalega kya",
+        "poore india mein",
+        "any state mein"
+      ],
+      "question_variants": [
+        "Mera ration card Tamil Nadu mein chalega?",
+        "Nua jagare mora ration card chaliba?",
+        "Kya mera card Gujarat mein bhi kaam karega?",
+        "Ration card doosre state mein work karta hai?",
+        "Nayi jagah pe ration milega?",
+        "Apna ration card yahan use kar sakta hoon?",
+        "Card transfer karna padega?",
+        "Naye city mein ration kaise milega?",
+        "Ration card poora India mein chalega kya?",
+        "Mere ghar ka card yahan chalega?",
+        "Ration card kisi bhi state mein use kar sakte hai?",
+        "Ration card nayi jagah pe valid hai?",
+        "Card seedha wahan bhi use ho sakta hai?",
+        "New place pe khana kaise milega?",
+        "Is state mein mera ration card accept hoga?"
+      ],
+      "answer": "Haan, aapka ration card poore India mein chalega. One Nation One Ration Card (ONORC) scheme ke under, aap kisi bhi state ke Fair Price Shop (ration dukaan) pe free anaj le sakte ho. Sirf Aadhaar card leke jaao aur fingerprint do. Nayi card banane ki zaroorat nahi.",
+      "source": "impds.nic.in, myscheme.gov.in"
+    },
+    {
+      "id": 2,
+      "scheme_id": 1,
+      "intent_tag": "pds_documents",
+      "question_keywords": [
+        "document",
+        "kagaz",
+        "kya chahiye",
+        "kya lana",
+        "kya leke jaana",
+        "proof",
+        "what needed",
+        "kya dikhana",
+        "saboot"
+      ],
+      "question_variants": [
+        "Ration ke liye kya kya chahiye?",
+        "Kya document leke jaana hai?",
+        "Ration ke liye kya dikhana padega?",
+        "Kaun kaun sa kagaz lana hai?",
+        "Document kana lagiba?",
+        "Ration lene ke liye kya kya chahiye?",
+        "Card ke alawa kuch aur chahiye?",
+        "Kya kya proof lena hai?",
+        "New city mein ration ke liye documents kya hain?",
+        "Ration ke liye sirf aadhaar kaafi hai?",
+        "Kitna document chahiye?",
+        "Ration lene ke liye kya chahiye?"
+      ],
+      "answer": "Sirf do cheez chahiye: aapka Aadhaar card aur aapka ration card number. Bas. Koi nayi card ya nayi application ki zaroorat nahi. Fair Price Shop pe Aadhaar number dijiye aur fingerprint do.",
+      "source": "myscheme.gov.in"
+    },
+    {
+      "id": 3,
+      "scheme_id": 1,
+      "intent_tag": "pds_aadhaar_link",
+      "question_keywords": [
+        "aadhaar link",
+        "linked nahi",
+        "link karna",
+        "kaise link",
+        "seeded",
+        "aadhaar jodna",
+        "aadhaar connect"
+      ],
+      "question_variants": [
+        "Mera aadhaar ration card se linked nahi hai — kya karoon?",
+        "Aadhaar link kaise karoon?",
+        "Aadhaar link nahi hai to ration milega?",
+        "Aadhaar jodna kaise hai?",
+        "Link karna kahan jaana padega?",
+        "Aadhaar seeded nahi hai — kya problem hogi?",
+        "Aadhaar aur ration card connect karna hai",
+        "Aadhaar link check kaise karein?"
+      ],
+      "answer": "Agar aapka Aadhaar ration card se linked nahi hai, toh aap kisi bhi CSC (Common Service Centre) ya Food & Civil Supplies office jaao. Wahan Aadhaar linking free mein ho jaayegi. Linking ke baad kisi bhi state mein ration le sakte ho.",
+      "source": "myscheme.gov.in"
+    },
+    {
+      "id": 4,
+      "scheme_id": 1,
+      "intent_tag": "pds_amount",
+      "question_keywords": [
+        "kitna anaj",
+        "kitna chawal",
+        "kitna gehu",
+        "how much",
+        "how many kg",
+        "mujhe kitna milega",
+        "kitna ration",
+        "free hai",
+        "free kab se",
+        "paisa lagega"
+      ],
+      "question_variants": [
+        "Ration mein kitna anaj milega?",
+        "Free hai ya paisa lagega?",
+        "Kitna kg chawal milega?",
+        "Muft milega kya?",
+        "Ration ka price kya hai?",
+        "Mujhe kitna grain milega?",
+        "Kitna ration le sakta hoon?",
+        "Free kab se ho gaya?",
+        "Ration ke liye kitne paise dene honge?",
+        "Anaj free mein milega?"
+      ],
+      "answer": "January 2023 se saari ration bilkul FREE hai. Agar aap Priority Household (PHH) mein ho toh 5 kg per person per month milega. Agar Antyodaya (AAY) category mein ho toh 35 kg per family per month milega. Ek bhi paisa nahi lagega.",
+      "source": "PMGKAY, dfpd.gov.in"
+    },
+    {
+      "id": 5,
+      "scheme_id": 1,
+      "intent_tag": "pds_family_split",
+      "question_keywords": [
+        "ghar wale",
+        "family",
+        "wife",
+        "biwi",
+        "baaki",
+        "balance",
+        "remaining",
+        "ghar pe bhi",
+        "dono jagah"
+      ],
+      "question_variants": [
+        "Ghar mein biwi aur bacche hain. Kya woh wahan se ration le sakte hain?",
+        "Main yahan se le loon toh ghar wale bhi le sakte hain?",
+        "Baaki ration ghar pe mil sakta hai?",
+        "Family alag jagah se le sakti hai?",
+        "Main yahan se aadha le loon toh?",
+        "Wife can collect ration at home village?"
+      ],
+      "answer": "Haan bilkul. ONORC mein partial collection hoti hai. Aap yahan se apna hissa le lo — baaki ration aapke ghar wale home state ke Fair Price Shop se le sakte hain. Ek hi ration card se dono jagah ho sakta hai.",
+      "source": "myscheme.gov.in"
+    },
+    {
+      "id": 6,
+      "scheme_id": 2,
+      "intent_tag": "pmjay_portability",
+      "question_keywords": [
+        "hospital kahan",
+        "yahan chalega",
+        "dusre state",
+        "any hospital",
+        "kaunsa hospital",
+        "is city mein",
+        "bengaluru",
+        "chennai",
+        "mumbai",
+        "surat",
+        "pune",
+        "gujarat",
+        "tamil nadu",
+        "karnataka"
+      ],
+      "question_variants": [
+        "Ayushman card Bengaluru mein chalega kya?",
+        "Is hospital mein PM-JAY chalega?",
+        "Doosre state mein health card use kar sakta hoon?",
+        "Hamra Ayushman card hai — Bengaluru mein chalega?",
+        "Gujarat mein Ayushman card valid hai?",
+        "Yahan kaunsa hospital free hai?",
+        "Health card kisi bhi state mein kaam karta hai?",
+        "Abhi jo hospital hai wahan chalega?",
+        "PM-JAY card abhi valid hai?",
+        "Naye state mein Ayushman card kaam karega?",
+        "Is state mein bhi free treatment milega?",
+        "Tamil Nadu mein health card chalega?",
+        "Kya mera Ayushman card yahan valid hai?",
+        "Health card transfer karni padegi?"
+      ],
+      "answer": "Haan. Ayushman Bharat PM-JAY POORE INDIA mein valid hai — kisi bhi state ke empanelled hospital mein. West Bengal bhi July 2026 mein join kar gaya. Toh ab sabhi 36 states covered hain. Hospital mein sirf Aadhaar dikhao, Ayushman Mitra waha sab verify karega.",
+      "source": "nha.gov.in, PIB July 2026"
+    },
+    {
+      "id": 7,
+      "scheme_id": 2,
+      "intent_tag": "pmjay_cost",
+      "question_keywords": [
+        "free hai",
+        "paisa lagega",
+        "kitna paisa",
+        "cashless",
+        "no payment",
+        "kitna cover",
+        "5 lakh",
+        "coverage",
+        "kharcha",
+        "fees",
+        "charge"
+      ],
+      "question_variants": [
+        "Free hai ya paisa dena padega?",
+        "Kitna paisa lagega hospital mein?",
+        "Cashless hai kya?",
+        "5 lakh kya matlab hai?",
+        "Kya koi fees nahi hai?",
+        "Treatment ka kharcha kaise hoga?",
+        "Hospital bill kaun bharega?",
+        "Paisa pehle dena hoga?",
+        "Insurance amount kitna hai?",
+        "Kitna cover milta hai?",
+        "Free ilaaj milega?",
+        "Bilkul free hai?",
+        "Paise nahi lagenge?"
+      ],
+      "answer": "Bilkul free — ek bhi paisa nahi dena. Rs 5 lakh per family per year ka cashless coverage hai. Hospital seedha government se paise leta hai. Tumhe kuch pay nahi karna. Sari existing bimariyan bhi day 1 se cover hain — koi waiting period nahi.",
+      "source": "nha.gov.in"
+    },
+    {
+      "id": 8,
+      "scheme_id": 2,
+      "intent_tag": "pmjay_how_to_get",
+      "question_keywords": [
+        "kaise milega",
+        "kaise register",
+        "kaise banao",
+        "card kahan banao",
+        "golden card",
+        "ayushman card banana",
+        "card nahi hai",
+        "eligible check",
+        "apply kaise"
+      ],
+      "question_variants": [
+        "Ayushman card kaise banate hain?",
+        "Golden card kahan banta hai?",
+        "Card nahi hai — kya treatment milega?",
+        "Eligible hoon kaise pata kare?",
+        "PM-JAY ke liye apply kaise karein?",
+        "Ayushman card banana hai",
+        "Main PM-JAY mein kaise aao?",
+        "Register kaise karein?",
+        "Card nahin hai toh hospital mein kya bolein?",
+        "Kaise pata chalega ki eligible hoon?"
+      ],
+      "answer": "Kisi bhi empanelled hospital mein jaao, Ayushman Mitra desk pe Aadhaar card dikhao. Woh check karenge aur agar eligible ho toh wahi pe Ayushman Card bana denge — bilkul free. Ya CSC centre pe bhi card banta hai. Helpline: 14555.",
+      "source": "pmjay.gov.in"
+    },
+    {
+      "id": 9,
+      "scheme_id": 2,
+      "intent_tag": "pmjay_diseases",
+      "question_keywords": [
+        "kaunsi bimari",
+        "cover hai",
+        "which disease",
+        "cancer",
+        "heart",
+        "kidney",
+        "operation",
+        "surgery",
+        "dialysis",
+        "TB",
+        "diabetes",
+        "kya kya cover"
+      ],
+      "question_variants": [
+        "Cancer ka ilaaj free hoga?",
+        "Heart operation milega?",
+        "Kidney dialysis cover hai?",
+        "Kaunsi bimariyan free hain?",
+        "TB ka ilaaj covered hai?",
+        "Diabetes mein treatment milega?",
+        "Kya kya operation free hote hain?",
+        "Mere bete ka operation hona hai — covered hai?",
+        "Pregnancy aur delivery free hai?",
+        "Bachhe ki bimari mein coverage milega?"
+      ],
+      "answer": "1900 se zyada treatment procedures cover hain — cancer, heart surgery, kidney dialysis, TB, diabetes complications, bone operations, eye surgery, ear surgery, maternity, newborn care — sab. Existing bimariyan bhi day 1 se cover hain.",
+      "source": "nha.gov.in"
+    },
+    {
+      "id": 10,
+      "scheme_id": 3,
+      "intent_tag": "eshram_what_is",
+      "question_keywords": [
+        "eshram kya hai",
+        "uan kya hai",
+        "shram card kya",
+        "kya milta hai",
+        "e-shram kyun",
+        "register kyun",
+        "kya faida",
+        "what is eshram"
+      ],
+      "question_variants": [
+        "e-Shram kya hota hai?",
+        "UAN card kya hai?",
+        "Shram card se kya faida hoga?",
+        "Register karne se kya milega?",
+        "e-Shram mein join karna zaroori hai?",
+        "Sarkaar ne yeh kyun banaya?",
+        "Mazdoor card kya hai?",
+        "Unorganised worker card kya hai?",
+        "Kya yeh free hai?",
+        "e-Shram mein kya hota hai?"
+      ],
+      "answer": "e-Shram ek free government registration hai unorganised workers ke liye. Register karne par aapko 12-digit UAN card milega — jo poore India mein valid hai. Saath hi Rs 2 lakh ka accident insurance bhi milega bilkul free pehle saal. 50 se zyada sarkari schemes is UAN se jodti hain.",
+      "source": "eshram.gov.in"
+    },
+    {
+      "id": 11,
+      "scheme_id": 3,
+      "intent_tag": "eshram_register",
+      "question_keywords": [
+        "register karna",
+        "kaise register",
+        "kahan register",
+        "registration process",
+        "apply kaise",
+        "form kahan",
+        "sign up",
+        "enroll"
+      ],
+      "question_variants": [
+        "e-Shram mein kaise register karein?",
+        "Kahan se register hoga?",
+        "Registration process kya hai?",
+        "Online register kar sakte hain?",
+        "CSC kahan hai?",
+        "Ghar se register ho sakta hai?",
+        "Kitna time lagega?",
+        "Registration free hai?",
+        "Kya documents chahiye register ke liye?",
+        "UAN card kaise milega?"
+      ],
+      "answer": "Register karne ke liye: kisi bhi CSC (Common Service Centre) pe jaao — apna Aadhaar card aur bank passbook le jaao. Registration bilkul FREE hai. CSC operator sabkuch kar dega. Turant UAN card milega. Ya eshram.gov.in pe khud bhi kar sakte ho — mobile pe OTP aayega.",
+      "source": "eshram.gov.in"
+    },
+    {
+      "id": 12,
+      "scheme_id": 3,
+      "intent_tag": "wage_theft",
+      "question_keywords": [
+        "paisa nahi diya",
+        "payment nahi",
+        "salary nahi",
+        "thekedar ne nahi diya",
+        "paise rok liye",
+        "wages withheld",
+        "cheating",
+        "dhokha",
+        "khoon paseena",
+        "mehnat ka paisa",
+        "complaint",
+        "mazdoori nahi"
+      ],
+      "question_variants": [
+        "Thekedar ne 45 din se paisa nahi diya — kya karoon?",
+        "Salary nahi de raha contractor — kahan complaint karoon?",
+        "Meri mazdoori rok li gayi — help chahiye",
+        "Payment late ho rahi hai — kya right hai?",
+        "Contractor dhoka de raha hai — kahan jaoon?",
+        "Paise nahi diye — police mein jaoon?",
+        "Thekedar salary roka — kya karein?",
+        "Apna paisa kaise wapas loon?",
+        "Khoon paseena ka paisa chheen liya — shikayat kahan?",
+        "Itne din se kaam kiya paisa nahi mila",
+        "Wage theft — where to complain?",
+        "Thekedar ne paise nahi diye — help karo"
+      ],
+      "answer": "OSH Code 2020 ke under contractor ko 14 din ke andar wages dene MANDATORY hain. Agar nahi diya toh turant Shram Suvidha Kendra ya District Labour Office jaao. Apna e-Shram UAN card lekar jaao. Complaint form bharo — contractor ka licence cancel ho sakta hai. Helpline: 14434 ya 1800-891-8888.",
+      "source": "OSH Code 2020, Section 135"
+    },
+    {
+      "id": 13,
+      "scheme_id": 3,
+      "intent_tag": "accident_claim",
+      "question_keywords": [
+        "accident",
+        "durghatna",
+        "injury",
+        "hurt",
+        "gir gaya",
+        "haath tuta",
+        "pair tuta",
+        "scaffold",
+        "site pe gira",
+        "kaam pe accident",
+        "compensation",
+        "insurance claim",
+        "insure"
+      ],
+      "question_variants": [
+        "Site pe accident hua — kya karna chahiye?",
+        "Mera haath toot gaya kaam par — kya milega?",
+        "Worksite pe gir gaya — compensation milega?",
+        "Accident insurance kaise claim karna?",
+        "Kaam pe injury — kahan jaoon?",
+        "Building se gira — help chahiye",
+        "e-Shram insurance claim kaise karein?",
+        "Scaffold se gira — compensation milega?",
+        "Durghatna mein pair toot gaya — kya karna hai?",
+        "Accident claim process kya hai?"
+      ],
+      "answer": "Pehle hospital jaao — PMJAY se free ilaaj milega. Agar e-Shram mein registered ho toh Rs 2 lakh accident insurance milega. Claim ke liye: apna UAN number lekar nearest CSC ya Labour Office jaao. Family member bhi claim kar sakta hai. Helpline: 14434.",
+      "source": "eshram.gov.in, jansuraksha.gov.in"
+    },
+    {
+      "id": 14,
+      "scheme_id": 3,
+      "intent_tag": "labour_rights",
+      "question_keywords": [
+        "rights",
+        "adhikar",
+        "haq",
+        "kanoon",
+        "kya milna chahiye",
+        "minimum wage",
+        "overtime",
+        "kaam ke ghante",
+        "working hours",
+        "safety",
+        "suraksha",
+        "protective",
+        "PPE",
+        "helmet"
+      ],
+      "question_variants": [
+        "Mazdoor ke kya rights hain?",
+        "Minimum wage kitna hona chahiye?",
+        "Thekedar kitne ghante kaam kara sakta hai?",
+        "Safety equipment dena contractor ki zimmedaari hai?",
+        "Helmet nahi diya — complaint kar sakta hoon?",
+        "Mujhe kya kya milna chahiye kanooni taur pe?",
+        "Overtime ka paisa milna chahiye?",
+        "Kaam mein safety kiska zimma hai?",
+        "Night shift ke liye zyada paisa milna chahiye?",
+        "Labour rights kya hain?"
+      ],
+      "answer": "OSH Code 2020 ke under aapke rights: (1) destination state ka minimum wage milna chahiye, (2) safety equipment FREE milni chahiye — helmet, boots, gloves, (3) max 8 ghante kaam aur overtime pay compulsory, (4) medical facility site pe milni chahiye, (5) contractor 14 din mein wages dega. Violation pe District Labour Office mein complaint karo.",
+      "source": "OSH Code 2020"
+    },
+    {
+      "id": 15,
+      "scheme_id": 4,
+      "intent_tag": "bocw_what_is",
+      "question_keywords": [
+        "bocw kya hai",
+        "construction card kya",
+        "nirman shramik card",
+        "labour card kya",
+        "kya faida",
+        "nirman card",
+        "welfare board",
+        "mazdoor card"
+      ],
+      "question_variants": [
+        "BOCW card kya hota hai?",
+        "Nirman shramik card kya hai?",
+        "Labour card se kya faida?",
+        "Construction worker card kya milta hai?",
+        "BOCW board kya hai?",
+        "Nirman mazdoor card ke benefits?",
+        "Labour card kyun banana chahiye?",
+        "Welfare board kya deta hai?",
+        "BOCW mein kya milta hai?"
+      ],
+      "answer": "BOCW card construction workers ke liye ek welfare card hai. Register karne par milta hai: accident insurance, beti ki shaadi ke liye paisa, bacchon ki padhai ka scholarship, medical help, aur 60 saal ke baad pension. Yeh state government ka scheme hai — jahan kaam kar rahe ho usi state mein register karo.",
+      "source": "BOCW Act 1996"
+    },
+    {
+      "id": 16,
+      "scheme_id": 4,
+      "intent_tag": "bocw_register",
+      "question_keywords": [
+        "bocw register",
+        "nirman card kaise",
+        "labour card banana",
+        "construction card apply",
+        "kahan register",
+        "kaise banao",
+        "eligibility",
+        "90 din"
+      ],
+      "question_variants": [
+        "Nirman shramik card kaise banayein?",
+        "BOCW mein kaise register karein?",
+        "Construction labour card kahan banta hai?",
+        "Labour card ke liye kya kya chahiye?",
+        "90 din kaam proof kaise milega?",
+        "Maharashtra mein BOCW kahan register karein?",
+        "Thekedar ne certificate nahi diya — kya karoon?",
+        "BOCW registration fee kitni hai?",
+        "Kaunsa form bharna hota hai?",
+        "Migrant worker BOCW mein register ho sakta hai?"
+      ],
+      "answer": "BOCW register karne ke liye: Aadhaar card, 90 din ka kaam ka proof (contractor ka certificate), bank passbook, aur passport photo leke nearest CSC ya District Labour Office jaao. Jo state mein kaam kar rahe ho USHI state ke BOCW board mein register karo. Fee Rs 25-50 lagti hai. Maharashtra ke liye: mahabocw.in.",
+      "source": "BOCW Act 1996, Supreme Court 2018"
+    },
+    {
+      "id": 17,
+      "scheme_id": 4,
+      "intent_tag": "bocw_certificate",
+      "question_keywords": [
+        "certificate nahi",
+        "thekedar nahi de raha",
+        "contractor refuse",
+        "proof kaise",
+        "90 din proof",
+        "self declaration",
+        "kaam ka saboot"
+      ],
+      "question_variants": [
+        "Thekedar certificate dene se mana kar raha hai — kya karoon?",
+        "Contractor ne 90 din ka proof nahi diya",
+        "Certificate kaise milega agar thekedar na maane?",
+        "Self declaration karke register ho sakta hoon?",
+        "Kaam ka proof kaise banao?",
+        "Koi aur option hai certificate ke liye?",
+        "NGO se certificate milta hai?"
+      ],
+      "answer": "Agar contractor certificate nahi de raha toh: (1) OSH Code ke under contractor ko worker register maintain karna compulsory hai — District Labour Office mein complain karo, (2) Kuch states mein self-declaration form accepted hota hai — wahan sign kar do, (3) Jan Sahas ya Aajeevika Bureau jaise NGO se certificate milta hai. Labour Office mein jaake apna case batao.",
+      "source": "OSH Code 2020, Section 134; State BOCW rules"
+    },
+    {
+      "id": 18,
+      "scheme_id": 4,
+      "intent_tag": "bocw_benefits_detail",
+      "question_keywords": [
+        "scholarship kitna",
+        "pension kitna",
+        "shaadi kitna",
+        "accident kitna",
+        "benefits amount",
+        "kitna milega",
+        "kya kya milega",
+        "medical kitna",
+        "pension",
+        "60 ke baad",
+        "budhapa",
+        "pension milegi",
+        "60 saal",
+        "retirement"
+      ],
+      "question_variants": [
+        "Bacchon ko scholarship mein kitna milega?",
+        "Accident mein kitna compensation milega?",
+        "Pension kitni milegi?",
+        "Beti ki shaadi mein kitna paisa?",
+        "BOCW se kya kya milta hai?",
+        "Sab benefits batao",
+        "Medical help mein kitna milega?",
+        "Total kitne benefits hain?"
+      ],
+      "answer": "BOCW benefits (state ke hisaab se alag hoga): Accident death: Rs 1-5 lakh. Bacchon ka scholarship: Rs 1,000-25,000/year. Beti ki shaadi: Rs 25,000-55,000 ek baar. Pension: Rs 1,000-3,000/mahina 60 ke baad. Medical help: hospitalisation ke liye alag. Apne state ke BOCW portal pe exact amount check karo.",
+      "source": "State BOCW Board schemes"
+    },
+    {
+      "id": 19,
+      "scheme_id": null,
+      "intent_tag": "all_schemes_overview",
+      "question_keywords": [
+        "kya kya milta",
+        "sab schemes",
+        "poori list",
+        "sarkaar kya deta",
+        "mazdoor ko kya",
+        "all benefits",
+        "sabhi schemes",
+        "naya aaya",
+        "first time",
+        "sab batao",
+        "government help",
+        "sarkar ki yojana",
+        "kya kya milta",
+        "sab kuch batao",
+        "poori list",
+        "mazdoor ko kya",
+        "government schemes"
+      ],
+      "question_variants": [
+        "Sarkaar se mazdooron ko kya kya milta hai?",
+        "Mujhe kya kya benefit milega?",
+        "Abhi naya aaya hoon — kya kya register karoon?",
+        "Poori list batao government schemes ki",
+        "Migrant worker ke liye kya kya hai?",
+        "Pehli baar aaya hoon — kahan se shuru karoon?",
+        "Sab schemes ek baar batao",
+        "Sarkar kya deti hai hum mazdooron ko?",
+        "Kya kya fayde milte hain government se?",
+        "Sarkaar ke saare schemes kya hain?",
+        "Naya mazdoor kya kya kar sakta hai?"
+      ],
+      "answer": "Mazdooron ke liye 4 main schemes hain: (1) RATION: Aapka ration card poore India mein chalega — free anaj milega. (2) HEALTH: Ayushman card se Rs 5 lakh tak hospital free. (3) e-SHRAM: Free register karo — Rs 2 lakh accident insurance milegi. (4) BOCW: Construction karte ho toh BOCW card banao — pension, bacchon ki padhai, aur accident cover milega. Pehle e-Shram register karo — sabse zaroori hai.",
+      "source": "eshram.gov.in, myscheme.gov.in"
+    },
+    {
+      "id": 20,
+      "scheme_id": null,
+      "intent_tag": "nearest_csc",
+      "question_keywords": [
+        "csc kahan",
+        "nearest",
+        "paas mein",
+        "kahin kahan",
+        "service centre",
+        "common service",
+        "register kahan",
+        "kahan jaoon",
+        "office kahan",
+        "nearest office"
+      ],
+      "question_variants": [
+        "Nearest CSC kahan hai?",
+        "Paas mein register kahan hoga?",
+        "Yahan kaunsa office hai?",
+        "Common Service Centre kahan milega?",
+        "Mujhe kahan jaana chahiye?",
+        "Labour office kahan hai?",
+        "Shram Suvidha Kendra kahan hai?",
+        "Registration ke liye paas mein kahan jaoon?"
+      ],
+      "answer": "Nearest CSC dhundhne ke liye: locator.csccloud.in pe jaao ya 14434 pe call karo. Kisi bhi local government office, post office, ya bank mein pooch sakte ho. Alternatively, eshram.gov.in pe online bhi register kar sakte ho agar Aadhaar linked mobile hai.",
+      "source": "csc.gov.in, eshram.gov.in"
+    },
+    {
+      "id": 21,
+      "scheme_id": 5,
+      "intent_tag": "mgnregs_what_is",
+      "question_keywords": [
+        "mgnrega kya hai",
+        "job card kya hai",
+        "what is mgnrega",
+        "what is nrega",
+        "100 din scheme",
+        "rozgar guarantee scheme",
+        "explain mgnrega",
+        "nrega scheme",
+        "rural employment scheme",
+        "gaon ki naukri scheme",
+        "mgnregs matlab"
+      ],
+      "question_variants": [
+        "What is MGNREGA?",
+        "MGNREGA kya hota hai?",
+        "Job card scheme kya hai?",
+        "100 din ka kaam wali scheme kya hai?",
+        "Tell me about the rural employment guarantee scheme.",
+        "Gaon mein kaam guarantee scheme kya hai?",
+        "Ye MGNREGA scheme kya cheez hai?",
+        "What does the rural job guarantee scheme cover?",
+        "Naya VB-G RAM G kya hai?"
+      ],
+      "answer": "MGNREGA (Mahatma Gandhi National Rural Employment Guarantee Act, 2005) guarantees at least 100 days of wage employment per year to every rural household willing to do unskilled manual work. From July 2026 this is expanded to 125 days under the VB-G RAM G Act, with a minimum wage of Rs 300 per day.",
+      "source": "MGNREGA 2005, nrega.nic.in"
+    },
+    {
+      "id": 22,
+      "scheme_id": 5,
+      "intent_tag": "mgnregs_register",
+      "question_keywords": [
+        "job card kaise banaye",
+        "mgnrega mein kaise register kare",
+        "how to get job card",
+        "job card apply",
+        "register for mgnrega",
+        "gram panchayat job card",
+        "naya job card",
+        "panchayat form",
+        "online job card apply"
+      ],
+      "question_variants": [
+        "How do I get a Job Card?",
+        "Job card kaise banwaye?",
+        "MGNREGA mein naam kaise likhwaye?",
+        "How do I register for MGNREGA?",
+        "Gram panchayat mein job card ke liye kya karna hoga?",
+        "UMANG app se job card kaise banaye?",
+        "What documents do I need for a Job Card?",
+        "Job card banwane ke liye kaha jau?"
+      ],
+      "answer": "Visit your local Gram Panchayat and submit a free application with photographs, Aadhaar details, and proof of residence for all adult household members. The Job Card is issued within 15 days after verification, and you can also apply online via the UMANG app.",
+      "source": "nrega.nic.in"
+    },
+    {
+      "id": 23,
+      "scheme_id": 5,
+      "intent_tag": "mgnregs_no_work_provided",
+      "question_keywords": [
+        "kaam nahi mila",
+        "work not provided",
+        "15 din mein kaam nahi",
+        "unemployment allowance",
+        "berozgari bhatta",
+        "no work given",
+        "kaam maanga nahi mila",
+        "application ke baad kaam nahi"
+      ],
+      "question_variants": [
+        "What happens if I don't get work within 15 days?",
+        "15 din mein kaam nahi mila to kya karu?",
+        "Mujhe kaam nahi diya gaya, ab kya?",
+        "Do I get paid if there's no work available?",
+        "Kaam nahi milne par paisa milega?",
+        "Maine kaam manga par nahi mila, kya karu?",
+        "What is the unemployment allowance rate?",
+        "Gram panchayat kaam nahi de raha to?"
+      ],
+      "answer": "If work is not provided within 15 days of your written application, you are entitled to an unemployment allowance from the State Government - at least one-fourth of the wage rate for the first 30 days, and at least one-half thereafter. Report this to your Gram Panchayat or the CPGRAMS grievance portal.",
+      "source": "MGNREGA 2005, Section 7"
+    },
+    {
+      "id": 24,
+      "scheme_id": 5,
+      "intent_tag": "mgnregs_wage_payment",
+      "question_keywords": [
+        "wage kaise milta hai",
+        "paisa kaise milega",
+        "how are wages paid",
+        "mgnrega salary",
+        "dbt wage",
+        "mazdoori payment",
+        "mgnrega wage rate",
+        "300 rupees din ka"
+      ],
+      "question_variants": [
+        "How are MGNREGA wages paid?",
+        "Paisa bank mein aata hai kya?",
+        "Mazdoori kaise milegi?",
+        "Is the payment direct to my bank account?",
+        "Kitna wage milta hai MGNREGA mein?",
+        "MGNREGA mein ek din ka wage kitna hai?",
+        "Kya sabhi states mein wage same hai?",
+        "Bank account nahi hai to wage kaise milega?"
+      ],
+      "answer": "Wages are paid directly into your Aadhaar-linked bank or post office account through Direct Benefit Transfer. From July 2026, the minimum base wage is Rs 300 per day, with state-wise rates notified annually - some states pay more.",
+      "source": "nrega.nic.in, pib.gov.in"
+    },
+    {
+      "id": 25,
+      "scheme_id": 5,
+      "intent_tag": "mgnregs_registration_fee",
+      "question_keywords": [
+        "job card fee",
+        "registration paisa lagta hai",
+        "is there a fee",
+        "free hai kya",
+        "job card free",
+        "paisa maanga job card ke liye",
+        "bribe job card"
+      ],
+      "question_variants": [
+        "Is there a fee for MGNREGA registration?",
+        "Job card banwane mein paisa lagta hai?",
+        "Kya yeh free hai?",
+        "Do I have to pay anything to register?",
+        "Koi paisa maang raha hai job card ke liye, sahi hai kya?",
+        "Registration bilkul free hai na?"
+      ],
+      "answer": "No. Job Card registration under MGNREGA is completely free. If anyone asks for money to register you, report it to the Gram Panchayat or the CPGRAMS grievance portal immediately.",
+      "source": "nrega.nic.in"
+    }
+  ],
+  "exceptions_and_limitations": [
+    {
+      "id": 1,
+      "scheme_id": 1,
+      "type": "exception",
+      "description": "ONORC portability only works if Aadhaar is seeded (linked) with the ration card. Without Aadhaar linking, inter-state access is not possible.",
+      "keywords": [
+        "aadhaar nahi",
+        "linked nahi",
+        "seeded nahi",
+        "aadhaar problem"
+      ]
+    },
+    {
+      "id": 2,
+      "scheme_id": 1,
+      "type": "limitation",
+      "description": "Only ePoS-enabled Fair Price Shops can process ONORC transactions. Rural shops without ePoS machines cannot offer portability.",
+      "keywords": [
+        "shop nahi hai",
+        "machine nahi",
+        "epos nahi",
+        "remote area",
+        "gaon mein"
+      ]
+    },
+    {
+      "id": 3,
+      "scheme_id": 1,
+      "type": "limitation",
+      "description": "Biometric failure (worn fingerprints of manual labourers) can prevent access. In such cases, ask the FPS operator for iris scan option or visit another FPS.",
+      "keywords": [
+        "fingerprint nahi",
+        "ungli nahi",
+        "biometric fail",
+        "scan nahi"
+      ]
+    },
+    {
+      "id": 4,
+      "scheme_id": 2,
+      "type": "exception",
+      "description": "Only empanelled hospitals provide cashless PM-JAY treatment. Non-empanelled hospitals cannot offer this benefit even if they claim to.",
+      "keywords": [
+        "empanelled",
+        "kaunsa hospital",
+        "private hospital",
+        "any hospital",
+        "sab hospital"
+      ]
+    },
+    {
+      "id": 5,
+      "scheme_id": 2,
+      "type": "limitation",
+      "description": "OPD (outpatient) expenses are NOT covered under PM-JAY. Only hospitalisation (admission of at least 24 hours) is covered.",
+      "keywords": [
+        "opd",
+        "outpatient",
+        "sadha doctor",
+        "bina admit",
+        "without admission",
+        "doctor fees"
+      ]
+    },
+    {
+      "id": 6,
+      "scheme_id": 3,
+      "type": "exception",
+      "description": "Workers already in EPFO or ESIC (formal sector employees) CANNOT register on e-Shram.",
+      "keywords": [
+        "epfo",
+        "esic",
+        "formal employee",
+        "pf",
+        "provident fund",
+        "already covered"
+      ]
+    },
+    {
+      "id": 7,
+      "scheme_id": 3,
+      "type": "limitation",
+      "description": "OSH Code 2020 protections are stronger for contractor-recruited workers. Self-migrated workers have fewer contractor-specific rights (like transport and displacement allowance).",
+      "keywords": [
+        "self migrated",
+        "khud aaya",
+        "contractor nahi tha",
+        "akele aaya"
+      ]
+    },
+    {
+      "id": 8,
+      "scheme_id": 4,
+      "type": "exception",
+      "description": "BOCW card expires if not renewed annually. Claims cannot be made on expired cards. Renew by showing continued construction work (90 days) each year.",
+      "keywords": [
+        "card expire",
+        "renew",
+        "renewal",
+        "annual renewal",
+        "card lapse"
+      ]
+    },
+    {
+      "id": 9,
+      "scheme_id": 4,
+      "type": "limitation",
+      "description": "BOCW benefit amounts vary significantly by state. Tamil Nadu and Maharashtra have better benefits than some other states. Always check your destination state's BOCW portal for exact amounts.",
+      "keywords": [
+        "amount different",
+        "state alag",
+        "kitna state mein",
+        "different amount",
+        "vary"
+      ]
+    },
+    {
+      "id": 10,
+      "scheme_id": 5,
+      "type": "exception",
+      "description": "Urban areas are not covered under MGNREGA - only rural households are eligible.",
+      "keywords": [
+        "urban nahi",
+        "city not covered",
+        "sheher mein nahi"
+      ]
+    },
+    {
+      "id": 11,
+      "scheme_id": 5,
+      "type": "limitation",
+      "description": "Only unskilled manual work is guaranteed; skilled or semi-skilled employment is not covered.",
+      "keywords": [
+        "skilled kaam nahi",
+        "unskilled only",
+        "semi skilled nahi"
+      ]
+    },
+    {
+      "id": 12,
+      "scheme_id": 5,
+      "type": "limitation",
+      "description": "The guarantee is capped at 100 days per household per financial year (125 days under VB-G RAM G from July 2026) - additional days are not guaranteed.",
+      "keywords": [
+        "100 din ke baad",
+        "zyada din nahi",
+        "days khatam"
+      ]
+    }
+  ],
+  "official_contacts": [
+    {
+      "id": 1,
+      "scheme_id": 1,
+      "contact_type": "helpline",
+      "contact_value": "14445",
+      "description": "ONORC national toll-free helpline for ration card portability queries",
+      "keywords": [
+        "helpline",
+        "call karo",
+        "number",
+        "toll free",
+        "ration helpline"
+      ]
+    },
+    {
+      "id": 2,
+      "scheme_id": 1,
+      "contact_type": "helpline",
+      "contact_value": "1967",
+      "description": "PDS grievance helpline",
+      "keywords": [
+        "complaint",
+        "grievance",
+        "problem",
+        "shikayat",
+        "ration problem"
+      ]
+    },
+    {
+      "id": 3,
+      "scheme_id": 2,
+      "contact_type": "helpline",
+      "contact_value": "14555",
+      "description": "PM-JAY national helpline for eligibility check, hospital help, and grievances",
+      "keywords": [
+        "helpline",
+        "ayushman helpline",
+        "health helpline",
+        "hospital complaint"
+      ]
+    },
+    {
+      "id": 4,
+      "scheme_id": 3,
+      "contact_type": "helpline",
+      "contact_value": "14434",
+      "description": "e-Shram helpline for registration queries and UAN card issues",
+      "keywords": [
+        "eshram helpline",
+        "uan helpline",
+        "registration problem",
+        "card problem"
+      ]
+    },
+    {
+      "id": 5,
+      "scheme_id": 3,
+      "contact_type": "helpline",
+      "contact_value": "1800-891-8888",
+      "description": "Ministry of Labour helpline for OSH Code, wage theft, BOCW complaints",
+      "keywords": [
+        "labour helpline",
+        "wage complaint",
+        "rights violation",
+        "bocw helpline",
+        "contractor complaint"
+      ]
+    },
+    {
+      "id": 6,
+      "scheme_id": null,
+      "contact_type": "portal",
+      "contact_value": "pgportal.gov.in",
+      "description": "CPGRAMS — central grievance portal for all government scheme complaints",
+      "keywords": [
+        "grievance portal",
+        "online complaint",
+        "central complaint",
+        "cpgrams"
+      ]
+    },
+    {
+      "id": 7,
+      "scheme_id": 5,
+      "contact_type": "website",
+      "contact_value": "https://nrega.nic.in",
+      "description": "Official MGNREGA MIS portal for Job Card details, work status, and payment status.",
+      "keywords": [
+        "nrega website",
+        "mgnrega portal",
+        "job card status check"
+      ]
+    },
+    {
+      "id": 8,
+      "scheme_id": 5,
+      "contact_type": "grievance",
+      "contact_value": "https://pgportal.gov.in/",
+      "description": "CPGRAMS centralized public grievance portal for filing MGNREGA complaints.",
+      "keywords": [
+        "complaint",
+        "shikayat",
+        "grievance",
+        "problem report karo"
+      ]
+    }
+  ],
+  "state_rules": [
+    {
+      "id": 1,
+      "scheme_id": 4,
+      "state": "Maharashtra",
+      "state_code": "MH",
+      "portal": "mahabocw.in",
+      "special_rule": "Maharashtra has one of the best BOCW benefit packages in India. Self-employed construction workers also eligible.",
+      "keywords": [
+        "maharashtra",
+        "mumbai",
+        "pune",
+        "nagpur",
+        "mahabocw"
+      ]
+    },
+    {
+      "id": 2,
+      "scheme_id": 4,
+      "state": "Tamil Nadu",
+      "state_code": "TN",
+      "portal": "tamilnaduconstruction.tn.gov.in",
+      "special_rule": "Tamil Nadu BOCW board provides education scholarships up to Class 12. Registration possible at District Labour Office or CSC.",
+      "keywords": [
+        "tamil nadu",
+        "chennai",
+        "coimbatore",
+        "madurai",
+        "tamil"
+      ]
+    },
+    {
+      "id": 3,
+      "scheme_id": 4,
+      "state": "Gujarat",
+      "state_code": "GJ",
+      "portal": "gccwb.gujarat.gov.in",
+      "special_rule": "Gujarat BOCW board — strong accident insurance. Self-declaration accepted for 90-day proof in Gujarat.",
+      "keywords": [
+        "gujarat",
+        "surat",
+        "ahmedabad",
+        "vadodara",
+        "gujrat"
+      ]
+    },
+    {
+      "id": 4,
+      "scheme_id": 4,
+      "state": "Karnataka",
+      "state_code": "KA",
+      "portal": "bocwwb.kar.nic.in",
+      "special_rule": "Karnataka BOCW provides housing loan assistance in addition to standard benefits.",
+      "keywords": [
+        "karnataka",
+        "bengaluru",
+        "bangalore",
+        "mysore",
+        "hubli"
+      ]
+    },
+    {
+      "id": 5,
+      "scheme_id": 4,
+      "state": "Uttar Pradesh",
+      "state_code": "UP",
+      "portal": "upbocw.in",
+      "special_rule": "UP BOCW — major source state. Workers from UP working in other states should register in DESTINATION state, not UP.",
+      "keywords": [
+        "uttar pradesh",
+        "up",
+        "lucknow",
+        "kanpur",
+        "varanasi",
+        "prayagraj"
+      ]
+    },
+    {
+      "id": 6,
+      "scheme_id": 1,
+      "state": "All States",
+      "state_code": "ALL",
+      "portal": "impds.nic.in",
+      "special_rule": "ONORC is implemented in all 36 states and UTs. State-specific helplines vary — call 14445 for the nearest FPS.",
+      "keywords": [
+        "all states",
+        "poora india",
+        "36 states",
+        "any state"
+      ]
+    },
+    {
+      "id": 7,
+      "scheme_id": 2,
+      "state": "All States",
+      "state_code": "ALL",
+      "portal": "hospitals.pmjay.gov.in",
+      "special_rule": "As of July 2026, ALL 36 states and UTs are covered under PM-JAY including West Bengal. Full pan-India cashless treatment.",
+      "keywords": [
+        "all states",
+        "west bengal",
+        "poora india",
+        "36 states",
+        "any state",
+        "any hospital"
+      ]
+    },
+    {
+      "id": 8,
+      "scheme_id": 4,
+      "state": "Bihar",
+      "state_code": "BR",
+      "portal": "bocwboard.bihar.gov.in",
+      "special_rule": "Bihar is a major source state. Migrant workers from Bihar should register BOCW in their DESTINATION state, not Bihar.",
+      "keywords": [
+        "bihar",
+        "patna",
+        "muzaffarpur",
+        "gaya",
+        "bihari"
+      ]
+    },
+    {
+      "id": 9,
+      "scheme_id": 4,
+      "state": "Telangana",
+      "state_code": "TS",
+      "portal": "labour.telangana.gov.in",
+      "special_rule": "Telangana BOCW includes skill development training as additional benefit.",
+      "keywords": [
+        "telangana",
+        "hyderabad",
+        "warangal",
+        "karimnagar"
+      ]
+    },
+    {
+      "id": 10,
+      "scheme_id": 5,
+      "state": "All States",
+      "state_code": "ALL",
+      "portal": "nrega.nic.in",
+      "special_rule": "Wage rates and helpline numbers vary by state and are notified annually - MGNREGA does not have inter-state portability like ONORC; work is tied to the registered Gram Panchayat.",
+      "keywords": [
+        "state wage alag",
+        "har state mein alag",
+        "portability nahi"
+      ]
+    }
+  ],
+  "important_definitions": [
+    {
+      "id": 1,
+      "scheme_id": 1,
+      "term": "ONORC",
+      "definition": "One Nation One Ration Card — the scheme that makes your ration card valid anywhere in India",
+      "keywords": [
+        "onorc",
+        "one nation",
+        "ek rashtra",
+        "national ration"
+      ]
+    },
+    {
+      "id": 2,
+      "scheme_id": 1,
+      "term": "ePoS",
+      "definition": "Electronic Point of Sale — the machine at the Fair Price Shop where you give your fingerprint to get ration",
+      "keywords": [
+        "epos",
+        "machine",
+        "fingerprint machine",
+        "biometric device",
+        "ungli dena"
+      ]
+    },
+    {
+      "id": 3,
+      "scheme_id": 2,
+      "term": "Ayushman Mitra",
+      "definition": "A helper at every empanelled hospital who assists PM-JAY patients with verification, card creation, and admission — find them at the hospital entrance",
+      "keywords": [
+        "ayushman mitra",
+        "helper at hospital",
+        "hospital agent",
+        "who to contact at hospital"
+      ]
+    },
+    {
+      "id": 4,
+      "scheme_id": 3,
+      "term": "UAN",
+      "definition": "Universal Account Number — the 12-digit unique number you get when you register on e-Shram. Valid across all of India.",
+      "keywords": [
+        "uan",
+        "12 digit",
+        "universal account",
+        "shram number"
+      ]
+    },
+    {
+      "id": 5,
+      "scheme_id": 3,
+      "term": "OSH Code 2020",
+      "definition": "Occupational Safety, Health and Working Conditions Code 2020 — the law that gives migrant workers the right to equal wages, safety, and free travel in any state they work in",
+      "keywords": [
+        "osh code",
+        "labour law",
+        "kanoon",
+        "migrant law",
+        "safety code"
+      ]
+    },
+    {
+      "id": 6,
+      "scheme_id": 3,
+      "term": "Shram Suvidha Kendra",
+      "definition": "District Labour Office — the government office where you file complaints against contractors for wage theft or rights violations",
+      "keywords": [
+        "shram suvidha",
+        "labour office",
+        "district labour",
+        "complaint office",
+        "kahan complaint"
+      ]
+    },
+    {
+      "id": 7,
+      "scheme_id": 4,
+      "term": "BOCW Cess",
+      "definition": "A 1% tax on construction projects that funds the state BOCW Welfare Boards — this is why the government has money to give you benefits",
+      "keywords": [
+        "cess",
+        "tax",
+        "funding",
+        "paisa kahan se"
+      ]
+    },
+    {
+      "id": 8,
+      "scheme_id": 5,
+      "term": "Job Card",
+      "definition": "The primary document issued to registered households under MGNREGA, needed to demand work; valid for five years.",
+      "keywords": [
+        "job card kya hai",
+        "job card matlab"
+      ]
+    },
+    {
+      "id": 9,
+      "scheme_id": 5,
+      "term": "Gram Rozgar Sahayak (GRS)",
+      "definition": "The Gram Panchayat-level official responsible for day-to-day MGNREGA implementation - registration, verification, and muster roll maintenance.",
+      "keywords": [
+        "grs kya hai",
+        "rozgar sahayak",
+        "panchayat official"
+      ]
+    },
+    {
+      "id": 10,
+      "scheme_id": 5,
+      "term": "VB-G RAM G",
+      "definition": "Viksit Bharat - Guarantee for Rozgar and Ajeevika Mission (Gramin) Act, 2025 - the successor legislation to MGNREGA effective July 1, 2026, expanding the guarantee to 125 days with a Rs 300/day minimum wage.",
+      "keywords": [
+        "vb-g ram g kya hai",
+        "naya kanoon",
+        "125 din scheme"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": 1,
+      "scheme_id": 1,
+      "source_name": "myscheme.gov.in",
+      "url": "https://www.myscheme.gov.in/schemes/onorc"
+    },
+    {
+      "id": 2,
+      "scheme_id": 1,
+      "source_name": "DFPD Official",
+      "url": "https://dfpd.gov.in"
+    },
+    {
+      "id": 3,
+      "scheme_id": 1,
+      "source_name": "IMPDS Portal",
+      "url": "https://impds.nic.in"
+    },
+    {
+      "id": 4,
+      "scheme_id": 2,
+      "source_name": "NHA Official",
+      "url": "https://nha.gov.in"
+    },
+    {
+      "id": 5,
+      "scheme_id": 2,
+      "source_name": "PM-JAY Portal",
+      "url": "https://pmjay.gov.in"
+    },
+    {
+      "id": 6,
+      "scheme_id": 2,
+      "source_name": "myscheme.gov.in",
+      "url": "https://www.myscheme.gov.in/schemes/ab-pmjay"
+    },
+    {
+      "id": 7,
+      "scheme_id": 3,
+      "source_name": "e-Shram Portal",
+      "url": "https://eshram.gov.in"
+    },
+    {
+      "id": 8,
+      "scheme_id": 3,
+      "source_name": "Ministry of Labour",
+      "url": "https://labour.gov.in"
+    },
+    {
+      "id": 9,
+      "scheme_id": 3,
+      "source_name": "OSH Code 2020 PDF",
+      "url": "https://labour.gov.in/sites/default/files/TheOccupationalSafetyHealthandWorkingConditionsCode2020.pdf"
+    },
+    {
+      "id": 10,
+      "scheme_id": 4,
+      "source_name": "BOCW Central",
+      "url": "https://labour.gov.in/bocw"
+    },
+    {
+      "id": 11,
+      "scheme_id": 4,
+      "source_name": "myscheme BOCW",
+      "url": "https://www.myscheme.gov.in/schemes/bocw"
+    },
+    {
+      "id": 12,
+      "scheme_id": 5,
+      "source_name": "nrega.nic.in",
+      "url": "https://nrega.nic.in"
+    },
+    {
+      "id": 13,
+      "scheme_id": 5,
+      "source_name": "rural.gov.in",
+      "url": "https://rural.gov.in"
+    },
+    {
+      "id": 14,
+      "scheme_id": 5,
+      "source_name": "myscheme.gov.in",
+      "url": "https://www.myscheme.gov.in/schemes/mgnregs"
+    },
+    {
+      "id": 15,
+      "scheme_id": 5,
+      "source_name": "pib.gov.in",
+      "url": "https://pib.gov.in/"
+    }
+  ],
+  "citizen_query_log": {
+    "_note": "This table is for RUNTIME use only — stores per-session query→intent→scheme mapping for the 4-second pipeline. NEVER persisted to disk. Purged on session end.",
+    "schema": {
+      "session_id": "ephemeral UUID (RAM only, not stored)",
+      "query_text": "ASR output text (deleted after processing)",
+      "detected_keywords": "matched keyword array",
+      "resolved_intent": "intent_tag string",
+      "resolved_scheme_id": "integer or null",
+      "answer_source": "rules_engine | rag | faq_match | fallback",
+      "answer_text": "final answer (deleted after TTS playback)",
+      "latency_ms": "integer (for dev monitoring)",
+      "turn_number": "1 or 2 (max 2 turns kept in RAM)"
+    }
+  }
+}

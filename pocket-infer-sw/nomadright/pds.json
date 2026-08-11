@@ -1,0 +1,313 @@
+{
+  "scheme_id": "PDS_ONORC_001",
+  "scheme_name": "Public Distribution System - One Nation One Ration Card (PDS / ONORC)",
+  "description": "The One Nation One Ration Card (ONORC) plan is a nationwide portability initiative under the National Food Security Act (NFSA), 2013, enabling eligible beneficiaries to access their subsidised food grain entitlements from any Fair Price Shop (FPS) across India using their existing ration card with Aadhaar-based authentication. It is implemented by the Department of Food and Public Distribution, Ministry of Consumer Affairs, Food and Public Distribution, Government of India.",
+  "objective": "To enable all NFSA beneficiaries, especially migrant workers and their families, to access their entitled quota of subsidised food grains from any ePoS-enabled Fair Price Shop anywhere in the country, through inter-state and intra-state portability using Aadhaar authentication.",
+  "eligibility": [
+    {
+      "criterion": "The applicant must be an existing ration cardholder covered under the National Food Security Act (NFSA), 2013.",
+      "source": "myscheme.gov.in"
+    },
+    {
+      "criterion": "The beneficiary's Aadhaar number must be seeded (linked) with their ration card to avail of the portability feature.",
+      "source": "myscheme.gov.in"
+    },
+    {
+      "criterion": "Beneficiary must fall under either Antyodaya Anna Yojana (AAY) or Priority Household (PHH) category as identified by the respective State/UT Government.",
+      "source": "nfsa.gov.in, dfpd.gov.in"
+    }
+  ],
+  "beneficiary_categories": [
+    {
+      "category": "Antyodaya Anna Yojana (AAY) Households",
+      "description": "The poorest of the poor households identified as per criteria laid down by the Central Government. Entitled to 35 kg of foodgrains per household per month.",
+      "source": "NFSA 2013, Section 3(2)"
+    },
+    {
+      "category": "Priority Households (PHH)",
+      "description": "Eligible persons identified by the State Government under NFSA. Entitled to 5 kg of foodgrains per person per month.",
+      "source": "NFSA 2013, Section 3(1)"
+    },
+    {
+      "category": "Migrant Workers and their families",
+      "description": "NFSA beneficiaries who migrate for work and need to access ration entitlements outside their home state/district.",
+      "source": "myscheme.gov.in"
+    }
+  ],
+  "required_documents": [
+    {
+      "document": "Ration Card",
+      "description": "Existing valid ration card issued under NFSA by the respective State/UT Government.",
+      "mandatory": true,
+      "source": "myscheme.gov.in"
+    },
+    {
+      "document": "Aadhaar Card",
+      "description": "Aadhaar number of the beneficiary, which must be seeded (linked) with the ration card for biometric or Aadhaar-based authentication at ePoS devices.",
+      "mandatory": true,
+      "source": "myscheme.gov.in"
+    }
+  ],
+  "benefits": [
+    {
+      "benefit": "Seamless access to subsidised food grains from any ePoS-enabled Fair Price Shop across all 36 States/UTs in India.",
+      "source": "myscheme.gov.in"
+    },
+    {
+      "benefit": "Inter-state and intra-state portability of ration card entitlements.",
+      "source": "myscheme.gov.in"
+    },
+    {
+      "benefit": "Flexible distribution: if a beneficiary collects part of their ration in one location, family members can collect the remaining balance at their home location using the same ration card.",
+      "source": "myscheme.gov.in"
+    },
+    {
+      "benefit": "Real-time access to entitlement details via ePoS devices and the Mera Ration mobile application (available in 13 languages).",
+      "source": "myscheme.gov.in"
+    },
+    {
+      "benefit": "No separate application required for existing NFSA beneficiaries to use ONORC; only Aadhaar-ration card linkage is needed.",
+      "source": "myscheme.gov.in"
+    }
+  ],
+  "financial_benefits": [
+    {
+      "benefit_type": "Subsidised Foodgrains (Original NFSA prices as per Section 3)",
+      "details": {
+        "rice": "Rs. 3 per kg",
+        "wheat": "Rs. 2 per kg",
+        "coarse_grains": "Rs. 1 per kg"
+      },
+      "source": "NFSA 2013, Schedule I",
+      "note": "These were the original statutory prices under NFSA 2013."
+    },
+    {
+      "benefit_type": "Free Foodgrains under PM Garib Kalyan Ann Yojana (PMGKAY) Extension",
+      "details": "Since January 1, 2023, the Government of India provides foodgrains free of cost to all AAY and PHH beneficiaries under NFSA. This has been extended for a period of five years effective from January 1, 2024.",
+      "source": "pib.gov.in, dfpd.gov.in"
+    },
+    {
+      "benefit_type": "AAY Household Entitlement",
+      "details": "35 kg of foodgrains per household per month",
+      "source": "NFSA 2013, Section 3(2)"
+    },
+    {
+      "benefit_type": "PHH Individual Entitlement",
+      "details": "5 kg of foodgrains per person per month",
+      "source": "NFSA 2013, Section 3(1)"
+    }
+  ],
+  "application_process": {
+    "online": [
+      {
+        "step": 1,
+        "description": "No separate online application is required for ONORC portability if you are already an NFSA beneficiary.",
+        "source": "myscheme.gov.in"
+      },
+      {
+        "step": 2,
+        "description": "Download the 'Mera Ration' mobile application (available on Android) to check entitlements, find nearest Fair Price Shops, view transaction history (last 6 months), check Aadhaar seeding status, and register migration details.",
+        "source": "myscheme.gov.in, impds.nic.in"
+      },
+      {
+        "step": 3,
+        "description": "Services are also accessible via the UMANG (Unified Mobile Application for New-age Governance) platform.",
+        "source": "umang.gov.in"
+      }
+    ],
+    "offline": [
+      {
+        "step": 1,
+        "description": "Ensure your Aadhaar number is linked (seeded) with your existing ration card. If not linked, visit the local Food and Civil Supplies office or designated centre.",
+        "source": "myscheme.gov.in"
+      },
+      {
+        "step": 2,
+        "description": "Visit any ePoS-enabled Fair Price Shop (FPS) in any State/UT.",
+        "source": "myscheme.gov.in"
+      },
+      {
+        "step": 3,
+        "description": "Provide your Aadhaar number or ration card number at the FPS for identification.",
+        "source": "myscheme.gov.in"
+      },
+      {
+        "step": 4,
+        "description": "Complete authentication via biometric verification (fingerprint or iris scan) on the ePoS device at the FPS.",
+        "source": "myscheme.gov.in"
+      },
+      {
+        "step": 5,
+        "description": "Collect your entitled food grains upon successful authentication.",
+        "source": "myscheme.gov.in"
+      }
+    ]
+  },
+  "portability": {
+    "inter_state": "Beneficiaries can collect their entitled foodgrains from any ePoS-enabled Fair Price Shop in any State/UT across India.",
+    "intra_state": "Beneficiaries can collect their entitled foodgrains from any ePoS-enabled Fair Price Shop within their own State/UT, in any district.",
+    "coverage": "Implemented across all 36 States/Union Territories of India.",
+    "partial_collection": "If a beneficiary collects part of their ration at one location, family members can collect the remaining balance at their home location or any other FPS.",
+    "authentication_method": "Aadhaar-based biometric authentication (fingerprint or iris scan) via ePoS devices.",
+    "source": "myscheme.gov.in, impds.nic.in"
+  },
+  "state_specific_rules": [
+    {
+      "note": "While ONORC is implemented across all 36 States/UTs, the identification of beneficiaries under AAY and PHH categories is done by the respective State/UT Governments as per criteria laid down under NFSA.",
+      "source": "NFSA 2013, dfpd.gov.in"
+    },
+    {
+      "note": "State-specific helpline numbers for PDS grievances may vary. Check the respective State Food and Civil Supplies Department website.",
+      "source": "nfsa.gov.in"
+    }
+  ],
+  "exceptions": [
+    {
+      "exception": "Beneficiaries whose Aadhaar is not seeded with their ration card cannot avail of ONORC portability features.",
+      "source": "myscheme.gov.in"
+    },
+    {
+      "exception": "Fair Price Shops that are not equipped with functional ePoS devices cannot process ONORC transactions.",
+      "source": "myscheme.gov.in"
+    }
+  ],
+  "limitations": [
+    {
+      "limitation": "ONORC portability is available only at ePoS-enabled Fair Price Shops. FPS without ePoS devices cannot offer portability.",
+      "source": "myscheme.gov.in"
+    },
+    {
+      "limitation": "Biometric authentication failure (e.g., due to worn fingerprints in manual labourers) may prevent beneficiaries from accessing rations at certain times.",
+      "source": "UNKNOWN"
+    },
+    {
+      "limitation": "Internet/network connectivity issues at remote FPS locations may affect real-time transaction processing.",
+      "source": "UNKNOWN"
+    }
+  ],
+  "faq": [
+    {
+      "question": "What is One Nation One Ration Card (ONORC)?",
+      "answer": "ONORC is a nationwide portability plan that enables NFSA beneficiaries to access their subsidised food grain entitlements from any Fair Price Shop across India using Aadhaar-based authentication, regardless of where their ration card was originally issued.",
+      "source": "myscheme.gov.in"
+    },
+    {
+      "question": "Do I need to apply separately for ONORC?",
+      "answer": "No. If you are already an NFSA beneficiary, you do not need a separate application. You only need to ensure your Aadhaar number is linked (seeded) with your ration card.",
+      "source": "myscheme.gov.in"
+    },
+    {
+      "question": "Can my family members collect the remaining ration at our home location?",
+      "answer": "Yes. If you collect part of your entitlement at one location, your family members can collect the remaining balance at any other ePoS-enabled Fair Price Shop.",
+      "source": "myscheme.gov.in"
+    },
+    {
+      "question": "What is the Mera Ration app?",
+      "answer": "Mera Ration is a mobile application developed by NIC that allows beneficiaries to find the nearest FPS, check food grain entitlements, view recent transaction history, check Aadhaar seeding status, and register migration details. It is available in 13 languages.",
+      "source": "myscheme.gov.in, impds.nic.in"
+    },
+    {
+      "question": "Is the food grain provided free of cost?",
+      "answer": "Since January 1, 2023, the Government of India provides foodgrains free of cost to all AAY and PHH beneficiaries under NFSA. This has been extended for five years from January 1, 2024.",
+      "source": "pib.gov.in, dfpd.gov.in"
+    }
+  ],
+  "important_definitions": [
+    {
+      "term": "NFSA",
+      "definition": "National Food Security Act, 2013 - An Act of Parliament aimed at providing subsidised food grains to approximately two-thirds of India's population.",
+      "source": "NFSA 2013"
+    },
+    {
+      "term": "AAY",
+      "definition": "Antyodaya Anna Yojana - A scheme targeting the poorest of the poor households, entitled to 35 kg of foodgrains per household per month.",
+      "source": "NFSA 2013"
+    },
+    {
+      "term": "PHH",
+      "definition": "Priority Households - Households identified by State Governments under NFSA, entitled to 5 kg of foodgrains per person per month.",
+      "source": "NFSA 2013"
+    },
+    {
+      "term": "ePoS",
+      "definition": "Electronic Point of Sale - Devices installed at Fair Price Shops for Aadhaar-based biometric authentication and real-time recording of food grain distribution.",
+      "source": "dfpd.gov.in"
+    },
+    {
+      "term": "FPS",
+      "definition": "Fair Price Shop - Government-licensed shops that distribute subsidised food grains to ration card holders.",
+      "source": "dfpd.gov.in"
+    },
+    {
+      "term": "IMPDS",
+      "definition": "Integrated Management of Public Distribution System - The central technology platform for ONORC managed by NIC at impds.nic.in.",
+      "source": "impds.nic.in"
+    }
+  ],
+  "official_contacts": [
+    {
+      "type": "Helpline",
+      "number": "14445",
+      "description": "National toll-free helpline for One Nation One Ration Card (ONORC) plan.",
+      "source": "myscheme.gov.in, impds.nic.in"
+    },
+    {
+      "type": "Helpline",
+      "number": "1967",
+      "description": "Nationwide helpline for Public Distribution System related queries.",
+      "source": "nfsa.gov.in"
+    },
+    {
+      "type": "Grievance Portal",
+      "url": "https://pgportal.gov.in/",
+      "description": "Centralized Public Grievance Redress and Monitoring System (CPGRAMS).",
+      "source": "pgportal.gov.in"
+    }
+  ],
+  "official_sources": [
+    {
+      "website": "MyScheme - Government of India",
+      "document": "One Nation One Ration Card (ONORC) Scheme Page",
+      "url": "https://www.myscheme.gov.in/schemes/onorc",
+      "page": "N/A",
+      "section": "Details, Benefits, Eligibility, Application Process, Documents Required"
+    },
+    {
+      "website": "Department of Food and Public Distribution",
+      "document": "DFPD Official Website",
+      "url": "https://dfpd.gov.in/",
+      "page": "N/A",
+      "section": "NFSA Implementation, ONORC"
+    },
+    {
+      "website": "National Food Security Portal",
+      "document": "NFSA Portal",
+      "url": "https://nfsa.gov.in/",
+      "page": "N/A",
+      "section": "NFSA Act Details"
+    },
+    {
+      "website": "IMPDS Portal",
+      "document": "Integrated Management of Public Distribution System Dashboard",
+      "url": "https://impds.nic.in/",
+      "page": "N/A",
+      "section": "ONORC Transactions, Dashboard"
+    },
+    {
+      "website": "Press Information Bureau",
+      "document": "PIB Press Release on free foodgrains extension",
+      "url": "https://pib.gov.in/",
+      "page": "N/A",
+      "section": "PM Garib Kalyan Ann Yojana extension announcements"
+    },
+    {
+      "website": "National Food Security Act, 2013",
+      "document": "The National Food Security Act, 2013 (Act No. 20 of 2013)",
+      "url": "https://nfsa.gov.in/portal/nfsa-act",
+      "page": "N/A",
+      "section": "Section 3 (Entitlements), Schedule I (Prices)"
+    }
+  ],
+  "last_updated": "2026-08-03",
+  "data_extraction_note": "Data extracted from official government sources (myscheme.gov.in, dfpd.gov.in, nfsa.gov.in, pib.gov.in, impds.nic.in) on 2026-08-03. Fields that could not be verified from official sources are marked as UNKNOWN."
+}

@@ -1,0 +1,340 @@
+{
+  "scheme_id": "BOCW_001",
+  "scheme_name": "Building and Other Construction Workers (BOCW) Welfare Scheme",
+  "description": "The Building and Other Construction Workers (Regulation of Employment and Conditions of Service) Act, 1996, establishes State Welfare Boards in every state to provide welfare benefits to registered construction workers. Any construction worker who has worked at least 90 days in construction in the preceding 12 months can register and access benefits including accident insurance, pension, medical assistance, education for children, housing, and marriage assistance. The Code on Social Security 2020 (notified November 2025) now folds BOCW into a unified national framework while State Welfare Boards continue to operate.",
+  "objective": "To provide social security and welfare benefits to construction workers (the largest category of interstate migrant workers) covering their lifecycle needs from accident insurance to pension, education, and housing assistance.",
+  "eligibility": [
+    {
+      "criterion": "Worker must be aged between 18 and 60 years.",
+      "source": "BOCW Act 1996, Section 12"
+    },
+    {
+      "criterion": "Worker must have been engaged in building or construction work for a minimum of 90 days in the preceding 12 months.",
+      "source": "BOCW Act 1996, Section 12"
+    },
+    {
+      "criterion": "Worker must register with the State Welfare Board of the state where they are currently working (destination state for migrant workers).",
+      "source": "BOCW Act 1996, Supreme Court Order 2018"
+    },
+    {
+      "criterion": "Interstate migrant construction workers are explicitly eligible — Supreme Court 2018 order mandated that welfare benefits be extended to migrant construction workers and that source and destination states coordinate implementation.",
+      "source": "Supreme Court of India, 2018 (Re: Building and Other Construction Workers)"
+    },
+    {
+      "criterion": "Worker must not be covered under any other organised sector social security scheme (EPFO/ESIC) for the construction work.",
+      "source": "BOCW Act 1996"
+    }
+  ],
+  "beneficiary_categories": [
+    {
+      "category": "Masons and Construction Labourers",
+      "description": "Workers directly engaged in brick-laying, plastering, concrete work, foundations.",
+      "source": "BOCW Act 1996, Schedule"
+    },
+    {
+      "category": "Carpenters and Woodworkers",
+      "description": "Workers engaged in wood frameworks, formwork, shuttering.",
+      "source": "BOCW Act 1996, Schedule"
+    },
+    {
+      "category": "Electricians and Plumbers",
+      "description": "Workers doing electrical wiring, pipe-fitting, drainage at construction sites.",
+      "source": "BOCW Act 1996, Schedule"
+    },
+    {
+      "category": "Painters and Finishers",
+      "description": "Workers doing painting, polishing, waterproofing at construction sites.",
+      "source": "BOCW Act 1996, Schedule"
+    },
+    {
+      "category": "Welders and Metal Workers",
+      "description": "Workers engaged in structural steel, iron rods, welding at construction sites.",
+      "source": "BOCW Act 1996, Schedule"
+    },
+    {
+      "category": "Helpers and General Labourers",
+      "description": "All supporting workers at construction sites — carrying materials, loading/unloading, etc.",
+      "source": "BOCW Act 1996, Schedule"
+    }
+  ],
+  "required_documents": [
+    {
+      "document": "Aadhaar Card",
+      "description": "Primary identity document for registration.",
+      "mandatory": true,
+      "source": "State BOCW Board websites"
+    },
+    {
+      "document": "90-Day Work Certificate",
+      "description": "Certificate from contractor or employer confirming at least 90 days of construction work in the preceding 12 months. Can also be a self-declaration in some states.",
+      "mandatory": true,
+      "source": "BOCW Act 1996, Section 12; State Board rules"
+    },
+    {
+      "document": "Bank Passbook / Bank Account Details",
+      "description": "Bank account for direct transfer of benefits.",
+      "mandatory": true,
+      "source": "State BOCW Board websites"
+    },
+    {
+      "document": "Passport-size Photographs",
+      "description": "2-4 recent passport photos depending on state board requirements.",
+      "mandatory": true,
+      "source": "State BOCW Board websites"
+    },
+    {
+      "document": "Residence Proof (at destination)",
+      "description": "Any proof of current address at the destination state — rental agreement, electricity bill, or self-declaration accepted in most states.",
+      "mandatory": false,
+      "source": "State BOCW Board websites"
+    }
+  ],
+  "benefits": [
+    {
+      "benefit": "Accident insurance — compensation for accidental death, permanent/partial disability at the worksite.",
+      "source": "BOCW Act 1996, Section 22; State Board schemes"
+    },
+    {
+      "benefit": "Medical assistance — financial support for hospitalization of worker and immediate family.",
+      "source": "BOCW Act 1996, Section 22"
+    },
+    {
+      "benefit": "Maternity benefit — financial assistance to female construction workers for delivery and post-natal care.",
+      "source": "BOCW Act 1996, Section 22"
+    },
+    {
+      "benefit": "Education assistance — scholarships for children of registered workers from Class 1 through professional courses.",
+      "source": "BOCW Act 1996, Section 22; State Board schemes"
+    },
+    {
+      "benefit": "Marriage assistance — financial aid for daughters' marriage.",
+      "source": "BOCW Act 1996, Section 22; State Board schemes"
+    },
+    {
+      "benefit": "Housing loan assistance / transit accommodation at worksites.",
+      "source": "BOCW Act 1996, Section 22"
+    },
+    {
+      "benefit": "Pension — monthly pension after age 60 for registered workers.",
+      "source": "BOCW Act 1996, Section 22; State Board schemes"
+    },
+    {
+      "benefit": "Skill development training — subsidised or free vocational training for career advancement.",
+      "source": "BOCW Act 1996, Section 22; State Board schemes"
+    },
+    {
+      "benefit": "Death benefit — financial assistance to the family of a worker who dies while registered.",
+      "source": "BOCW Act 1996, Section 22"
+    },
+    {
+      "benefit": "Tools and equipment assistance — subsidy for purchase of work tools.",
+      "source": "State BOCW Board schemes (varies by state)"
+    }
+  ],
+  "financial_benefits": [
+    {
+      "benefit_type": "Accident Death Compensation",
+      "amount": "Rs. 1,00,000 to Rs. 5,00,000 (varies by state)",
+      "description": "Lump sum payment to nominee in case of accidental death of registered worker.",
+      "source": "State BOCW Board schemes"
+    },
+    {
+      "benefit_type": "Education Scholarship",
+      "amount": "Rs. 1,000 to Rs. 25,000/year (varies by state and class)",
+      "description": "Annual scholarship for children of registered workers — higher amounts for professional courses like engineering, medicine.",
+      "source": "State BOCW Board schemes (e.g., Maharashtra: Rs. 6,000 for Class 10 pass)"
+    },
+    {
+      "benefit_type": "Marriage Assistance",
+      "amount": "Rs. 25,000 to Rs. 55,000 (varies by state)",
+      "description": "One-time financial assistance for daughter's marriage.",
+      "source": "State BOCW Board schemes"
+    },
+    {
+      "benefit_type": "Maternity Benefit",
+      "amount": "Rs. 3,000 to Rs. 12,000 (varies by state)",
+      "description": "Financial assistance to female workers for maternity.",
+      "source": "State BOCW Board schemes"
+    },
+    {
+      "benefit_type": "Pension",
+      "amount": "Rs. 1,000 to Rs. 3,000/month (varies by state)",
+      "description": "Monthly pension for registered workers after age 60.",
+      "source": "State BOCW Board schemes"
+    }
+  ],
+  "application_process": {
+    "online": [
+      {
+        "step": 1,
+        "description": "Visit the State BOCW Board portal of the state where you are currently working. Examples: mahabocw.in (Maharashtra), tamilnaduconstruction.tn.gov.in (Tamil Nadu), bocwboard.bihar.gov.in (Bihar), bocwwb.gov.in (West Bengal).",
+        "source": "State BOCW Board portals"
+      },
+      {
+        "step": 2,
+        "description": "Click on 'Register as Construction Worker' and fill in your details: name, Aadhaar, bank account, occupation, 90-day work proof.",
+        "source": "State BOCW Board portals"
+      },
+      {
+        "step": 3,
+        "description": "Upload scanned documents: Aadhaar, work certificate, bank passbook, photograph.",
+        "source": "State BOCW Board portals"
+      },
+      {
+        "step": 4,
+        "description": "Submit application. You will receive a BOCW card/labour card number after verification (typically 7-30 days).",
+        "source": "State BOCW Board portals"
+      },
+      {
+        "step": 5,
+        "description": "After getting the BOCW card, apply individually for benefits (education, marriage, medical) through the same portal.",
+        "source": "State BOCW Board portals"
+      }
+    ],
+    "offline": [
+      {
+        "step": 1,
+        "description": "Visit the nearest Common Service Centre (CSC), District Labour Office, or BOCW Board office with your Aadhaar, work certificate (signed by contractor), bank passbook, and passport photos.",
+        "source": "State BOCW Board; CSC"
+      },
+      {
+        "step": 2,
+        "description": "Fill the BOCW registration form (Form IV under BOCW Act). The CSC operator or labour office can help you fill it.",
+        "source": "BOCW Act 1996, Form IV"
+      },
+      {
+        "step": 3,
+        "description": "Pay the one-time registration fee (Rs. 25 to Rs. 50 in most states; free in some states). Annual renewal fee is typically Rs. 25 to Rs. 50.",
+        "source": "State BOCW Board rules"
+      },
+      {
+        "step": 4,
+        "description": "Receive your BOCW labour card. Keep it active by renewing it annually (submit work proof each year confirming continued 90 days of construction work).",
+        "source": "BOCW Act 1996, Section 12"
+      }
+    ]
+  },
+  "state_portals": [
+    {"state": "Maharashtra", "portal": "mahabocw.in"},
+    {"state": "Tamil Nadu", "portal": "tamilnaduconstruction.tn.gov.in"},
+    {"state": "Gujarat", "portal": "gccwb.gujarat.gov.in"},
+    {"state": "Karnataka", "portal": "bocwwb.kar.nic.in"},
+    {"state": "Bihar", "portal": "bocwboard.bihar.gov.in"},
+    {"state": "West Bengal", "portal": "bocwwb.gov.in"},
+    {"state": "Telangana", "portal": "labour.telangana.gov.in"},
+    {"state": "Rajasthan", "portal": "labour.rajasthan.gov.in"},
+    {"state": "Uttar Pradesh", "portal": "upbocw.in"},
+    {"state": "Odisha", "portal": "bocboard.labdirodisha.gov.in"}
+  ],
+  "portability": {
+    "inter_state": "A migrant worker registers with the BOCW Board of the destination state (where they are currently working), NOT their home state. The 90-day work certificate is for work done in the destination state.",
+    "key_note": "BOCW registration is state-specific. A worker who moves from Maharashtra to Tamil Nadu should ideally register with Tamil Nadu BOCW Board if they have 90 days of construction work there. Their Maharashtra card does not automatically transfer.",
+    "supreme_court_2018": "The Supreme Court 2018 order mandated coordination between source and destination state BOCW Boards for migrant worker welfare. Workers are not required to de-register from home state before registering in destination state.",
+    "source": "BOCW Act 1996; Supreme Court 2018 Order"
+  },
+  "exceptions": [
+    {
+      "exception": "Workers covered under ESIC (Employees State Insurance Corporation) are NOT eligible for BOCW benefits.",
+      "source": "BOCW Act 1996"
+    },
+    {
+      "exception": "BOCW card must be renewed annually. Lapsed cards do not qualify for benefit claims.",
+      "source": "BOCW Act 1996, Section 12"
+    },
+    {
+      "exception": "Financial benefit amounts and specific schemes vary significantly by state. What is available in Maharashtra may differ from Tamil Nadu or Gujarat.",
+      "source": "State BOCW Board schemes"
+    }
+  ],
+  "limitations": [
+    {
+      "limitation": "Registration requires a 90-day work certificate — migrant workers in seasonal or short-term employment may find it difficult to get a contractor to sign this certificate.",
+      "source": "Field reports, NGO research"
+    },
+    {
+      "limitation": "Benefits are administered by state boards — delays in benefit disbursement are common. Claim processing can take weeks to months.",
+      "source": "PDAG Consulting research, Jan Sahas reports"
+    },
+    {
+      "limitation": "The scheme was not originally designed for migrant workers — many migrant workers remain unaware of their eligibility in the destination state.",
+      "source": "PDAG Consulting research"
+    }
+  ],
+  "faq": [
+    {
+      "question": "I am a construction worker from Bihar working in Pune. Which BOCW Board should I register with?",
+      "answer": "You should register with the Maharashtra BOCW Board (mahabocw.in) since that is where you are currently working. You need a 90-day work certificate from your Pune contractor or supervisor.",
+      "source": "BOCW Act 1996; Supreme Court 2018 Order"
+    },
+    {
+      "question": "What proof do I need to show 90 days of construction work?",
+      "answer": "A certificate signed by your contractor, supervisor, or site manager stating you worked at least 90 days in construction in the past 12 months. If the contractor refuses to give this, a self-declaration witnessed by two people, or a certificate from a labour union or NGO, is accepted by many state boards.",
+      "source": "State BOCW Board rules"
+    },
+    {
+      "question": "My contractor refused to give me a work certificate. What can I do?",
+      "answer": "Under OSH Code 2020, the contractor is required to maintain a register of workers. You can demand a copy. If they refuse, file a complaint at the District Labour Office. Some state BOCW Boards also accept self-declarations or certificates from labour unions and NGOs like Jan Sahas or Aajeevika Bureau.",
+      "source": "OSH Code 2020, Section 134; State BOCW Board rules"
+    },
+    {
+      "question": "Is there a fee to register for BOCW?",
+      "answer": "Most states charge a small one-time registration fee of Rs. 25 to Rs. 50 and an annual renewal fee. Some states have made registration free. Check your destination state's BOCW Board portal.",
+      "source": "State BOCW Board rules"
+    },
+    {
+      "question": "What is the most important benefit of BOCW registration?",
+      "answer": "Accident insurance is the most immediately valuable benefit — if you are injured or die in a worksite accident, your family gets compensation of Rs. 1 to 5 lakh depending on your state. Long-term benefits include pension, children's education scholarships, and daughter's marriage assistance.",
+      "source": "BOCW Act 1996, Section 22"
+    }
+  ],
+  "important_definitions": [
+    {
+      "term": "BOCW Card / Labour Card",
+      "definition": "The registration card issued by the State Welfare Board to eligible construction workers. This card is the entry point to all welfare benefits.",
+      "source": "BOCW Act 1996"
+    },
+    {
+      "term": "BOCW Cess",
+      "definition": "A 1% cess (tax) levied on construction project costs that funds the State Welfare Boards and their benefit schemes.",
+      "source": "BOCW Cess Act 1996"
+    },
+    {
+      "term": "90-Day Work Requirement",
+      "definition": "A worker must have engaged in construction work for at least 90 days in the preceding 12 months to be eligible for BOCW registration.",
+      "source": "BOCW Act 1996, Section 12"
+    }
+  ],
+  "official_contacts": [
+    {
+      "type": "Helpline (Labour Ministry)",
+      "number": "1800-891-8888",
+      "description": "Ministry of Labour & Employment national helpline.",
+      "source": "labour.gov.in"
+    },
+    {
+      "type": "Website",
+      "url": "https://labour.gov.in/bocw",
+      "description": "Central BOCW information from Ministry of Labour.",
+      "source": "labour.gov.in"
+    }
+  ],
+  "official_sources": [
+    {
+      "website": "Ministry of Labour & Employment — BOCW",
+      "url": "https://labour.gov.in/bocw",
+      "section": "BOCW Act, Welfare Boards, Benefits"
+    },
+    {
+      "website": "MyScheme — BOCW",
+      "url": "https://www.myscheme.gov.in/schemes/bocw",
+      "section": "Eligibility, Application, Benefits"
+    },
+    {
+      "website": "apps.labour.gov.in",
+      "url": "https://apps.labour.gov.in/bocw",
+      "section": "BOCW central dashboard"
+    }
+  ],
+  "last_updated": "2026-08-08",
+  "data_extraction_note": "Data extracted from official government sources and cross-referenced with NGO research (Jan Sahas, PDAG Consulting) on 2026-08-08. Financial benefit amounts are indicative ranges — verify exact amounts with the destination state's BOCW Board portal."
+}

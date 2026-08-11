@@ -1,0 +1,423 @@
+{
+  "scheme_id": "MGNREGS_001",
+  "scheme_name": "Mahatma Gandhi National Rural Employment Guarantee Scheme (MGNREGS)",
+  "description": "The Mahatma Gandhi National Rural Employment Guarantee Act (MGNREGA), 2005, provides a legal guarantee of at least 100 days of wage employment in a financial year to every rural household whose adult members volunteer to do unskilled manual work. It is implemented by the Ministry of Rural Development, Government of India. Note: As of July 1, 2026, the MGNREGA framework has been succeeded by the Viksit Bharat – Guarantee for Rozgar and Ajeevika Mission (Gramin) (VB-G RAM G) Act, 2025, which expands the guarantee to 125 days.",
+  "objective": "To enhance the livelihood security of rural households by guaranteeing at least 100 days of wage employment per financial year to every household whose adult members volunteer to do unskilled manual work, while simultaneously creating durable rural infrastructure such as water conservation structures, rural connectivity, and land development works.",
+  "eligibility": [
+    {
+      "criterion": "Any adult member (aged 18 years or above) of a rural household.",
+      "source": "nrega.nic.in, MGNREGA 2005"
+    },
+    {
+      "criterion": "The applicant must reside in a rural area.",
+      "source": "nrega.nic.in"
+    },
+    {
+      "criterion": "The household must be willing to perform unskilled manual work.",
+      "source": "nrega.nic.in, MGNREGA 2005"
+    },
+    {
+      "criterion": "The household must register with their local Gram Panchayat and obtain a Job Card.",
+      "source": "nrega.nic.in"
+    }
+  ],
+  "beneficiary_categories": [
+    {
+      "category": "Rural Households",
+      "description": "Any household residing in rural areas whose adult members are willing to do unskilled manual work.",
+      "source": "MGNREGA 2005"
+    },
+    {
+      "category": "Scheduled Castes (SC) and Scheduled Tribes (ST)",
+      "description": "The scheme specifically encourages participation of SC/ST households.",
+      "source": "nrega.nic.in"
+    },
+    {
+      "category": "Women",
+      "description": "One-third of the beneficiaries are required to be women. The scheme prioritises women's participation.",
+      "source": "MGNREGA 2005, Section 5"
+    },
+    {
+      "category": "Women-headed households",
+      "description": "Special priority is given to women-headed households.",
+      "source": "nrega.nic.in"
+    },
+    {
+      "category": "Persons with disabilities",
+      "description": "The scheme provides for the participation of persons with disabilities through suitable work categories.",
+      "source": "MGNREGA 2005"
+    }
+  ],
+  "required_documents": [
+    {
+      "document": "Aadhaar Card",
+      "description": "Aadhaar card of the family head and all adult members (mandatory for identity verification and Direct Benefit Transfer of wages).",
+      "mandatory": true,
+      "source": "nrega.nic.in"
+    },
+    {
+      "document": "Passport-sized Photographs",
+      "description": "Recent passport-sized photographs of all adult members applying for the Job Card.",
+      "mandatory": true,
+      "source": "nrega.nic.in"
+    },
+    {
+      "document": "Proof of Residence",
+      "description": "Such as Ration Card, Voter ID, or Electricity Bill to establish rural residence.",
+      "mandatory": true,
+      "source": "nrega.nic.in"
+    },
+    {
+      "document": "Bank / Post Office Account Details",
+      "description": "Copy of bank passbook (Aadhaar-linked bank account) to facilitate direct wage payments via DBT.",
+      "mandatory": true,
+      "source": "nrega.nic.in"
+    },
+    {
+      "document": "Self-Declaration Form",
+      "description": "A declaration stating the household's willingness to do unskilled manual work.",
+      "mandatory": true,
+      "source": "nrega.nic.in"
+    }
+  ],
+  "benefits": [
+    {
+      "benefit": "Legal guarantee of at least 100 days of wage employment per household per financial year (expanded to 125 days under VB-G RAM G Act from July 2026).",
+      "source": "MGNREGA 2005, pib.gov.in"
+    },
+    {
+      "benefit": "Right to unemployment allowance: If work is not provided within 15 days of a formal application, the applicant is entitled to an unemployment allowance from the State Government.",
+      "source": "MGNREGA 2005, Section 7"
+    },
+    {
+      "benefit": "Wages paid directly to the worker's bank or post office account through Direct Benefit Transfer (DBT).",
+      "source": "nrega.nic.in"
+    },
+    {
+      "benefit": "Work to be provided within 5 km radius of the applicant's residence. If work is beyond 5 km, a travel and subsistence allowance is paid.",
+      "source": "MGNREGA 2005"
+    },
+    {
+      "benefit": "Worksite facilities: drinking water, shade for rest, and first-aid must be provided at worksites.",
+      "source": "MGNREGA 2005"
+    },
+    {
+      "benefit": "Job Card is issued free of cost.",
+      "source": "nrega.nic.in"
+    },
+    {
+      "benefit": "One-third of beneficiaries must be women, promoting women's economic empowerment.",
+      "source": "MGNREGA 2005, Section 5"
+    },
+    {
+      "benefit": "Creation of durable rural assets including water conservation, rural connectivity, land development, and flood control works.",
+      "source": "nrega.nic.in"
+    }
+  ],
+  "financial_benefits": [
+    {
+      "benefit_type": "Daily Wage Rate",
+      "details": "State-wise wage rates are notified annually by the Ministry of Rural Development. From July 1, 2026, a minimum interim base wage rate of Rs. 300 per day has been introduced under VB-G RAM G, ensuring no state has a wage below this amount.",
+      "source": "pib.gov.in, Ministry of Rural Development Gazette Notification"
+    },
+    {
+      "benefit_type": "Unemployment Allowance",
+      "details": "If employment is not provided within 15 days of application, the State Government must pay an unemployment allowance. The rate is at least one-fourth of the wage rate for the first 30 days and at least one-half thereafter.",
+      "source": "MGNREGA 2005, Section 7"
+    },
+    {
+      "benefit_type": "Wage Increase (2026-27)",
+      "details": "Average wage increase across the country is over 10% under the VB-G RAM G Act. States with historically lower wages (UP, Bihar, Jharkhand, West Bengal, Assam, Arunachal Pradesh, Himachal Pradesh) received increases of 15% to 25%.",
+      "source": "pib.gov.in"
+    },
+    {
+      "benefit_type": "Travel and Subsistence Allowance",
+      "details": "Payable when work is provided beyond 5 km from the applicant's residence.",
+      "source": "MGNREGA 2005"
+    }
+  ],
+  "application_process": {
+    "online": [
+      {
+        "step": 1,
+        "description": "Download and register on the UMANG (Unified Mobile Application for New-age Governance) mobile app.",
+        "source": "umang.gov.in"
+      },
+      {
+        "step": 2,
+        "description": "Search for 'MGNREGA' in the UMANG app and select the option to 'Apply for Job Card'.",
+        "source": "umang.gov.in"
+      },
+      {
+        "step": 3,
+        "description": "Fill in the required details including household information and adult member details.",
+        "source": "umang.gov.in"
+      },
+      {
+        "step": 4,
+        "description": "Upload the necessary documents (photographs, Aadhaar, proof of residence).",
+        "source": "umang.gov.in"
+      },
+      {
+        "step": 5,
+        "description": "Submit the application to receive a tracking ID for status monitoring.",
+        "source": "umang.gov.in"
+      }
+    ],
+    "offline": [
+      {
+        "step": 1,
+        "description": "Visit your local Gram Panchayat office and request an application form for a Job Card (the form is free of cost). Alternatively, submit an application on plain paper.",
+        "source": "nrega.nic.in"
+      },
+      {
+        "step": 2,
+        "description": "Provide the names, ages, and Aadhaar details of all adult household members willing to perform unskilled manual work.",
+        "source": "nrega.nic.in"
+      },
+      {
+        "step": 3,
+        "description": "Attach required documents: photographs, Aadhaar card copies, proof of residence, and bank account details.",
+        "source": "nrega.nic.in"
+      },
+      {
+        "step": 4,
+        "description": "The Gram Rozgar Sahayak (GRS) or Panchayat Secretary will verify your documents and residence.",
+        "source": "nrega.nic.in"
+      },
+      {
+        "step": 5,
+        "description": "The Job Card is typically issued within 15 days of verification.",
+        "source": "nrega.nic.in"
+      },
+      {
+        "step": 6,
+        "description": "To demand work: Submit a written application for work to the Gram Panchayat, specifying the time and duration for which work is sought (minimum 14 days of continuous work).",
+        "source": "MGNREGA 2005"
+      },
+      {
+        "step": 7,
+        "description": "The Gram Panchayat must provide work within 15 days of receipt of application, failing which the applicant is entitled to unemployment allowance.",
+        "source": "MGNREGA 2005, Section 7"
+      }
+    ]
+  },
+  "portability": {
+    "description": "MGNREGA work is typically provided at the Gram Panchayat level where the household is registered. The Job Card is valid within the Block/District of registration.",
+    "note": "MGNREGA does not have inter-state portability like ONORC. Work demand and entitlements are tied to the registered Gram Panchayat.",
+    "source": "MGNREGA 2005"
+  },
+  "state_specific_rules": [
+    {
+      "note": "Wage rates vary by state and are notified annually by the Ministry of Rural Development.",
+      "source": "Ministry of Rural Development Gazette Notification"
+    },
+    {
+      "note": "State-specific MGNREGA helpline numbers vary. Check the respective state's NREGA portal at nrega.nic.in for state-specific contact information.",
+      "source": "nrega.nic.in"
+    },
+    {
+      "note": "Some states have expanded the 100-day guarantee or linked MGNREGA with state-specific employment schemes.",
+      "source": "UNKNOWN"
+    },
+    {
+      "note": "Social audits are mandatory and conducted by the Gram Sabha to ensure transparency and accountability in fund utilization.",
+      "source": "MGNREGA 2005, nrega.nic.in"
+    }
+  ],
+  "exceptions": [
+    {
+      "exception": "Urban areas are not covered under MGNREGA. Only rural households are eligible.",
+      "source": "MGNREGA 2005"
+    },
+    {
+      "exception": "Minors (below 18 years) cannot be registered or employed under MGNREGA.",
+      "source": "MGNREGA 2005"
+    },
+    {
+      "exception": "Skilled and semi-skilled work categories are not covered. Only unskilled manual work is guaranteed.",
+      "source": "MGNREGA 2005"
+    }
+  ],
+  "limitations": [
+    {
+      "limitation": "The guarantee is limited to 100 days per household per financial year (125 days under VB-G RAM G from July 2026). Additional days are not guaranteed.",
+      "source": "MGNREGA 2005, pib.gov.in"
+    },
+    {
+      "limitation": "Only unskilled manual work is provided. Skilled or semi-skilled employment is not covered.",
+      "source": "MGNREGA 2005"
+    },
+    {
+      "limitation": "The scheme is applicable only in rural areas. Urban residents are not eligible.",
+      "source": "MGNREGA 2005"
+    },
+    {
+      "limitation": "Delays in wage payments have been reported in various states, although the Act mandates timely payment.",
+      "source": "UNKNOWN"
+    }
+  ],
+  "faq": [
+    {
+      "question": "What is MGNREGA?",
+      "answer": "The Mahatma Gandhi National Rural Employment Guarantee Act (MGNREGA), 2005, is an Indian labour law and social security scheme that guarantees the 'right to work'. It provides at least 100 days of guaranteed wage employment in a financial year to every rural household whose adult members volunteer to do unskilled manual work.",
+      "source": "MGNREGA 2005, nrega.nic.in"
+    },
+    {
+      "question": "How do I get a Job Card?",
+      "answer": "Visit your local Gram Panchayat and submit an application (free of cost) with photographs, Aadhaar details, and proof of residence of all adult household members. The Job Card is issued within 15 days after verification.",
+      "source": "nrega.nic.in"
+    },
+    {
+      "question": "Is there a fee for registration?",
+      "answer": "No. Job Card registration under MGNREGA is completely free. If anyone asks for money for registration, it should be reported to local authorities.",
+      "source": "nrega.nic.in"
+    },
+    {
+      "question": "What happens if work is not provided within 15 days?",
+      "answer": "If work is not provided within 15 days of a formal written application, the applicant is entitled to an unemployment allowance from the State Government. The rate is at least one-fourth of the wage rate for the first 30 days and at least one-half thereafter.",
+      "source": "MGNREGA 2005, Section 7"
+    },
+    {
+      "question": "How are wages paid?",
+      "answer": "Wages are paid directly to the beneficiary's Aadhaar-linked bank or post office account through Direct Benefit Transfer (DBT).",
+      "source": "nrega.nic.in"
+    },
+    {
+      "question": "What is the minimum number of days of work I can demand?",
+      "answer": "You can demand a minimum of 14 days of continuous work in your application.",
+      "source": "MGNREGA 2005"
+    },
+    {
+      "question": "Can women participate in MGNREGA?",
+      "answer": "Yes. One-third of the beneficiaries under MGNREGA must be women as per the Act. Women are actively encouraged to participate.",
+      "source": "MGNREGA 2005, Section 5"
+    },
+    {
+      "question": "What is VB-G RAM G?",
+      "answer": "The Viksit Bharat – Guarantee for Rozgar and Ajeevika Mission (Gramin) (VB-G RAM G) Act, 2025, is the successor legislation to MGNREGA, effective from July 1, 2026. It expands the employment guarantee from 100 to 125 days per household per financial year and introduces a minimum base wage of Rs. 300 per day.",
+      "source": "pib.gov.in"
+    }
+  ],
+  "important_definitions": [
+    {
+      "term": "MGNREGA",
+      "definition": "Mahatma Gandhi National Rural Employment Guarantee Act, 2005 - An Act of Parliament providing a legal right to work in rural areas.",
+      "source": "MGNREGA 2005"
+    },
+    {
+      "term": "Job Card",
+      "definition": "The primary document issued to registered households under MGNREGA, containing photographs and details of adult members. It is required to demand work and is valid for five years.",
+      "source": "MGNREGA 2005"
+    },
+    {
+      "term": "Gram Panchayat",
+      "definition": "The lowest tier of the Panchayati Raj system, responsible for registration, work allocation, and implementation of MGNREGA at the village level.",
+      "source": "MGNREGA 2005"
+    },
+    {
+      "term": "GRS",
+      "definition": "Gram Rozgar Sahayak - The designated official at the Gram Panchayat level responsible for day-to-day implementation of MGNREGA including registration, verification, and muster roll maintenance.",
+      "source": "nrega.nic.in"
+    },
+    {
+      "term": "Social Audit",
+      "definition": "A process mandated under MGNREGA whereby the Gram Sabha reviews and evaluates the implementation of the scheme to ensure transparency, accountability, and proper utilization of funds.",
+      "source": "MGNREGA 2005"
+    },
+    {
+      "term": "Muster Roll",
+      "definition": "A record of attendance and work done by labourers at MGNREGA worksites, used as the basis for wage calculation and payment.",
+      "source": "nrega.nic.in"
+    },
+    {
+      "term": "DBT",
+      "definition": "Direct Benefit Transfer - The mechanism for transferring MGNREGA wages directly to the beneficiary's Aadhaar-linked bank account.",
+      "source": "nrega.nic.in"
+    },
+    {
+      "term": "VB-G RAM G",
+      "definition": "Viksit Bharat – Guarantee for Rozgar and Ajeevika Mission (Gramin) Act, 2025 - The successor legislation to MGNREGA effective from July 1, 2026, expanding the employment guarantee to 125 days.",
+      "source": "pib.gov.in"
+    }
+  ],
+  "official_contacts": [
+    {
+      "type": "Website",
+      "url": "https://nrega.nic.in",
+      "description": "Official MGNREGA MIS portal for Job Card details, work status, payment status, and state-wise information.",
+      "source": "nrega.nic.in"
+    },
+    {
+      "type": "Website",
+      "url": "https://rural.gov.in",
+      "description": "Ministry of Rural Development official website.",
+      "source": "rural.gov.in"
+    },
+    {
+      "type": "Helpline",
+      "number": "UNKNOWN",
+      "description": "There is no single national toll-free helpline number for all states. State-specific helpline numbers are available on nrega.nic.in. Example: Rajasthan uses 1800-180-6127.",
+      "source": "nrega.nic.in"
+    },
+    {
+      "type": "Grievance Portal",
+      "url": "https://pgportal.gov.in/",
+      "description": "Centralized Public Grievance Redress and Monitoring System (CPGRAMS) for filing complaints.",
+      "source": "pgportal.gov.in"
+    }
+  ],
+  "official_sources": [
+    {
+      "website": "MGNREGA Official Portal",
+      "document": "MGNREGA MIS Portal",
+      "url": "https://nrega.nic.in/",
+      "page": "N/A",
+      "section": "About, Job Card, Works, Payments"
+    },
+    {
+      "website": "Ministry of Rural Development",
+      "document": "MoRD Official Website",
+      "url": "https://rural.gov.in/",
+      "page": "N/A",
+      "section": "MGNREGA Scheme Details"
+    },
+    {
+      "website": "MyScheme - Government of India",
+      "document": "MGNREGS Scheme Page",
+      "url": "https://www.myscheme.gov.in/schemes/mgnregs",
+      "page": "N/A",
+      "section": "Details, Benefits, Eligibility, Application Process, Documents Required"
+    },
+    {
+      "website": "Press Information Bureau",
+      "document": "PIB Press Release on VB-G RAM G Act and wage revision",
+      "url": "https://pib.gov.in/",
+      "page": "N/A",
+      "section": "VB-G RAM G Act commencement, revised wage rates July 2026"
+    },
+    {
+      "website": "UMANG Portal",
+      "document": "UMANG - MGNREGA Online Services",
+      "url": "https://umang.gov.in/",
+      "page": "N/A",
+      "section": "MGNREGA Job Card Application"
+    },
+    {
+      "website": "Indian Economic Service",
+      "document": "IES MGNREGA Analysis",
+      "url": "https://ies.gov.in/",
+      "page": "N/A",
+      "section": "MGNREGA Act provisions"
+    },
+    {
+      "website": "The Mahatma Gandhi National Rural Employment Guarantee Act, 2005",
+      "document": "MGNREGA Act, 2005 (Act No. 42 of 2005)",
+      "url": "https://nrega.nic.in/netnrega/filext/act/nrega_act.pdf",
+      "page": "N/A",
+      "section": "Sections 3, 5, 7 (Employment Guarantee, Women's Participation, Unemployment Allowance)"
+    }
+  ],
+  "last_updated": "2026-08-03",
+  "data_extraction_note": "Data extracted from official government sources (nrega.nic.in, rural.gov.in, myscheme.gov.in, pib.gov.in, umang.gov.in, ies.gov.in) on 2026-08-03. The VB-G RAM G Act, 2025 (successor to MGNREGA) became effective July 1, 2026. Fields that could not be verified from official sources are marked as UNKNOWN."
+}

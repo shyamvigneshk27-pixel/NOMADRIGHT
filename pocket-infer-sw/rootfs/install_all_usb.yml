@@ -1,0 +1,7 @@
+---
+- hosts: usb
+  roles:
+    - { role: initial, tags: ['initial'] }
+    - { role: vllm, tags: ['initial'] }
+    - { role: indic, tags: ['initial'] }
+    - { role: app, tags: ['initial'] }

@@ -1,0 +1,13 @@
+[Unit]
+Description=PocketInfer Service
+After=network.target
+
+[Service]
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/pocket-infer-sw
+ExecStart=/home/ubuntu/pocket-infer-sw/python/venv/bin/pocketinfer-service
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

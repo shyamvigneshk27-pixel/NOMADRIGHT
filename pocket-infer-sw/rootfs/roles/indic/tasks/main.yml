@@ -1,0 +1,127 @@
+---
+# Ctranslate2 requires a dependency from intel's OneAPI
+- name: Add Intel OneAPI keyring
+  shell: wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+  become: true
+
+- name: Add to apt
+  shell: echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+  become: true
+
+- name: Install Ctranslate2 dependencies
+  ansible.builtin.apt:
+    pkg:
+    - libomp5-14
+    update_cache: yes
+  become: true
+
+# This deb was created by cloning CTranslate2 onto the Jetson
+# The following was added to the bottom of CMakeLists.txt
+# +SET(CPACK_GENERATOR "DEB")
+# +SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "AT")
+# +SET(CPACK_DEBIAN_PACKAGE_SHLIBDEPS "ON")
+# +INCLUDE(CPack)
+# Then it was built with the following commands:
+# mkdir build && cd build
+# cmake .. -DWITH_MKL=OFF -DWITH_CUDA=ON -DWITH_CUDNN=ON -DWITH_OPENBLAS=ON
+# cmake --build .
+# sudo cpack
+
+- name: Copy ctranslate2 .deb
+  copy:
+    src: ctranslate2-0.1.1-Linux.deb
+    dest: /tmp/ctranslate2-0.1.1-Linux.deb
+
+# The following was built from the Ctranslate2 repository
+# by running 
+# cd python
+# pip install -r install_requirements.txt
+# python setup.py bdist_wheel
+
+- name: Copy ctranslate2 python .whl
+  copy:
+    src: ctranslate2-4.6.3-cp310-cp310-linux_aarch64.whl
+    dest: /tmp/ctranslate2-4.6.3-cp310-cp310-linux_aarch64.whl
+
+- name: Install the ctranslate2 .deb
+  ansible.builtin.apt:
+    deb: /tmp/ctranslate2-0.1.1-Linux.deb
+    state: present
+    update_cache: yes
+  become: true
+
+- name: Install ctranslate2 python bindings .whl
+  ansible.builtin.pip:
+    name: /tmp/ctranslate2-4.6.3-cp310-cp310-linux_aarch64.whl
+    state: present
+
+# ---- Bhashini Models -----
+- name: Extract bhashini models from local archive
+  ansible.builtin.unarchive:
+    src: bhashini_models.zip
+    dest: ~/
+
+- name: Install ASR python dependencies
+  ansible.builtin.pip:
+    requirements: ~/bhashini_models/requirements.txt
+    extra_args: --index-url=https://pypi.jetson-ai-lab.io/jp6/cu126
+    virtualenv: ~/bhashini_models/venv
+    virtualenv_site_packages: yes
+
+- name: Install ctranslate2 python bindings .whl
+  ansible.builtin.pip:
+    name: /tmp/ctranslate2-4.6.3-cp310-cp310-linux_aarch64.whl
+    state: present
+    virtualenv: ~/bhashini_models/venv
+    virtualenv_site_packages: yes
+
+- name: Force numpy compatibility
+  ansible.builtin.pip:
+    name: numpy<2
+    virtualenv: ~/bhashini_models/venv
+    virtualenv_site_packages: yes
+
+- name: Clone Flite repository
+  ansible.builtin.git:
+    repo: http://github.com/festvox/flite
+    dest: ~/bhashini_models/tts/flite
+
+- name: Configure Flite
+  shell: ./configure
+  args:
+    chdir: ~/bhashini_models/tts/flite
+
+- name: Build Flite
+  shell: make
+  args:
+    chdir: ~/bhashini_models/tts/flite
+
+- name: Make flite voices directory
+  ansible.builtin.file:
+    path: ~/bhashini_models/tts/flite/voices
+    state: directory
+
+- name: Extract flite voices from local archive
+  ansible.builtin.unarchive:
+    src: flite_voices.zip
+    dest: ~/bhashini_models/tts/flite/voices/
+
+- name: Download NLTK data
+  shell: /home/ubuntu/bhashini_models/venv/bin/python -c "import nltk;nltk.download('punkt_tab')"
+  args:
+    chdir: ~/bhashini_models
+
+- name: Install Service
+  ansible.builtin.copy:
+    src: /home/ubuntu/bhashini_models/bhashini_models.service
+    dest: /etc/systemd/system/bhashini_models.service
+    remote_src: true
+  become: true
+
+- name: Enable and start Service
+  ansible.builtin.systemd:
+    name: bhashini_models.service
+    daemon_reload: true
+    enabled: true
+    state: started
+  become: true

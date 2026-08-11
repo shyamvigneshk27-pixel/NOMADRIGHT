@@ -1,0 +1,19 @@
+---
+- name: Gather package facts
+  ansible.builtin.package_facts:
+    manager: apt # Specify 'apt' for Debian-based systems
+  register: package_facts_result
+
+- name: Copy cudnn-local-tegra-repo-ubuntu2204-9.3.0_1.0-1_arm64.deb
+  ansible.builtin.copy:
+    src: cudnn-local-tegra-repo-ubuntu2204-9.3.0_1.0-1_arm64.deb
+    dest: /tmp/deb/
+    mode: '0644'
+  when: '"libcudnn9-cuda-12 " not in ansible_facts.packages'
+
+- name: Install cudnn-local-tegra-repo-ubuntu2204-9.3.0_1.0-1_arm64.deb
+  ansible.builtin.dpkg:
+    pkg: /tmp/deb/cudnn-local-tegra-repo-ubuntu2204-9.3.0_1.0-1_arm64.deb
+    state: present
+  become: true
+  when: '"libcudnn9-cuda-12 " not in ansible_facts.packages'

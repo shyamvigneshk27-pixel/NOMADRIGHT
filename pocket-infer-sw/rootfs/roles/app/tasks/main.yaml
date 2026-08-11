@@ -1,0 +1,75 @@
+---
+- name: Install onnxruntime-gpu 
+  tags: [always]
+  ansible.builtin.pip:
+    name:
+      - onnxruntime
+      - onnxruntime-gpu
+    extra_args: --index-url=https://pypi.jetson-ai-lab.io/jp6/cu126
+  become: true
+
+- name: Install additional deps
+  tags: [always]
+  ansible.builtin.apt:
+    pkg:
+    - libasound-dev
+    - portaudio19-dev
+    - libportaudio2
+    - ffmpeg
+    - flac
+  become: true
+
+- name: Clone root application code
+  tags: [always]
+  ansible.builtin.git:
+    repo: 'https://github.com/currentai-org/suno-sutra-sw.git'
+    version: main
+    dest: /home/ubuntu/pocket-infer-sw
+  environment:
+    GIT_LFS_SKIP_SMUDGE: 1
+
+- name: Pull LFS objects for root application code only
+  tags: [always]
+  ansible.builtin.command:
+    cmd: git lfs pull --include "python/**"
+    chdir: /home/ubuntu/pocket-infer-sw
+
+- name: Install global python dependencies
+  tags: [always]
+  ansible.builtin.pip:
+    requirements: /home/ubuntu/pocket-infer-sw/python/requirements.txt
+  become: true
+    
+- name: Install pocketinfer package to system
+  tags: [always]
+  ansible.builtin.pip:
+    name: /home/ubuntu/pocket-infer-sw/python
+    state: present
+    editable: yes
+  become: true
+
+- name: Install remaining pocketinfer deps for default app
+  tags: [always]
+  ansible.builtin.command:
+    cmd: /usr/local/bin/pocketinfer-service --update-app
+
+- name: Install polkit config
+  tags: [always]
+  ansible.builtin.copy:
+    src: manage-units.pkla
+    dest: /etc/polkit-1/localauthority/50-local.d/manage-units.pkla
+  become: true
+
+- name: Enable pinmux on expansion header
+  tags: [always]
+  ansible.builtin.command:
+    cmd: /opt/nvidia/jetson-io/config-by-function.py 1="i2c2 i2c8 spi1 uarta" -o dt
+    creates: /boot/jetson-io-hdr40-user-custom.dtbo
+  become: true
+
+- name: Copy DTB overlay to boot partition
+  tags: [always]
+  ansible.builtin.copy:
+    src: jetson-io-hdr40-user-custom.dtbo
+    dest: /boot/jetson-io-hdr40-user-custom.dtbo
+  become: true
