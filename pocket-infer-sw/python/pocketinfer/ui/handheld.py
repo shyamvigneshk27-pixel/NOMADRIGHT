@@ -80,16 +80,23 @@ class HandheldUI:
                                         label_color=color, fill_color=0x000000, outline_color=0x000000))
         self.topbar.append(self._button('Settings', x=320-28*2, y=0, width=28, height=28, label=icons.book, font=self.ICON_FONT,
                                         label_color=color, fill_color=0x000000, outline_color=0x000000, cb=_toggle_setpage))
+        # NomadRight's form-reading flow (see nomad_right/app.py's ui_cb):
+        # captures a photo via board.camera_frame_jpg() and waits for the
+        # worker's next spoken question about it. Apps that don't subscribe
+        # to the "Camera" message simply never receive it - safe to always
+        # show.
+        self.topbar.append(self._button('Camera', x=320-28*3, y=0, width=28, height=28, label=icons.camera, font=self.ICON_FONT,
+                                        label_color=color, fill_color=0x000000, outline_color=0x000000))
 
         # Create the text label
         self.battval = label.Label(self.ICON_FONT, text=f"{icons.microchip}     {icons.battery_full}", color=color)
         self.battval.anchor_point = (1.0, 0.0)
-        self.battval.anchored_position = (320-28*2-4, 3)
+        self.battval.anchored_position = (320-28*3-4, 3)
         self.topbar.append(self.battval)
 
         self.memval = label.Label(self.HINDI_FONT, text="    ", color=color)
         self.memval.anchor_point = (1.0, 0.0)
-        self.memval.anchored_position = (320-28*4-4, 8)
+        self.memval.anchored_position = (320-28*5-4, 8)
         self.topbar.append(self.memval)
 
         self.toptext = text_box.TextBox(x=0, y=0, width=320, height=100, line_spacing=0.80, font=self.HINDI_FONT, color=color)

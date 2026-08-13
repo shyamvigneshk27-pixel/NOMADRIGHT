@@ -21,6 +21,7 @@ import logging
 import re
 import threading
 import unittest
+import unittest.mock
 
 # ── Path setup ─────────────────────────────────────────────────────────────
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -301,6 +302,72 @@ class TestMainAppExceptionHandling(unittest.TestCase):
 
 
 # ──────────────────────────────────────────────────────────────────────────────
+# qwen2.5vl:3b text-fallback and vision-form paths (qwen_client.py)
+# ──────────────────────────────────────────────────────────────────────────────
+# QwenClient.answer_text/answer_vision are mocked throughout - this suite
+# stays fully offline and must not depend on Ollama/qwen2.5vl actually
+# being installed or loaded. It only verifies the *wiring*: that a grounded
+# answer gets the LLM_FALLBACK/VISION_FORM_QUERY tag, and that the sentinel/
+# None case still falls through to the existing constant fallback message
+# rather than silently failing or guessing.
+
+class TestLLMFallbackAndVision(unittest.TestCase):
+    """Regression tests for workflow.py's Step 6.5 and process_vision_query()."""
+
+    # Known negative-control query already used elsewhere in this suite's
+    # sibling pipeline_test.py: garbled/off-topic, no real scheme keyword,
+    # so it reliably produces no rule match and no RAG chunk above
+    # RAG_MIN_SCORE - i.e. it reaches Step 6.5 in every test run regardless
+    # of index contents.
+    UNMATCHED_QUERY = "Yapri festival at Kudab Uri"
+
+    def setUp(self):
+        from pocketinfer.applications.nomad_right.workflow import WorkflowController
+        from pocketinfer.applications.nomad_right.config import NomadRightConfig
+        self.workflow = WorkflowController(config=NomadRightConfig())
+
+    def test_unmatched_query_uses_llm_fallback_when_qwen_grounds_an_answer(self):
+        """An unmatched query should get an LLM_FALLBACK-tagged answer (not the
+        constant fallback) when qwen returns a grounded answer from context."""
+        with unittest.mock.patch.object(
+            self.workflow.qwen_client, "answer_text",
+            return_value="Ration cards are portable across states under ONORC.",
+        ):
+            pkg = self.workflow.process(self.UNMATCHED_QUERY)
+        self.assertEqual(pkg.qr_payload["status"], "LLM_FALLBACK")
+        self.assertIn("ration cards are portable", pkg.voice_text.lower())
+
+    def test_unmatched_query_falls_back_to_constant_message_on_sentinel(self):
+        """When qwen can't answer from context (QwenClient already collapses the
+        sentinel/errors/timeouts to None), the response must still be the
+        existing constant fallback - never silence, never a guess."""
+        with unittest.mock.patch.object(self.workflow.qwen_client, "answer_text", return_value=None):
+            pkg = self.workflow.process(self.UNMATCHED_QUERY)
+        self.assertEqual(pkg.qr_payload["status"], "FALLBACK")
+        self.assertIn("i'm sorry", pkg.voice_text.lower())
+
+    def test_vision_query_uses_answer_when_qwen_reads_the_form(self):
+        """A photographed-form question should get a FORM HELP / VISION_FORM_QUERY
+        tagged answer when qwen finds it in the image."""
+        with unittest.mock.patch.object(
+            self.workflow.qwen_client, "answer_vision",
+            return_value="This field asks for your Aadhaar number.",
+        ):
+            pkg = self.workflow.process_vision_query("What does this field mean?", b"fake-jpeg-bytes")
+        self.assertEqual(pkg.qr_payload["status"], "VISION_FORM_QUERY")
+        self.assertEqual(pkg.display_top_text, "FORM HELP")
+        self.assertIn("aadhaar", pkg.voice_text.lower())
+
+    def test_vision_query_falls_back_when_qwen_cannot_read_the_form(self):
+        """An unreadable/irrelevant photo must fall back to the constant
+        message, not a confident guess about document content."""
+        with unittest.mock.patch.object(self.workflow.qwen_client, "answer_vision", return_value=None):
+            pkg = self.workflow.process_vision_query("What does this field mean?", b"fake-jpeg-bytes")
+        self.assertEqual(pkg.qr_payload["status"], "FALLBACK")
+        self.assertIn("i'm sorry", pkg.voice_text.lower())
+
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Main runner
 # ──────────────────────────────────────────────────────────────────────────────
 
@@ -314,6 +381,7 @@ def _run_all():
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestMultilineIntentMatching))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestSQLiteConnectionCleanup))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestMainAppExceptionHandling))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestLLMFallbackAndVision))
 
     runner = unittest.TextTestRunner(verbosity=2, stream=sys.stdout)
     result = runner.run(suite)

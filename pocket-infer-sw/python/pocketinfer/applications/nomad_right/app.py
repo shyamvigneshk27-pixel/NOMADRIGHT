@@ -11,8 +11,12 @@ language are both selected from the touchscreen Settings page (see
 ui/handheld.py) using the same `ASR <lang>` / `Bridge <lang>` message
 convention already established by the HearTheWorld reference application.
 
-100% offline: BHASHINI ASR/NMT/TTS all talk to localhost:11400 only. No
-camera, no VLM, no generative LLM anywhere in the answer path.
+100% offline: BHASHINI ASR/NMT/TTS all talk to localhost:11400 only.
+qwen2.5vl:3b (via Ollama, localhost:11434) is the only generative model in
+the loop, and only in two narrow, explicitly-gated cases: a grounded text
+fallback when intent/RAG matching finds nothing (see workflow.py Step 6.5),
+and the Camera-button form-reading flow below - never as the primary answer
+path. See qwen_client.py for the grounding/sentinel guarantees.
 """
 
 import os
@@ -77,6 +81,16 @@ class NomadRightApplication(BaseApplication):
         # without the worker having to repeat the scheme name - see
         # EntityExtractor._CONTEXT_INHERITABLE_INTENTS.
         self.last_scheme_code: Optional[str] = None
+        # Set when the worker presses the touchscreen Camera button (see
+        # ui_cb below). The *next* voice query is answered against this
+        # photo via workflow.process_vision_query() instead of the normal
+        # Decision Layer, then cleared (one photo -> one follow-up question;
+        # asking a second question about the same form means pressing
+        # Camera again). Cleared without use if constants.LLM_VISION_PENDING_TTL_S
+        # elapses first, so a stale photo can't attach to an unrelated
+        # later question.
+        self.pending_form_image: Optional[bytes] = None
+        self.pending_form_image_ts: float = 0.0
 
     def start(self) -> None:
         """Application start hook. Instantiates the BHASHINI bridge and pipeline controller."""
@@ -107,6 +121,36 @@ class NomadRightApplication(BaseApplication):
             if code:
                 self.settings["bridge_language"] = code
                 self.logger.info(f"[NomadRight] Voice bridge language set to {code}")
+        elif msg == "Camera":
+            self._on_camera_pressed()
+
+    def _on_camera_pressed(self) -> None:
+        """
+        Touchscreen Camera button handler: captures a form photo via the
+        board's existing camera_frame_jpg() (boards/base.py - Arducam CSI on
+        real hardware / USB webcam on this dev box, no new camera-driver
+        code needed) and puts the app into "waiting for your query" state.
+        Runs on the UI subprocess's callback thread, not the main run()
+        loop thread - board.top_text/bottom_text/statusbar calls are
+        thread-safe (see ui/handheld.py's RemoteUI rpc_lock).
+        """
+        try:
+            image_jpg = self.board.camera_frame_jpg()
+        except Exception as exc:
+            self.logger.error(f"[NomadRight] Camera capture failed: {exc}")
+            self.board.statusbar("[ERROR] Camera unavailable")
+            return
+        if not image_jpg:
+            self.logger.warning("[NomadRight] Camera returned no frame.")
+            self.board.statusbar("[ERROR] Camera unavailable")
+            return
+
+        self.pending_form_image = bytes(image_jpg)
+        self.pending_form_image_ts = time.time()
+        self.logger.info("[NomadRight] Form photo captured, awaiting follow-up query.")
+        self.board.top_text("Photo captured")
+        self.board.bottom_text("Waiting for your query....")
+        self.board.statusbar("[WAITING FOR QUERY] Hold button and ask about the form")
 
     @staticmethod
     def _lang_name_to_code(name: str, table: Dict[str, str]) -> Optional[str]:
@@ -184,39 +228,63 @@ class NomadRightApplication(BaseApplication):
                 self.board.statusbar("[TRANSLATING]")
                 query_en = self.bridge.to_pipeline_language(native_query, lang)
 
-                # ── 3. Voice bridge short-circuit ────────────────────────────
-                # If the worker is asking to translate the last answer for a
-                # destination-state official, skip the Decision Layer entirely.
-                intent_res = self.workflow.intent_recognizer.recognize(query_en)
-                if intent_res.intent_type == IntentType.TRANSLATION_REQUEST and self.last_answer_en:
-                    entities = self.workflow.entity_extractor.extract(query_en, intent_res)
-                    target_lang = entities.language_code or bridge_lang
-                    if target_lang not in constants.BRIDGE_LANGUAGES:
-                        target_lang = bridge_lang
-                    target_name = constants.BRIDGE_LANGUAGES.get(target_lang, target_lang)
+                # ── 3. Camera follow-up short-circuit ────────────────────────
+                # A pending form photo (Camera button, see ui_cb/_on_camera_pressed)
+                # claims this turn's query before anything else - the worker
+                # was explicitly told "waiting for your query...." after
+                # snapping the photo. A stale photo past the TTL is dropped
+                # silently and this turn falls through to the normal flow.
+                image_for_this_turn: Optional[bytes] = None
+                if self.pending_form_image is not None:
+                    if time.time() - self.pending_form_image_ts <= constants.LLM_VISION_PENDING_TTL_S:
+                        image_for_this_turn = self.pending_form_image
+                    else:
+                        self.logger.info("[NomadRight] Pending form photo expired, discarding.")
+                    self.pending_form_image = None
 
-                    self.board.statusbar(f"[TRANSLATING] for official ({target_name})")
-                    bridged_text = self.bridge.bridge_translate(self.last_answer_en, "EN", target_lang)
+                if image_for_this_turn is not None:
+                    self.board.statusbar("[READING FORM] This may take a moment")
+                    response_pkg: StructuredResponsePackage = self.workflow.process_vision_query(
+                        query_en, image_for_this_turn, context_scheme_code=self.last_scheme_code
+                    )
+                    self.last_answer_en = response_pkg.voice_text
+                    if response_pkg.scheme_code:
+                        self.last_scheme_code = response_pkg.scheme_code
 
-                    self.board.top_text("VOICE BRIDGE")
-                    self.board.bottom_text(bridged_text[:100])
-                    self.board.statusbar("[SPEAKING]")
-                    self._play(self.bridge.speak(bridged_text, target_lang))
-                    self.board.statusbar("[READY] Hold button to ask")
-                    continue
+                else:
+                    # ── 3b. Voice bridge short-circuit ────────────────────────
+                    # If the worker is asking to translate the last answer for a
+                    # destination-state official, skip the Decision Layer entirely.
+                    intent_res = self.workflow.intent_recognizer.recognize(query_en)
+                    if intent_res.intent_type == IntentType.TRANSLATION_REQUEST and self.last_answer_en:
+                        entities = self.workflow.entity_extractor.extract(query_en, intent_res)
+                        target_lang = entities.language_code or bridge_lang
+                        if target_lang not in constants.BRIDGE_LANGUAGES:
+                            target_lang = bridge_lang
+                        target_name = constants.BRIDGE_LANGUAGES.get(target_lang, target_lang)
 
-                # ── 4. Decision Layer: Intent -> Entity -> Rules/RAG -> Response ─
-                self.board.statusbar("[THINKING]")
-                response_pkg: StructuredResponsePackage = self.workflow.process(
-                    query_en, context_scheme_code=self.last_scheme_code
-                )
-                self.last_answer_en = response_pkg.voice_text
-                # Only update on an actual scheme match this turn - keep the
-                # previous scheme remembered across a genuinely unrelated/
-                # unmatched follow-up rather than losing it (see
-                # EntityExtractor._CONTEXT_INHERITABLE_INTENTS).
-                if response_pkg.scheme_code:
-                    self.last_scheme_code = response_pkg.scheme_code
+                        self.board.statusbar(f"[TRANSLATING] for official ({target_name})")
+                        bridged_text = self.bridge.bridge_translate(self.last_answer_en, "EN", target_lang)
+
+                        self.board.top_text("VOICE BRIDGE")
+                        self.board.bottom_text(bridged_text[:100])
+                        self.board.statusbar("[SPEAKING]")
+                        self._play(self.bridge.speak(bridged_text, target_lang))
+                        self.board.statusbar("[READY] Hold button to ask")
+                        continue
+
+                    # ── 4. Decision Layer: Intent -> Entity -> Rules/RAG -> Response ─
+                    self.board.statusbar("[THINKING]")
+                    response_pkg = self.workflow.process(
+                        query_en, context_scheme_code=self.last_scheme_code
+                    )
+                    self.last_answer_en = response_pkg.voice_text
+                    # Only update on an actual scheme match this turn - keep the
+                    # previous scheme remembered across a genuinely unrelated/
+                    # unmatched follow-up rather than losing it (see
+                    # EntityExtractor._CONTEXT_INHERITABLE_INTENTS).
+                    if response_pkg.scheme_code:
+                        self.last_scheme_code = response_pkg.scheme_code
 
                 # ── 5. NMT: English answer -> worker's own language ─────────
                 self.board.statusbar("[TRANSLATING]")

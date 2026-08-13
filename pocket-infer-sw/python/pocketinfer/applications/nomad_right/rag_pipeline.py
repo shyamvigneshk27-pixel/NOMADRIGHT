@@ -227,13 +227,21 @@ class RAGRetriever:
 
     # ── Query-time retrieval ─────────────────────────────────────────────────
 
-    def retrieve(self, query_text: str, top_k: Optional[int] = None) -> List[RetrievedChunk]:
+    def retrieve(
+        self, query_text: str, top_k: Optional[int] = None, min_score: Optional[float] = None
+    ) -> List[RetrievedChunk]:
         """
         Retrieves the top-k most relevant scheme passages for a query.
 
         Args:
             query_text: English query text (after BHASHINI ASR + NMT-to-English).
             top_k:      Overrides config.rag_top_k if provided.
+            min_score:  Overrides constants.RAG_MIN_SCORE if provided. The
+                        qwen fallback (qwen_client.py, via workflow.py) calls
+                        this with constants.LLM_CONTEXT_MIN_SCORE - a looser
+                        floor - to gather grounding material for the LLM to
+                        read, as distinct from this default's stricter floor
+                        for accepting a chunk as a direct template answer.
 
         Returns:
             List of RetrievedChunk, best match first. Empty list if the RAG
@@ -250,6 +258,7 @@ class RAGRetriever:
             return []
 
         k = top_k or self.config.rag_top_k
+        score_floor = constants.RAG_MIN_SCORE if min_score is None else min_score
         try:
             query_embedding = self._embedder.encode(
                 [constants.RAG_QUERY_PREFIX + query_text], normalize_embeddings=True
@@ -271,10 +280,10 @@ class RAGRetriever:
                 (code for code, sid in constants.SCHEME_CODE_TO_DB_ID.items() if sid == scheme_id),
                 "",
             )
-            if score < constants.RAG_MIN_SCORE:
+            if score < score_floor:
                 self.logger.info(
-                    f"RAG chunk below RAG_MIN_SCORE ({score:.3f} < "
-                    f"{constants.RAG_MIN_SCORE}) - dropping to avoid a "
+                    f"RAG chunk below score floor ({score:.3f} < "
+                    f"{score_floor}) - dropping to avoid a "
                     f"confident-but-irrelevant answer: '{doc[:60]}'"
                 )
                 continue

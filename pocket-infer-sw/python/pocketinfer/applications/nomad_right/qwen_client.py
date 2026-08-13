@@ -1,0 +1,181 @@
+"""
+NomadRight qwen2.5vl:3b Client
+
+Lazy Ollama HTTP client for the two places a generative model is allowed to
+touch NomadRight's answer path:
+
+  1. Text fallback - when intent/keyword matching AND the thresholded RAG
+     pipeline both find nothing (see workflow.py Step 6.5 / response.py's
+     LLM_FALLBACK priority).
+  2. Vision form-reading - a worker photographs a government form via the
+     touchscreen Camera button and asks a follow-up question about it (see
+     workflow.py's process_vision_query).
+
+Deliberately NOT a reuse of pocketinfer.models.ollama.Ollama: that class
+hardcodes keep_alive=-1 (permanently resident - the opposite of "only use
+RAM when necessary") and has no per-request timeout or num_gpu control, and
+it's shared by other applications this module has no business changing.
+
+Every request is grounded and sentinel-gated: the system prompt instructs
+the model to answer ONLY from the provided context/image and to return
+constants.LLM_SENTINEL_NOT_FOUND verbatim otherwise. Callers treat the
+sentinel exactly like "no answer" and fall through to the existing constant
+fallback message - this is what keeps the zero-confident-hallucination
+guarantee response.py's docstring already commits to, extended rather than
+broken.
+
+num_gpu is forced high on every call rather than left to Ollama's own
+auto-fit heuristic - see constants.LLM_NUM_GPU's comment for why (Jetson's
+GPU/CPU share one physical RAM pool, and the auto-fit heuristic otherwise
+offloads 0 layers whenever BHASHINI is already resident, which is always).
+"""
+
+import base64
+import logging
+import time
+from dataclasses import dataclass
+from typing import List, Optional
+
+import requests
+
+from pocketinfer.applications.nomad_right import constants
+
+logger = logging.getLogger(__name__)
+
+_OLLAMA_GENERATE_URL = "http://localhost:11434/api/generate"
+
+_SYSTEM_PROMPT = (
+    "You are a factual assistant for a welfare-rights kiosk used by migrant "
+    "workers in India. Answer the question using ONLY the information given "
+    "in the context below (and the photographed document, if one is "
+    "provided). Keep the answer under 40 words, plain factual sentences, no "
+    "speculation. If the context/document does not contain the answer, "
+    f"reply with exactly this text and nothing else: {constants.LLM_SENTINEL_NOT_FOUND}"
+)
+
+
+@dataclass
+class QwenAnswer:
+    """Result of a qwen call, with enough timing info to log/debug latency."""
+    text: str
+    elapsed_s: float
+    found: bool  # False if the model returned the not-found sentinel
+
+
+class QwenClientError(RuntimeError):
+    """Raised when the Ollama request itself fails (network/timeout/HTTP error)."""
+
+
+class QwenClient:
+    """
+    Thin, lazy client for qwen2.5vl:3b via Ollama's /api/generate. Nothing
+    is loaded or warmed at construction time - the first real answer_text()/
+    answer_vision() call is what triggers Ollama to load the model, and it
+    stays resident only for constants.LLM_KEEP_ALIVE afterward.
+    """
+
+    def __init__(self, model: str = constants.LLM_FALLBACK_MODEL):
+        self.model = model
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+    # ── Shared request plumbing ─────────────────────────────────────────────
+
+    def _build_prompt(self, query: str, context_snippets: List[str]) -> str:
+        if context_snippets:
+            context_block = "\n".join(f"- {c}" for c in context_snippets)
+        else:
+            context_block = "(no matching context found)"
+        return (
+            f"{_SYSTEM_PROMPT}\n\n"
+            f"Context:\n{context_block}\n\n"
+            f"Question: {query}\n"
+            f"Answer:"
+        )
+
+    def _call(
+        self, prompt: str, images: Optional[List[bytes]], num_predict: int
+    ) -> QwenAnswer:
+        payload = {
+            "model": self.model,
+            "prompt": prompt,
+            "stream": False,
+            "keep_alive": constants.LLM_KEEP_ALIVE,
+            "options": {
+                "num_gpu": constants.LLM_NUM_GPU,
+                "num_thread": constants.LLM_NUM_THREAD,
+                "num_predict": num_predict,
+                "temperature": constants.LLM_TEMPERATURE,
+            },
+        }
+        if images:
+            # Ollama's REST API requires images as base64-encoded strings in
+            # the JSON body, not raw bytes - passing raw JPEG bytes makes
+            # requests' JSON encoder try to treat them as UTF-8 text and
+            # fail immediately (JPEG's 0xFF magic byte isn't valid UTF-8).
+            payload["images"] = [
+                base64.b64encode(bytes(img) if isinstance(img, (bytearray, memoryview)) else img).decode("ascii")
+                for img in images
+            ]
+
+        start = time.monotonic()
+        try:
+            resp = requests.post(
+                _OLLAMA_GENERATE_URL, json=payload, timeout=constants.LLM_REQUEST_TIMEOUT_S
+            )
+            resp.raise_for_status()
+            data = resp.json()
+        except Exception as exc:
+            elapsed = time.monotonic() - start
+            self.logger.error(f"qwen request failed after {elapsed:.1f}s: {exc}")
+            raise QwenClientError(str(exc)) from exc
+
+        elapsed = time.monotonic() - start
+        text = (data.get("response") or "").strip()
+        found = bool(text) and constants.LLM_SENTINEL_NOT_FOUND not in text
+        self.logger.info(
+            f"qwen answered in {elapsed:.1f}s (found={found}, "
+            f"eval_count={data.get('eval_count')}, "
+            f"load_ms={data.get('load_duration', 0) / 1e6:.0f})"
+        )
+        return QwenAnswer(text=text, elapsed_s=elapsed, found=found)
+
+    # ── Public API ───────────────────────────────────────────────────────────
+
+    def answer_text(self, query: str, context_snippets: List[str]) -> Optional[str]:
+        """
+        Text-only grounded QA for the intent/RAG fallback path. Returns None
+        if the model errored, timed out, or couldn't answer from context -
+        callers treat that identically to "no answer" (existing constant
+        fallback).
+        """
+        if not query or not query.strip():
+            return None
+        prompt = self._build_prompt(query, context_snippets)
+        try:
+            result = self._call(prompt, images=None, num_predict=constants.LLM_NUM_PREDICT_TEXT)
+        except QwenClientError:
+            return None
+        return result.text if result.found else None
+
+    def answer_vision(
+        self, query: str, image_jpg: bytes, context_snippets: Optional[List[str]] = None
+    ) -> Optional[str]:
+        """
+        Image + text grounded QA for the camera/form-reading path. Returns
+        None if the model errored, timed out, or the photographed document
+        didn't answer the question - callers fall through to the existing
+        constant fallback message.
+        """
+        if not image_jpg:
+            return None
+        prompt = self._build_prompt(
+            query or "Describe what this document says and how it's relevant to the worker.",
+            context_snippets or [],
+        )
+        try:
+            result = self._call(
+                prompt, images=[image_jpg], num_predict=constants.LLM_NUM_PREDICT_VISION
+            )
+        except QwenClientError:
+            return None
+        return result.text if result.found else None

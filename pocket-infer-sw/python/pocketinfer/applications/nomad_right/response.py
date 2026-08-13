@@ -13,7 +13,9 @@ Priority chain:
   1. Rules Engine response    (statutory eligibility / registration / benefits)
   2. RAG retrieval response   (retrieve-then-TEMPLATE, no generative LLM)
   3. KB-only context response (scheme data found but no rule/RAG chunk matched)
-  4. Unknown / fallback       (nothing matched)
+  4. LLM fallback response    (qwen2.5vl:3b, grounded + sentinel-gated - see
+                               qwen_client.py; only reached when 1-3 all miss)
+  5. Unknown / fallback       (nothing matched, including the LLM)
 """
 
 import hashlib
@@ -70,6 +72,7 @@ class IResponseGenerator(ABC):
         kb_record: Optional[PortabilityRecord] = None,
         rag_chunks: Optional[List[RetrievedChunk]] = None,
         entities: Optional[EntityMap] = None,
+        llm_answer: Optional[str] = None,
     ) -> StructuredResponsePackage:
         """Synthesizes voice, LCD screen, and QR output."""
         pass
@@ -147,6 +150,25 @@ class ResponseGenerator(IResponseGenerator):
             "hash":    chk,
         }
 
+    # ── Vision form-reading synthesis (Camera button flow) ──────────────────
+
+    def generate_vision_response(self, answer: str, scheme_code: Optional[str] = None) -> StructuredResponsePackage:
+        """
+        Synthesizes a StructuredResponsePackage from a qwen_client.answer_vision()
+        result (see workflow.py's process_vision_query). Only called with an
+        already sentinel-checked, non-empty answer - the caller falls
+        through to the normal generate()'s Priority 5 fallback otherwise.
+        """
+        voice_txt = self._cap_words(self._fmt_voice(answer))
+        return StructuredResponsePackage(
+            voice_text=voice_txt,
+            display_top_text=self._trunc("FORM HELP", constants.DISPLAY_HEADER_MAX_LEN),
+            display_bottom_text=self._trunc(answer, constants.DISPLAY_BODY_MAX_LEN),
+            qr_payload=self._qr_payload("VISION_FORM_QUERY", "VISION_FORM_QUERY", answer),
+            severity=SeverityLevel.WARNING,
+            scheme_code=scheme_code,
+        )
+
     # ── Main synthesis method ──────────────────────────────────────────────
 
     def generate(
@@ -157,6 +179,7 @@ class ResponseGenerator(IResponseGenerator):
         kb_record: Optional[PortabilityRecord] = None,
         rag_chunks: Optional[List[RetrievedChunk]] = None,
         entities: Optional[EntityMap] = None,
+        llm_answer: Optional[str] = None,
     ) -> StructuredResponsePackage:
         """
         Synthesizes a StructuredResponsePackage from Decision Layer outputs.
@@ -170,6 +193,10 @@ class ResponseGenerator(IResponseGenerator):
                              best match first (retrieve-then-TEMPLATE, never
                              paraphrased by a generative model).
             entities:       Optional EntityMap from EntityExtractor.
+            llm_answer:     Optional grounded answer from qwen_client.py,
+                             already sentinel-checked by the caller (workflow.py)
+                             - only ever populated when rule_result/rag_chunks/
+                             kb_record all found nothing usable.
 
         Returns:
             StructuredResponsePackage for voice, LCD, and QR.
@@ -250,7 +277,19 @@ class ResponseGenerator(IResponseGenerator):
                 scheme_code=entities.scheme_code if entities else None,
             )
 
-        # ── Priority 4: Unknown / Fallback ────────────────────────────────
+        # ── Priority 4: LLM fallback (qwen2.5vl:3b, grounded) ───────────────
+        if llm_answer:
+            voice_txt = self._cap_words(self._fmt_voice(llm_answer))
+            return StructuredResponsePackage(
+                voice_text=voice_txt,
+                display_top_text=self._trunc(f"{scheme_label} INFO", constants.DISPLAY_HEADER_MAX_LEN),
+                display_bottom_text=self._trunc(llm_answer, constants.DISPLAY_BODY_MAX_LEN),
+                qr_payload=self._qr_payload(intent_code, "LLM_FALLBACK", llm_answer),
+                severity=SeverityLevel.WARNING,
+                scheme_code=entities.scheme_code if entities else None,
+            )
+
+        # ── Priority 5: Unknown / Fallback ────────────────────────────────
         self.logger.warning(
             f"No response data for intent={intent_code}. Returning fallback."
         )

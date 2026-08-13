@@ -149,3 +149,56 @@ RAG_PASSAGE_PREFIX = "passage: "
 # missed legitimate query gets an honest "I don't know" fallback; the
 # alternative is a confidently wrong scheme answer, which is worse).
 RAG_MIN_SCORE = 0.83
+
+# ── LLM Fallback / Vision (qwen2.5vl:3b via Ollama) ─────────────────────────
+# Deliberately NOT in the primary answer path for routed (rules/RAG) queries
+# - only used when those find nothing (text fallback) or when a worker
+# explicitly photographs a form (vision path). See qwen_client.py.
+#
+# num_gpu is forced high (not left to Ollama's auto-fit) because on this
+# Jetson's *unified* memory (GPU and CPU share one physical RAM pool - no
+# separate VRAM), Ollama's auto-fit heuristic sees little "free GPU memory"
+# once BHASHINI's ASR/NMT/TTS service is already resident and defensively
+# offloads 0 layers to GPU, running everything on CPU. Empirically measured
+# on this device: forcing full GPU offload cut warm prompt-eval from 7.16s
+# to 1.07s and generation from 4.61s to 3.25s (~4.3s total, inside the 5s
+# budget) - see the "wire qwen2.5vl" plan for the full measurement.
+LLM_FALLBACK_MODEL = "qwen2.5vl:3b"
+LLM_FALLBACK_ENABLED = True
+# How long the model stays resident after answering before Ollama evicts it,
+# freeing RAM back to BHASHINI - user-chosen: covers one worker's back-and-
+# forth at the kiosk without holding ~4.9GB hostage between different
+# workers' sessions.
+LLM_KEEP_ALIVE = "5m"
+LLM_NUM_GPU = 99
+LLM_NUM_THREAD = 6
+LLM_NUM_PREDICT_TEXT = 60
+LLM_NUM_PREDICT_VISION = 80
+LLM_TEMPERATURE = 0.1
+# Generous enough to allow a legitimate cold load rather than aborting a
+# real answer right before it would have landed - callers must show a "may
+# take a moment" status during the wait instead of leaving the screen
+# looking hung. See qwen_client.py / app.py. Measured cold loads on this
+# device ranged 108-242s depending on memory/swap pressure from BHASHINI +
+# whatever else is resident (RAG embedder, chromadb, UI process); a real
+# on-device run hit >150s and got cut off right as it would have answered,
+# wasting the whole wait for nothing - 220s gives more margin for that
+# worst case while still eventually giving up rather than hanging forever.
+LLM_REQUEST_TIMEOUT_S = 220.0
+# Looser than RAG_MIN_SCORE (0.83) on purpose: this floor only decides
+# whether a chunk is worth handing to the LLM as *grounding material*, not
+# whether to accept it as a direct template answer - the LLM's own strict
+# "answer only from context" instruction (see LLM_SENTINEL_NOT_FOUND) is the
+# real backstop against a loosely-related chunk causing a wrong answer.
+LLM_CONTEXT_MIN_SCORE = 0.55
+# Sentinel the LLM is instructed to return verbatim when the provided
+# context/image doesn't actually answer the question - callers treat this
+# exactly like "no answer" and fall through to the existing constant
+# fallback message, preserving the no-confident-hallucination guarantee.
+LLM_SENTINEL_NOT_FOUND = "NOT_IN_CONTEXT"
+# How long a Camera-button photo stays "pending" waiting for the worker's
+# follow-up question before app.py silently drops it and treats the next
+# utterance as a normal voice query - stops a stale photo from an earlier
+# worker (who walked away without asking) getting attached to someone
+# else's unrelated question later. See app.py's ui_cb/run().
+LLM_VISION_PENDING_TTL_S = 120.0
