@@ -42,7 +42,7 @@ OFFICIAL_DOMAINS = {
     "pgportal.gov.in", "indiabudget.gov.in", "ies.gov.in"
 }
 
-d = r'd:\MyData\downloads\bhasini_dataset'
+d = os.path.dirname(os.path.abspath(__file__))
 files = ["pds.json", "pmjay.json", "mgnregs.json"]
 findings = {}
 

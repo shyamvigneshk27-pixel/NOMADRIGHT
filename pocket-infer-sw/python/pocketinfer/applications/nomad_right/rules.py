@@ -356,6 +356,7 @@ class RulesEngine(IRulesEngine):
         dispatch = {
             IntentType.ESHRAM_REGISTRATION: self._eshram_registration,
             IntentType.ESHRAM_DOCUMENTS:    self._eshram_documents,
+            IntentType.REQUIRED_DOCUMENTS:  self._eshram_documents,
             IntentType.ESHRAM_WAGE_RIGHTS:  self._eshram_wage_rights,
             IntentType.ESHRAM_BENEFITS:     self._eshram_benefits,
         }
@@ -520,6 +521,7 @@ class RulesEngine(IRulesEngine):
             IntentType.BOCW_ELIGIBILITY:  self._bocw_eligibility,
             IntentType.BOCW_REGISTRATION: self._bocw_registration,
             IntentType.BOCW_DOCUMENTS:    self._bocw_documents,
+            IntentType.REQUIRED_DOCUMENTS:self._bocw_documents,
             IntentType.BOCW_BENEFITS:     self._bocw_benefits,
         }
         handler = dispatch.get(intent_type)

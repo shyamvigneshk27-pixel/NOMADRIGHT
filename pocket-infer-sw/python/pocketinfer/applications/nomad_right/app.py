@@ -23,6 +23,7 @@ import os
 import time
 import wave
 import logging
+import threading
 from io import BytesIO
 from typing import Optional, Dict, Any
 
@@ -91,6 +92,7 @@ class NomadRightApplication(BaseApplication):
         # later question.
         self.pending_form_image: Optional[bytes] = None
         self.pending_form_image_ts: float = 0.0
+        self._image_lock = threading.Lock()
 
     def start(self) -> None:
         """Application start hook. Instantiates the BHASHINI bridge and pipeline controller."""
@@ -145,8 +147,9 @@ class NomadRightApplication(BaseApplication):
             self.board.statusbar("[ERROR] Camera unavailable")
             return
 
-        self.pending_form_image = bytes(image_jpg)
-        self.pending_form_image_ts = time.time()
+        with self._image_lock:
+            self.pending_form_image = bytes(image_jpg)
+            self.pending_form_image_ts = time.time()
         self.logger.info("[NomadRight] Form photo captured, awaiting follow-up query.")
         self.board.top_text("Photo captured")
         self.board.bottom_text("Waiting for your query....")
@@ -235,12 +238,13 @@ class NomadRightApplication(BaseApplication):
                 # snapping the photo. A stale photo past the TTL is dropped
                 # silently and this turn falls through to the normal flow.
                 image_for_this_turn: Optional[bytes] = None
-                if self.pending_form_image is not None:
-                    if time.time() - self.pending_form_image_ts <= constants.LLM_VISION_PENDING_TTL_S:
-                        image_for_this_turn = self.pending_form_image
-                    else:
-                        self.logger.info("[NomadRight] Pending form photo expired, discarding.")
-                    self.pending_form_image = None
+                with self._image_lock:
+                    if self.pending_form_image is not None:
+                        if time.time() - self.pending_form_image_ts <= constants.LLM_VISION_PENDING_TTL_S:
+                            image_for_this_turn = self.pending_form_image
+                        else:
+                            self.logger.info("[NomadRight] Pending form photo expired, discarding.")
+                        self.pending_form_image = None
 
                 if image_for_this_turn is not None:
                     self.board.statusbar("[READING FORM] This may take a moment")
