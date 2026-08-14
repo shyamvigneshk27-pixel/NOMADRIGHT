@@ -19,9 +19,9 @@ import json
     "author": "PocketInfer",
     "version": "0.1.0",
     "models": {
-        # "ollama": {"model_name": "qwen3-vl:2b"},
+        "ollama": {"model_name": "qwen3-vl:2b"},
         # "ollama": {"model_name": "moondream:1.8B"},
-        "ollama": {"model_name": "ministral-3:3B"},
+        # "ollama": {"model_name": "ministral-3:3B"},
         "piper": {"voice_name": "en_US-lessac-medium"},
         "vosk": {"model_name": "vosk-model-small-en-us-0.15"},
     },

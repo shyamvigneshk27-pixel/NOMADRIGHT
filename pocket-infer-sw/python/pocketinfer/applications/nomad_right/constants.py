@@ -163,13 +163,13 @@ RAG_MIN_SCORE = 0.83
 # on this device: forcing full GPU offload cut warm prompt-eval from 7.16s
 # to 1.07s and generation from 4.61s to 3.25s (~4.3s total, inside the 5s
 # budget) - see the "wire qwen2.5vl" plan for the full measurement.
-LLM_FALLBACK_MODEL = "qwen2.5vl:3b"
+LLM_FALLBACK_MODEL = "qwen3-vl:2b"
 LLM_FALLBACK_ENABLED = True
 # How long the model stays resident after answering before Ollama evicts it,
 # freeing RAM back to BHASHINI - user-chosen: covers one worker's back-and-
 # forth at the kiosk without holding ~4.9GB hostage between different
 # workers' sessions.
-LLM_KEEP_ALIVE = "5m"
+LLM_KEEP_ALIVE = "15m"
 LLM_NUM_GPU = 99
 LLM_NUM_THREAD = 6
 LLM_NUM_PREDICT_TEXT = 60
