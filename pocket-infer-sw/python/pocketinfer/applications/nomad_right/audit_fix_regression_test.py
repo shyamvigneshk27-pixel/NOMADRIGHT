@@ -327,10 +327,13 @@ class TestLLMFallbackAndVision(unittest.TestCase):
         self.workflow = WorkflowController(config=NomadRightConfig())
 
     def test_unmatched_query_uses_llm_fallback_when_qwen_grounds_an_answer(self):
-        """An unmatched query should get an LLM_FALLBACK-tagged answer (not the
-        constant fallback) when qwen returns a grounded answer from context."""
+        """An unmatched query with no scheme named should get an
+        LLM_FALLBACK-tagged answer (not the constant fallback) from qwen's
+        general-assistant path (see qwen_client.answer_general /
+        workflow.py Step 6.5b) - not the scheme-grounded answer_text path,
+        since UNMATCHED_QUERY names no scheme."""
         with unittest.mock.patch.object(
-            self.workflow.qwen_client, "answer_text",
+            self.workflow.qwen_client, "answer_general",
             return_value="Ration cards are portable across states under ONORC.",
         ):
             pkg = self.workflow.process(self.UNMATCHED_QUERY)
@@ -338,10 +341,10 @@ class TestLLMFallbackAndVision(unittest.TestCase):
         self.assertIn("ration cards are portable", pkg.voice_text.lower())
 
     def test_unmatched_query_falls_back_to_constant_message_on_sentinel(self):
-        """When qwen can't answer from context (QwenClient already collapses the
-        sentinel/errors/timeouts to None), the response must still be the
-        existing constant fallback - never silence, never a guess."""
-        with unittest.mock.patch.object(self.workflow.qwen_client, "answer_text", return_value=None):
+        """When qwen can't answer at all (QwenClient already collapses
+        errors/timeouts to None), the response must still be the existing
+        constant fallback - never silence, never a guess."""
+        with unittest.mock.patch.object(self.workflow.qwen_client, "answer_general", return_value=None):
             pkg = self.workflow.process(self.UNMATCHED_QUERY)
         self.assertEqual(pkg.qr_payload["status"], "FALLBACK")
         self.assertIn("i'm sorry", pkg.voice_text.lower())

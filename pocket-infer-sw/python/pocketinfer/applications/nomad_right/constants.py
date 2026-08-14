@@ -259,12 +259,6 @@ LLM_TEMPERATURE = 0.1
 # wasting the whole wait for nothing - 220s gives more margin for that
 # worst case while still eventually giving up rather than hanging forever.
 LLM_REQUEST_TIMEOUT_S = 220.0
-# Looser than RAG_MIN_SCORE (0.83) on purpose: this floor only decides
-# whether a chunk is worth handing to the LLM as *grounding material*, not
-# whether to accept it as a direct template answer - the LLM's own strict
-# "answer only from context" instruction (see LLM_SENTINEL_NOT_FOUND) is the
-# real backstop against a loosely-related chunk causing a wrong answer.
-LLM_CONTEXT_MIN_SCORE = 0.55
 # Sentinel the LLM is instructed to return verbatim when the provided
 # context/image doesn't actually answer the question - callers treat this
 # exactly like "no answer" and fall through to the existing constant

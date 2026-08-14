@@ -148,37 +148,86 @@ class RAGRetriever:
                     "text": f"{scheme_name}. {text.strip()}",
                 })
 
+        # Newer scheme JSON files (apy.json, nsap.json, pm_*.json, etc. -
+        # added in the "New schemes" pull) use flat string lists for several
+        # sections instead of the original 5 schemes' {"criterion": ...}-
+        # style dicts. build_sqlite_db.py already handles this shape
+        # variance with isinstance(item, str) checks; this chunker didn't,
+        # and crashed with AttributeError partway through the very first
+        # of the 15 new schemes - silently leaving the RAG index stuck at
+        # its old 269-chunk/5-scheme state since --build-cache never
+        # reached completion. Mirrors the same string/dict handling here.
         if scheme_json.get("description"):
             add("description", scheme_json["description"], 0)
         for i, item in enumerate(scheme_json.get("eligibility", [])):
-            add("eligibility", item.get("criterion", ""), i)
+            text = item if isinstance(item, str) else item.get("criterion", "")
+            add("eligibility", text, i)
         for i, item in enumerate(scheme_json.get("benefits", [])):
-            add("benefits", item.get("benefit", ""), i)
+            text = item if isinstance(item, str) else item.get("benefit", "")
+            add("benefits", text, i)
         for i, item in enumerate(scheme_json.get("financial_benefits", [])):
-            details = item.get("details") or item.get("amount") or ""
-            text = f"{item.get('benefit_type', '')}: {details}. {item.get('description', '')}"
+            if isinstance(item, str):
+                text = item
+            else:
+                details = item.get("details") or item.get("amount") or ""
+                if isinstance(details, (dict, list)):
+                    details = json.dumps(details)
+                text = f"{item.get('benefit_type', '')}: {details}. {item.get('description', '')}"
             add("financial_benefits", text, i)
         for i, item in enumerate(scheme_json.get("required_documents", [])):
-            add("documents", f"{item.get('document', '')}: {item.get('description', '')}", i)
-        for mode in ("online", "offline"):
-            for i, step in enumerate(scheme_json.get("application_process", {}).get(mode, [])):
-                add(f"application_{mode}", f"Step {step.get('step')}: {step.get('description', '')}", i)
+            text = item if isinstance(item, str) else f"{item.get('document', '')}: {item.get('description', '')}"
+            add("documents", text, i)
+        app_proc = scheme_json.get("application_process", {})
+        if isinstance(app_proc, str):
+            add("application_offline", app_proc, 0)
+        else:
+            for mode in ("online", "offline"):
+                steps = app_proc.get(mode, [])
+                if isinstance(steps, str):
+                    add(f"application_{mode}", steps, 0)
+                else:
+                    for i, step in enumerate(steps):
+                        text = step if isinstance(step, str) else f"Step {step.get('step')}: {step.get('description', '')}"
+                        add(f"application_{mode}", text, i)
         for i, item in enumerate(scheme_json.get("exceptions", [])):
-            add("exceptions", item.get("exception", ""), i)
+            text = item if isinstance(item, str) else item.get("exception", "")
+            add("exceptions", text, i)
         for i, item in enumerate(scheme_json.get("limitations", [])):
-            add("limitations", item.get("limitation", ""), i)
+            text = item if isinstance(item, str) else item.get("limitation", "")
+            add("limitations", text, i)
         for i, item in enumerate(scheme_json.get("faq", [])):
-            q, a = item.get("question", ""), item.get("answer", "")
-            add("faq", f"Q: {q} A: {a}", i)
+            if isinstance(item, str):
+                text = item
+            else:
+                q, a = item.get("question", ""), item.get("answer", "")
+                text = f"Q: {q} A: {a}"
+            add("faq", text, i)
         for i, item in enumerate(scheme_json.get("important_definitions", [])):
-            add("definitions", f"{item.get('term', '')}: {item.get('definition', '')}", i)
+            text = item if isinstance(item, str) else f"{item.get('term', '')}: {item.get('definition', '')}"
+            add("definitions", text, i)
         for i, item in enumerate(scheme_json.get("worker_rights_under_osh_code", [])):
-            add("rights", f"{item.get('right', '')} {item.get('action_if_violated', '')}", i)
+            text = item if isinstance(item, str) else f"{item.get('right', '')} {item.get('action_if_violated', '')}"
+            add("rights", text, i)
+        # Chunked for parity with build_sqlite_db.py's ingestion - these
+        # sections exist in the DB but weren't previously indexed for RAG.
+        for i, item in enumerate(scheme_json.get("beneficiary_categories", [])):
+            text = item if isinstance(item, str) else f"{item.get('category', '')}: {item.get('description', '')}"
+            add("beneficiary_categories", text, i)
+        state_rules = scheme_json.get("state_specific_rules", [])
+        if isinstance(state_rules, str):
+            add("state_rules", state_rules, 0)
+        else:
+            for i, item in enumerate(state_rules):
+                text = item if isinstance(item, str) else item.get("note", "")
+                add("state_rules", text, i)
 
         port = scheme_json.get("portability", {})
-        for i, (key, val) in enumerate(port.items()):
-            if isinstance(val, str):
-                add("portability", val, i)
+        if isinstance(port, dict):
+            for i, (key, val) in enumerate(port.items()):
+                if isinstance(val, str):
+                    add("portability", val, i)
+        elif isinstance(port, str):
+            add("portability", port, 0)
 
         return chunks
 
@@ -248,12 +297,7 @@ class RAGRetriever:
         Args:
             query_text: English query text (after BHASHINI ASR + NMT-to-English).
             top_k:      Overrides config.rag_top_k if provided.
-            min_score:  Overrides constants.RAG_MIN_SCORE if provided. The
-                        qwen fallback (qwen_client.py, via workflow.py) calls
-                        this with constants.LLM_CONTEXT_MIN_SCORE - a looser
-                        floor - to gather grounding material for the LLM to
-                        read, as distinct from this default's stricter floor
-                        for accepting a chunk as a direct template answer.
+            min_score:  Overrides constants.RAG_MIN_SCORE if provided.
 
         Returns:
             List of RetrievedChunk, best match first. Empty list if the RAG

@@ -14,12 +14,14 @@ Priority chain:
                                  deterministic, never touches Qwen)
   2. RAG retrieve-then-GENERATE (Qwen answers from the retrieved chunks -
                                  grounded + sentinel-gated, see qwen_client.py)
-  2b. RAG retrieve-then-TEMPLATE (raw top chunk - fallback for when 2 errors
-                                 or Qwen returns the not-found sentinel)
-  3. KB-only context response   (scheme data found but no rule/RAG chunk matched)
-  4. LLM fallback response      (qwen, grounded + sentinel-gated; only reached
-                                 when 1-3 all miss)
-  5. Unknown / fallback         (nothing matched, including the LLM)
+  3. LLM fallback response      (qwen, scheme-KB-grounded or general assistant;
+                                 reached whenever 2 didn't produce a grounded
+                                 answer - a Qwen decline is a more trustworthy
+                                 relevance signal than the raw RAG score alone)
+  4. RAG retrieve-then-TEMPLATE (raw top chunk, last resort - both 2 and 3
+                                 failed but a chunk was at least retrieved)
+  5. KB-only context response   (scheme data found but no rule/RAG chunk matched)
+  6. Unknown / fallback         (nothing matched, including the LLM)
 """
 
 import hashlib
@@ -268,7 +270,32 @@ class ResponseGenerator(IResponseGenerator):
                 scheme_code=(best.scheme_code if best else None) or (entities.scheme_code if entities else None),
             )
 
-        # ── Priority 2b: RAG retrieve-then-TEMPLATE (qwen errored/sentinel) ─
+        # ── Priority 3: LLM fallback (qwen, scheme-KB-grounded or general) ──
+        # Checked BEFORE the raw RAG top-chunk echo below on purpose: this
+        # only exists when Step 6.5a's Qwen-grounded RAG answer failed, and
+        # Qwen declining to answer from the retrieved chunks (sentinel) is
+        # a more trustworthy relevance signal than the raw cosine score
+        # that let a chunk through RAG_MIN_SCORE in the first place - some
+        # of the newer, terser scheme chunks can spuriously cross that
+        # floor against unrelated/garbled text (reproduced on-device: a
+        # garbled query matched 3 PM_VISHWAKARMA chunks at >0.83 and Qwen
+        # correctly declined all of them). This fallback gets a second,
+        # smarter shot at a real answer instead of the query falling
+        # through to a blind, possibly-spurious top-chunk echo.
+        if llm_answer:
+            voice_txt = self._cap_words(self._fmt_voice(llm_answer))
+            return StructuredResponsePackage(
+                voice_text=voice_txt,
+                display_top_text=self._trunc(f"{scheme_label} INFO", constants.DISPLAY_HEADER_MAX_LEN),
+                display_bottom_text=self._trunc(llm_answer, constants.DISPLAY_BODY_MAX_LEN),
+                qr_payload=self._qr_payload(intent_code, "LLM_FALLBACK", llm_answer),
+                severity=SeverityLevel.WARNING,
+                scheme_code=entities.scheme_code if entities else None,
+            )
+
+        # ── Priority 4: RAG retrieve-then-TEMPLATE (last resort - qwen and ─
+        # the smarter fallback above both failed, but a chunk was at least
+        # retrieved; degrade to echoing it verbatim rather than nothing) ──
         if rag_chunks:
             best = rag_chunks[0]
             voice_txt = self._cap_words(self._fmt_voice(best.text))
@@ -282,7 +309,10 @@ class ResponseGenerator(IResponseGenerator):
                 scheme_code=best.scheme_code or (entities.scheme_code if entities else None),
             )
 
-        # ── Priority 3: KB data only (no rule or RAG chunk matched) ────────
+        # ── Priority 5: KB data only (no rule or RAG chunk matched) ────────
+        # Mutually exclusive with llm_answer in practice - workflow.py only
+        # computes llm_answer when kb_record is falsy - kept as its own
+        # tier for a clear, deterministic-data-first priority order.
         if kb_record:
             benefit_txt = (
                 kb_record.benefits[0] if kb_record.benefits else "Scheme data available."
@@ -301,19 +331,7 @@ class ResponseGenerator(IResponseGenerator):
                 scheme_code=entities.scheme_code if entities else None,
             )
 
-        # ── Priority 4: LLM fallback (qwen2.5vl:3b, grounded) ───────────────
-        if llm_answer:
-            voice_txt = self._cap_words(self._fmt_voice(llm_answer))
-            return StructuredResponsePackage(
-                voice_text=voice_txt,
-                display_top_text=self._trunc(f"{scheme_label} INFO", constants.DISPLAY_HEADER_MAX_LEN),
-                display_bottom_text=self._trunc(llm_answer, constants.DISPLAY_BODY_MAX_LEN),
-                qr_payload=self._qr_payload(intent_code, "LLM_FALLBACK", llm_answer),
-                severity=SeverityLevel.WARNING,
-                scheme_code=entities.scheme_code if entities else None,
-            )
-
-        # ── Priority 5: Unknown / Fallback ────────────────────────────────
+        # ── Priority 6: Unknown / Fallback ────────────────────────────────
         self.logger.warning(
             f"No response data for intent={intent_code}. Returning fallback."
         )

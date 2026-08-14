@@ -101,6 +101,23 @@ class WorkflowController(IWorkflowController):
         # Preload High-Performance L1 DB Cache
         self.db_access.preload_cache()
 
+        # Warm the RAG embedder (sentence-transformers) + ChromaDB
+        # collection now, at app startup, instead of leaving it lazy until
+        # the first live RAG-routed query. Measured on-device: this cold
+        # load is highly variable (10-140s depending on system memory
+        # pressure at the moment) - lazy-loading it meant whichever worker
+        # happened to ask the first RAG-routed question of a session could
+        # wait well over a minute for an answer, blowing the <7s latency
+        # budget. is_available() triggers the same _ensure_ready() load
+        # path and never raises (swallows errors, logs a warning) - a slow
+        # or failed warm-up here degrades gracefully to the existing
+        # empty-chunks-on-failure behavior in rag_pipeline.py, it never
+        # blocks startup from completing.
+        if self.rag_retriever.is_available():
+            self.logger.info("RAG engine pre-warmed at startup.")
+        else:
+            self.logger.warning("RAG engine unavailable after startup warm-up attempt.")
+
     # ──────────────────────────────────────────────────────────────────────
     # Main pipeline
     # ──────────────────────────────────────────────────────────────────────
@@ -189,13 +206,36 @@ class WorkflowController(IWorkflowController):
                 f"{'answered' if rag_llm_answer else 'no answer (sentinel/error) - template fallback'}"
             )
 
-        # ── Step 6.5b: LLM text fallback (qwen, grounded) ───────────────────
-        # Only reached when every higher-priority path in response.py's
-        # chain (rule_result / rag_chunks / kb_record) found nothing -
-        # mirrors that priority order exactly so a query response.py would
-        # answer from kb_record never pays the qwen latency cost.
+        # ── Step 6.5b: LLM text fallback (qwen) ─────────────────────────────
+        # Reached whenever rule_result, kb_record, AND a Qwen-grounded RAG
+        # answer (Step 6.5a) all came up empty - deliberately NOT gated on
+        # "rag_chunks empty", only on "rag_llm_answer empty". Some of the
+        # newer, terser scheme chunks (e.g. "PM Vishwakarma. Marketing
+        # support" - a 3-word fragment) can spuriously cross RAG_MIN_SCORE
+        # against completely unrelated/garbled text (short passages carry
+        # little specific semantic content, so embedding similarity against
+        # them is noisier) - reproduced on-device with a garbled-ASR query
+        # that matched 3 PM_VISHWAKARMA chunks at >0.83 even though it was
+        # meaningless. Qwen (Step 6.5a) correctly declined to answer from
+        # those chunks (sentinel), which is a stronger relevance signal
+        # than the raw cosine score that let them through RAG_MIN_SCORE in
+        # the first place - so a Qwen decline here now gets a second real
+        # chance via this smarter fallback instead of falling straight to
+        # response.py's blind "echo the raw top chunk" tier. Two cases:
+        #   - A scheme WAS named - ground qwen in that scheme's own
+        #     deterministic KB record (a direct DB lookup, not another
+        #     vector search) so the answer still centers on the right
+        #     scheme's real facts.
+        #   - No scheme was named at all - a genuinely general/off-topic
+        #     question - let qwen answer directly as a general assistant.
+        # Previously both cases ran a second, LOOSELY-thresholded RAG
+        # search as "reading material," which was both redundant latency
+        # (Step 6 already searched once) and a real hallucination bug: an
+        # unrelated query ("Updating the app") pulled in an unrelated
+        # e-Shram chunk as fake context and qwen fabricated an answer from
+        # it. Removed entirely.
         llm_answer: Optional[str] = None
-        if constants.LLM_FALLBACK_ENABLED and not rule_res and not rag_chunks and not kb_record:
+        if constants.LLM_FALLBACK_ENABLED and not rule_res and not rag_llm_answer and not kb_record:
             llm_answer = self._llm_fallback_answer(transcribed_text, entities, session_id)
 
         # ── Step 7: Response Synthesis ──────────────────────────────────────
@@ -225,47 +265,75 @@ class WorkflowController(IWorkflowController):
             status=response_pkg.severity.value,
         )
         self.db_access.insert_query_log(log_dto)
+        self._clear_gpu_cache()
 
         return response_pkg
 
     # ──────────────────────────────────────────────────────────────────────
-    # LLM fallback context gathering (shared by Step 6.5 and vision queries)
+    # GPU memory hygiene
     # ──────────────────────────────────────────────────────────────────────
 
-    def _gather_llm_context(self, query_text: str, scheme_code: Optional[str]) -> List[str]:
+    def _clear_gpu_cache(self) -> None:
         """
-        Collects grounding snippets for a qwen call: loosely-thresholded RAG
-        chunks (constants.LLM_CONTEXT_MIN_SCORE - looser than the strict
-        RAG_MIN_SCORE used for direct template answers, since here the
-        snippets are just reading material for the LLM, not the answer
-        itself) plus a KB record's key facts if a scheme was detected.
+        Releases any GPU memory this Python process is still holding after
+        finishing one complete pipeline iteration, so a long-running kiosk
+        session doesn't accumulate a growing CUDA allocator cache turn
+        after turn on the Jetson's unified memory pool. Only affects
+        allocations made INSIDE this process (currently none by default -
+        the RAG embedder is pinned to CPU, see rag_pipeline.py). Qwen's own
+        GPU memory is managed separately by Ollama (a different OS process
+        running its own llama.cpp allocator) and is deliberately NOT
+        touched here - see constants.LLM_KEEP_ALIVE for why it's kept
+        warm between turns rather than unloaded (unloading it every
+        iteration would reintroduce the ~30-60s cold-load penalty this
+        app's <7s latency budget can't afford). Safe no-op if torch/CUDA
+        aren't available - never allowed to break a pipeline turn.
+        """
+        try:
+            import torch
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except Exception as exc:
+            self.logger.debug(f"GPU cache clear skipped: {exc}")
+
+    # ──────────────────────────────────────────────────────────────────────
+    # LLM fallback for queries strict RAG and RulesEngine both missed
+    # ──────────────────────────────────────────────────────────────────────
+
+    def _gather_kb_context(self, scheme_code: str) -> List[str]:
+        """
+        Deterministic grounding snippets for a named scheme's own KB record
+        (direct DB lookup - not a vector search, so it can't attach the
+        wrong scheme's facts to the question). Used only when a scheme was
+        actually named but strict RAG (Step 6) didn't match a chunk for
+        this exact phrasing.
         """
         snippets: List[str] = []
-        try:
-            loose_chunks = self.rag_retriever.retrieve(
-                query_text, min_score=constants.LLM_CONTEXT_MIN_SCORE
-            )
-            snippets.extend(c.text for c in loose_chunks)
-        except Exception as exc:
-            self.logger.warning(f"LLM context RAG lookup failed: {exc}")
-
-        if scheme_code:
-            kb_record = self.db_access.get_portability_record(scheme_code)
-            if kb_record:
-                snippets.extend(kb_record.eligibility_criteria[:3])
-                snippets.extend(kb_record.benefits[:3])
-                snippets.extend(kb_record.required_documents[:3])
-
+        kb_record = self.db_access.get_portability_record(scheme_code)
+        if kb_record:
+            snippets.extend(kb_record.eligibility_criteria[:3])
+            snippets.extend(kb_record.benefits[:3])
+            snippets.extend(kb_record.required_documents[:3])
         return snippets
 
     def _llm_fallback_answer(
         self, query_text: str, entities: EntityMap, session_id: str
     ) -> Optional[str]:
-        """Step 6.5 helper: gathers context and calls qwen's text path."""
-        context = self._gather_llm_context(query_text, entities.scheme_code)
-        answer = self.qwen_client.answer_text(query_text, context)
+        """
+        Step 6.5b helper. A scheme was named -> ground qwen in that
+        scheme's own KB record. No scheme was named -> a genuinely
+        general/off-topic question, let qwen answer directly with no forced
+        scheme context (see qwen_client._GENERAL_SYSTEM_PROMPT).
+        """
+        if entities.scheme_code:
+            context = self._gather_kb_context(entities.scheme_code)
+            answer = self.qwen_client.answer_text(query_text, context)
+            kind = "scheme-grounded (KB)"
+        else:
+            answer = self.qwen_client.answer_general(query_text)
+            kind = "general"
         self.logger.info(
-            f"[{session_id}] LLM_FALLBACK → "
+            f"[QWEN] [{session_id}] LLM_FALLBACK ({kind}) → "
             f"{'answered' if answer else 'no answer (sentinel/error)'}"
         )
         return answer
@@ -285,9 +353,8 @@ class WorkflowController(IWorkflowController):
 
         Eligibility RULE logic doesn't apply to "what does this field mean"
         questions, so this deliberately skips RulesEngine entirely and goes
-        straight to qwen, grounded with whatever scheme context is available
-        (same _gather_llm_context() helper as the text fallback) plus the
-        image itself.
+        straight to qwen, grounded only in the photographed image itself
+        (no RAG/KB context - see the CAMERA_FORM note below).
 
         Args:
             query_text:          English query text (after ASR + NMT).
@@ -307,12 +374,7 @@ class WorkflowController(IWorkflowController):
 
         # CAMERA_FORM never touches RAG/ChromaDB/the scheme database - the
         # image itself is the only source of truth Qwen is grounded against
-        # here (see qwen_client.answer_vision's system prompt). Previously
-        # this called the shared _gather_llm_context() helper, which does a
-        # ChromaDB vector search - a real violation reproduced on-device
-        # (photographing a form and asking about it silently cold-loaded
-        # the RAG embedder, adding ~25s of unnecessary latency and pulling
-        # ChromaDB into a pipeline that must be fully independent of it).
+        # here (see qwen_client.answer_vision's system prompt).
         answer = self.qwen_client.answer_vision(query_text, image_jpg, context_snippets=None)
         self.logger.info(
             f"[QWEN_VISION] [{session_id}] VISION_FORM_QUERY → "
@@ -340,5 +402,6 @@ class WorkflowController(IWorkflowController):
             status=response_pkg.severity.value,
         )
         self.db_access.insert_query_log(log_dto)
+        self._clear_gpu_cache()
 
         return response_pkg

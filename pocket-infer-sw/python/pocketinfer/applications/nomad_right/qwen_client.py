@@ -70,6 +70,25 @@ _VISION_SYSTEM_PROMPT = (
     f"reply with exactly this text and nothing else: {constants.LLM_SENTINEL_NOT_FOUND}"
 )
 
+# For a query that isn't about any welfare scheme at all (no scheme named,
+# RulesEngine and RAG both found nothing - see workflow.py Step 6.5) - no
+# "context below" framing here on purpose. Grounding this case in loosely-
+# related RAG chunks was the previous design, and it measurably backfired:
+# a genuinely unrelated query ("Updating the app") pulled in an unrelated
+# e-Shram chunk as "reading material" and the model fabricated an
+# Aadhaar-OTP answer from it. There's nothing scheme-specific to hallucinate
+# here since no scheme was named, so it's safe (and more useful) to let the
+# model just answer directly instead of forcing it to pretend-ground itself
+# in irrelevant scheme text - not sentinel-gated, since there's no context
+# to fail to find an answer in.
+_GENERAL_SYSTEM_PROMPT = (
+    "You are a helpful voice assistant at an offline welfare-rights kiosk "
+    "for migrant workers in India. The worker just asked something that "
+    "isn't about a specific government welfare scheme. Answer directly and "
+    "helpfully in plain, simple language. Keep the answer under 40 words. "
+    "If you genuinely don't know, say so briefly rather than guessing."
+)
+
 
 @dataclass
 class QwenAnswer:
@@ -111,6 +130,9 @@ class QwenClient:
 
     def _build_vision_prompt(self, query: str) -> str:
         return f"{_VISION_SYSTEM_PROMPT}\n\nQuestion: {query}\nAnswer:"
+
+    def _build_general_prompt(self, query: str) -> str:
+        return f"{_GENERAL_SYSTEM_PROMPT}\n\nQuestion: {query}\nAnswer:"
 
     def _call(
         self, prompt: str, images: Optional[List[bytes]], num_predict: int
@@ -204,3 +226,20 @@ class QwenClient:
         except QwenClientError:
             return None
         return result.text if result.found else None
+
+    def answer_general(self, query: str) -> Optional[str]:
+        """
+        Ungrounded general-assistant QA for a query that isn't about any
+        welfare scheme (no scheme named, RulesEngine and RAG both found
+        nothing - see workflow.py Step 6.5). Not sentinel-gated - there's no
+        context to fail to find an answer in, so any non-empty response is
+        used as-is. Returns None only on an actual error/timeout.
+        """
+        if not query or not query.strip():
+            return None
+        prompt = self._build_general_prompt(query)
+        try:
+            result = self._call(prompt, images=None, num_predict=constants.LLM_NUM_PREDICT_TEXT)
+        except QwenClientError:
+            return None
+        return result.text or None
