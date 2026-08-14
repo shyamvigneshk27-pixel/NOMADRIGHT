@@ -40,23 +40,26 @@ DEFAULT_SAMPLE_RATE = 16000
 # TTS answers must stay short for a comfortable listening experience.
 MAX_VOICE_WORDS = 60
 
-# ── Voice styling (male-leaning, energetic delivery) ─────────────────────────
-# The only installed Flite voices for Hindi (cmu_indic_hin_ab) and Tamil
-# (cmu_indic_tam_sdr) are both tagged "female" in their model metadata, and
-# no alternate male Indic voice file is installed on this device - there is
-# no different-voice-actor option available offline. As a software-only
-# approximation, TTS output is pitch-shifted down (more masculine-leaning)
-# and sped up slightly (more energetic/"active" delivery) via ffmpeg before
-# playback. Purely a DSP post-process on the WAV bytes - never touches the
-# BHASHINI service itself, and always falls back to the unmodified audio if
-# ffmpeg is unavailable or fails, so this can never break playback.
+# ── Voice styling (natural pitch, Alexa-like clarity) ────────────────────────
+# There is only ONE Flite voice file installed per language NomadRight
+# actually uses (e.g. cmu_indic_hin_ab.flitevox for Hindi, cmu_indic_tam_sdr
+# for Tamil - see ~/bhashini_models/tts/infer.py's LANG_VOICE_MAP) and no
+# alternate/neural voice available offline on this device, so a different
+# *voice* isn't selectable - the only lever is this ffmpeg DSP post-process
+# on the WAV bytes. An earlier version of this shifted pitch down a full
+# octave (TTS_PITCH_FACTOR=0.50) to fake a male-leaning voice; on-device
+# listening confirmed that made speech sound distorted/hard to follow, not
+# clearer - reverted to natural pitch and natural pace (a real assistant
+# voice like Alexa's is clear because it's natural-pitched and consistently
+# leveled, not because it's pitch-shifted). The presence EQ / compressor /
+# loudnorm stages below (bhashini_bridge.py's _apply_voice_style) are kept -
+# those genuinely improve clarity and consistent volume. Purely a DSP
+# post-process - never touches the BHASHINI service itself, and always
+# falls back to the unmodified audio if ffmpeg is unavailable or fails, so
+# this can never break playback.
 TTS_VOICE_STYLE_ENABLED = True
-TTS_PITCH_FACTOR = 0.50   # <1.0 = lower pitch (more male-leaning)
-# asetrate-based pitch shifting stretches duration by 1/TTS_PITCH_FACTOR as a
-# side effect (lowering pitch this way inherently slows playback down) - the
-# tempo factor must first cancel that out, then add extra on top for a
-# genuinely brisker/more "active" delivery rather than just a normal-speed one.
-TTS_ENERGY_BOOST = 1.05   # extra >1.0 speed-up beyond canceling the pitch-shift slowdown
+TTS_PITCH_FACTOR = 1.0    # 1.0 = natural pitch, no artificial shift
+TTS_ENERGY_BOOST = 1.0    # 1.0 = natural pace, no artificial speed-up
 
 # ── Supported Welfare Scheme Identifiers (short codes) ───────────────────────
 SCHEME_CODE_PDS = "PDS"
@@ -163,7 +166,7 @@ RAG_MIN_SCORE = 0.83
 # on this device: forcing full GPU offload cut warm prompt-eval from 7.16s
 # to 1.07s and generation from 4.61s to 3.25s (~4.3s total, inside the 5s
 # budget) - see the "wire qwen2.5vl" plan for the full measurement.
-LLM_FALLBACK_MODEL = "qwen3-vl:2b"
+LLM_FALLBACK_MODEL = "hf.co/Qwen/Qwen3-VL-2B-Instruct-GGUF:Q4_K_M"
 LLM_FALLBACK_ENABLED = True
 # How long the model stays resident after answering before Ollama evicts it,
 # freeing RAM back to BHASHINI - user-chosen: covers one worker's back-and-

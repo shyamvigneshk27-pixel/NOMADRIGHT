@@ -81,13 +81,20 @@ def _apply_voice_style(wav_bytes: bytes) -> bytes:
         # Stage 2: Highpass — cut sub-80 Hz rumble (boom/hum on small speakers)
         stage2 = "highpass=f=80"
 
-        # Stage 3: EQ — boost speech "presence" (2–4 kHz) and "air" (8 kHz).
+        # Stage 3: EQ — boost speech "presence" (2-4 kHz).
         # Flite/Indic TTS tends to sound nasal and mid-heavy; these lifts open
-        # it up and make consonants sharper and easier to distinguish.
+        # it up and make consonants sharper and easier to distinguish. There
+        # is deliberately no 8kHz "air" band here: BHASHINI TTS outputs
+        # 16kHz audio, whose Nyquist frequency is exactly 8000Hz - a peaking
+        # equalizer centered exactly at Nyquist is numerically degenerate in
+        # ffmpeg's biquad implementation and was measured on-device to
+        # silently zero out 100% of the output samples (peak amplitude 0,
+        # no ffmpeg error/warning - the process exits 0 with a "valid",
+        # completely silent WAV). This was why every answer played nothing
+        # at all through the speaker despite ffmpeg reporting success.
         stage3 = (
             "equalizer=f=2500:width_type=o:width=1.5:g=3,"   # +3 dB presence
-            "equalizer=f=4000:width_type=o:width=1.0:g=2,"   # +2 dB definition
-            "equalizer=f=8000:width_type=o:width=1.0:g=1.5"  # +1.5 dB air/crispness
+            "equalizer=f=4000:width_type=o:width=1.0:g=2"    # +2 dB definition
         )
         # Stage 4: Compressor — tighten dynamic range so every syllable is heard.
         # threshold=-18dB: starts compressing above comfortable speech level.
@@ -116,8 +123,20 @@ def _apply_voice_style(wav_bytes: bytes) -> bytes:
         os.close(out_fd)
 
         proc = subprocess.run(
+            # -ar/-ac/-c:a pin the muxed output to standard 16-bit PCM at
+            # the original sample rate. Without an explicit final rate,
+            # ffmpeg's filtergraph negotiation (loudnorm in particular) can
+            # silently settle on an internal rate like 192kHz for the last
+            # filter stage, which pushes libavformat's WAV muxer to write
+            # WAVE_FORMAT_EXTENSIBLE (tag 0xFFFE) instead of plain PCM (tag
+            # 1) - Python's stdlib `wave` module (used by app.py's _play())
+            # cannot parse WAVE_FORMAT_EXTENSIBLE at all and raises
+            # "unknown format: 65534", silently dropping every styled
+            # answer's audio. Reproduced and confirmed on-device.
             ["ffmpeg", "-loglevel", "error", "-y",
-             "-i", in_path, "-af", filter_chain, out_path],
+             "-i", in_path, "-af", filter_chain,
+             "-ar", str(source_rate), "-ac", "1", "-c:a", "pcm_s16le",
+             out_path],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             timeout=10.0,

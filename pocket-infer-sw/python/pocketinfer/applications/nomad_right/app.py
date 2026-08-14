@@ -50,6 +50,7 @@ logger = logging.getLogger(__name__)
         "asr": {},
         "nmt": {},
         "tts": {},
+        "ollama": {"model_name": constants.LLM_FALLBACK_MODEL},
     },
     "default_settings": {
         "input_language": constants.DEFAULT_SOURCE_LANGUAGE,
@@ -93,6 +94,16 @@ class NomadRightApplication(BaseApplication):
         self.pending_form_image: Optional[bytes] = None
         self.pending_form_image_ts: float = 0.0
         self._image_lock = threading.Lock()
+        # Set for the duration of _on_camera_pressed() (which runs on the UI
+        # callback thread, concurrently with the main run() loop below
+        # blocking on wait_for_trigger_button_down()). Without this, a
+        # worker who presses the trigger button again fast enough - before
+        # the capture finishes and "Photo captured" is shown - could have
+        # their follow-up question race ahead of pending_form_image being
+        # set, and get answered as a normal voice query instead of a vision
+        # one. run() waits on this before it starts listening, so the mic
+        # is never armed until the capture is actually confirmed on screen.
+        self._camera_busy = threading.Event()
 
     def start(self) -> None:
         """Application start hook. Instantiates the BHASHINI bridge and pipeline controller."""
@@ -136,24 +147,32 @@ class NomadRightApplication(BaseApplication):
         loop thread - board.top_text/bottom_text/statusbar calls are
         thread-safe (see ui/handheld.py's RemoteUI rpc_lock).
         """
+        self._camera_busy.set()
         try:
-            image_jpg = self.board.camera_frame_jpg()
-        except Exception as exc:
-            self.logger.error(f"[NomadRight] Camera capture failed: {exc}")
-            self.board.statusbar("[ERROR] Camera unavailable")
-            return
-        if not image_jpg:
-            self.logger.warning("[NomadRight] Camera returned no frame.")
-            self.board.statusbar("[ERROR] Camera unavailable")
-            return
+            try:
+                image_jpg = self.board.camera_frame_jpg()
+            except Exception as exc:
+                self.logger.error(f"[NomadRight] Camera capture failed: {exc}")
+                self.board.statusbar("[ERROR] Camera unavailable")
+                return
+            if not image_jpg:
+                self.logger.warning("[NomadRight] Camera returned no frame.")
+                self.board.statusbar("[ERROR] Camera unavailable")
+                return
 
-        with self._image_lock:
-            self.pending_form_image = bytes(image_jpg)
-            self.pending_form_image_ts = time.time()
-        self.logger.info("[NomadRight] Form photo captured, awaiting follow-up query.")
-        self.board.top_text("Photo captured")
-        self.board.bottom_text("Waiting for your query....")
-        self.board.statusbar("[WAITING FOR QUERY] Hold button and ask about the form")
+            with self._image_lock:
+                self.pending_form_image = bytes(image_jpg)
+                self.pending_form_image_ts = time.time()
+            self.logger.info("[NomadRight] Form photo captured, awaiting follow-up query.")
+            self.board.top_text("Photo captured")
+            self.board.bottom_text("Waiting for your query....")
+            self.board.statusbar("[WAITING FOR QUERY] Hold button and ask about the form")
+        finally:
+            # Cleared last, after pending_form_image and the "Photo
+            # captured" screen text are both fully in place (or on any
+            # early-return error path above) - run() only starts listening
+            # once this clears.
+            self._camera_busy.clear()
 
     @staticmethod
     def _lang_name_to_code(name: str, table: Dict[str, str]) -> Optional[str]:
@@ -194,6 +213,16 @@ class NomadRightApplication(BaseApplication):
 
             if not self.running:
                 break
+
+            # A Camera-button capture may still be in flight on the UI
+            # callback thread (see _on_camera_pressed) - don't start
+            # listening until "Photo captured" is actually confirmed on
+            # screen, so a follow-up question asked too quickly can never
+            # race ahead of its own photo and get answered as a normal
+            # voice query instead of a vision one.
+            if self._camera_busy.is_set():
+                self.board.statusbar("[WAIT] Capturing photo...")
+                self._camera_busy.wait(timeout=5.0)
 
             try:
                 self.board.button_led(True)
@@ -247,6 +276,12 @@ class NomadRightApplication(BaseApplication):
                         self.pending_form_image = None
 
                 if image_for_this_turn is not None:
+                    self.logger.info("[PIPELINE] CAMERA_FORM")
+                    self.logger.info("[CAMERA] Image captured")
+                    self.logger.info(f"[ASR] lang={lang} text='{native_query}'")
+                    self.logger.info(f"[LANGUAGE] input={lang}")
+                    self.logger.info(f"[TRANSLATION] EN: '{query_en}'")
+                    self.logger.info("[QWEN_VISION] RAG NOT called - image + question sent directly to Qwen")
                     self.board.statusbar("[READING FORM] This may take a moment")
                     response_pkg: StructuredResponsePackage = self.workflow.process_vision_query(
                         query_en, image_for_this_turn, context_scheme_code=self.last_scheme_code
@@ -278,6 +313,10 @@ class NomadRightApplication(BaseApplication):
                         continue
 
                     # ── 4. Decision Layer: Intent -> Entity -> Rules/RAG -> Response ─
+                    self.logger.info("[PIPELINE] VOICE_SCHEME")
+                    self.logger.info(f"[ASR] lang={lang} text='{native_query}'")
+                    self.logger.info(f"[LANGUAGE] input={lang}")
+                    self.logger.info(f"[TRANSLATION] EN: '{query_en}'")
                     self.board.statusbar("[THINKING]")
                     response_pkg = self.workflow.process(
                         query_en, context_scheme_code=self.last_scheme_code
@@ -293,6 +332,7 @@ class NomadRightApplication(BaseApplication):
                 # ── 5. NMT: English answer -> worker's own language ─────────
                 self.board.statusbar("[TRANSLATING]")
                 answer_native = self.bridge.from_pipeline_language(response_pkg.voice_text, lang)
+                self.logger.info(f"[TRANSLATION_OUTPUT] {lang}: '{answer_native}'")
 
                 # ── 6. Display + Speak — conversation view ────────────────────
                 # top_text keeps showing "You: <question>" from step 1 above
@@ -304,6 +344,7 @@ class NomadRightApplication(BaseApplication):
                 self.board.bottom_text(bottom_hint[:180])
 
                 self.board.statusbar(f"[SPEAKING] {response_pkg.display_top_text}")
+                self.logger.info("[TTS] Synthesizing and playing speaker output")
                 self._play(self.bridge.speak(answer_native, lang))
 
                 self.board.statusbar("[READY] Hold button to ask")

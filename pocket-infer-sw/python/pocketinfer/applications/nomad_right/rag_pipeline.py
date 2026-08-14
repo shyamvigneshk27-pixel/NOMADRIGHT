@@ -104,7 +104,19 @@ class RAGRetriever:
             name=self.config.chroma_collection_name,
             metadata={"hnsw:space": "cosine"},
         )
-        self._embedder = SentenceTransformer(self.config.embedding_model_name)
+        # Explicit CPU placement: left to auto-select, sentence-transformers
+        # puts this on cuda:0 - but Qwen (qwen_client.py, LLM_NUM_GPU=99) is
+        # forced fully onto the GPU precisely because Jetson's unified
+        # memory has no separate VRAM pool, and the two now contend for the
+        # same physical RAM on every RAG-routed query (Step 6.5a in
+        # workflow.py runs the embedder, then Qwen, back to back). Confirmed
+        # on-device: with Qwen resident, embedder cuda:0 init raised
+        # "NVML_SUCCESS == r INTERNAL ASSERT FAILED" (CUDA allocator OOM)
+        # under real memory pressure. multilingual-e5-small is a ~118M-param
+        # model - CPU embedding of one short query is a few hundred ms, a
+        # cost worth paying to keep the GPU free for Qwen and avoid this
+        # crash entirely.
+        self._embedder = SentenceTransformer(self.config.embedding_model_name, device="cpu")
         self.logger.info(
             f"RAG engine ready: collection='{self.config.chroma_collection_name}' "
             f"({self._collection.count()} chunks), model='{self.config.embedding_model_name}'"

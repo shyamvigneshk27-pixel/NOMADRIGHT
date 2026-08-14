@@ -47,9 +47,26 @@ _OLLAMA_GENERATE_URL = "http://localhost:11434/api/generate"
 _SYSTEM_PROMPT = (
     "You are a factual assistant for a welfare-rights kiosk used by migrant "
     "workers in India. Answer the question using ONLY the information given "
-    "in the context below (and the photographed document, if one is "
-    "provided). Keep the answer under 40 words, plain factual sentences, no "
-    "speculation. If the context/document does not contain the answer, "
+    "in the context below. Keep the answer under 40 words, plain factual "
+    "sentences, no speculation. If the context does not contain the answer, "
+    f"reply with exactly this text and nothing else: {constants.LLM_SENTINEL_NOT_FOUND}"
+)
+
+# Vision path (camera/form-reading) never receives text context - see
+# workflow.py's process_vision_query and the module docstring above. The
+# text-fallback prompt's "context below" framing measurably biased the
+# model toward the not-found sentinel even with a clear, readable image in
+# front of it (reproduced on-device: a synthetic form photo that answered
+# correctly when (incorrectly) given RAG context returned the sentinel once
+# that context was correctly removed) - this prompt instead frames the
+# photographed image itself as the one and only source of truth.
+_VISION_SYSTEM_PROMPT = (
+    "You are a factual assistant for a welfare-rights kiosk used by migrant "
+    "workers in India, reading a photographed government form/document on "
+    "their behalf. Carefully look at the provided image and answer the "
+    "question using ONLY what is visible in it. Keep the answer under 40 "
+    "words, plain factual sentences, no speculation. If the image is "
+    "unclear, blurry, cropped, or the requested field/text is not visible, "
     f"reply with exactly this text and nothing else: {constants.LLM_SENTINEL_NOT_FOUND}"
 )
 
@@ -91,6 +108,9 @@ class QwenClient:
             f"Question: {query}\n"
             f"Answer:"
         )
+
+    def _build_vision_prompt(self, query: str) -> str:
+        return f"{_VISION_SYSTEM_PROMPT}\n\nQuestion: {query}\nAnswer:"
 
     def _call(
         self, prompt: str, images: Optional[List[bytes]], num_predict: int
@@ -168,10 +188,15 @@ class QwenClient:
         """
         if not image_jpg:
             return None
-        prompt = self._build_prompt(
-            query or "Describe what this document says and how it's relevant to the worker.",
-            context_snippets or [],
-        )
+        query = query or "Describe what this document says and how it's relevant to the worker."
+        # CAMERA_FORM never passes context_snippets (see workflow.py) - the
+        # branch on context_snippets here exists only so this method still
+        # behaves sensibly if some future caller does supply grounding text
+        # alongside the image, without regressing the image-only case.
+        if context_snippets:
+            prompt = self._build_prompt(query, context_snippets)
+        else:
+            prompt = self._build_vision_prompt(query)
         try:
             result = self._call(
                 prompt, images=[image_jpg], num_predict=constants.LLM_NUM_PREDICT_VISION

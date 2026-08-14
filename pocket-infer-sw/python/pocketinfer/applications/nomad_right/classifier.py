@@ -52,8 +52,12 @@ class QueryClassifier(IQueryClassifier):
     """
     Offline Query Classifier decision engine directing execution flow to the
     deterministic RulesEngine, the ChromaDB RAG pipeline, or the voice-bridge
-    NMT/TTS path. There is no generative LLM in the answer path — hallucination
-    risk is unacceptable for legal welfare entitlements (see prompt.txt).
+    NMT/TTS path. RULES_ENGINE answers (statutory eligibility/registration/
+    benefits) are always deterministic and never touch a generative model -
+    hallucination risk is unacceptable for legal welfare entitlements. RAG
+    chunks (RAG_PIPELINE route) are used to ground a Qwen-generated answer
+    (see workflow.py Step 6.5a / qwen_client.py) rather than being echoed
+    verbatim, with a template fallback if Qwen can't answer from them.
     """
 
     # Scheme codes that have a hand-written dispatch branch in

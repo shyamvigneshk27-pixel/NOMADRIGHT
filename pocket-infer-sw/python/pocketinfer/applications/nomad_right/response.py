@@ -10,12 +10,16 @@ Synthesizes multi-modal output packages from pipeline results:
   - severity            : INFO / WARNING / CRITICAL for logging
 
 Priority chain:
-  1. Rules Engine response    (statutory eligibility / registration / benefits)
-  2. RAG retrieval response   (retrieve-then-TEMPLATE, no generative LLM)
-  3. KB-only context response (scheme data found but no rule/RAG chunk matched)
-  4. LLM fallback response    (qwen2.5vl:3b, grounded + sentinel-gated - see
-                               qwen_client.py; only reached when 1-3 all miss)
-  5. Unknown / fallback       (nothing matched, including the LLM)
+  1. Rules Engine response      (statutory eligibility/registration/benefits -
+                                 deterministic, never touches Qwen)
+  2. RAG retrieve-then-GENERATE (Qwen answers from the retrieved chunks -
+                                 grounded + sentinel-gated, see qwen_client.py)
+  2b. RAG retrieve-then-TEMPLATE (raw top chunk - fallback for when 2 errors
+                                 or Qwen returns the not-found sentinel)
+  3. KB-only context response   (scheme data found but no rule/RAG chunk matched)
+  4. LLM fallback response      (qwen, grounded + sentinel-gated; only reached
+                                 when 1-3 all miss)
+  5. Unknown / fallback         (nothing matched, including the LLM)
 """
 
 import hashlib
@@ -73,6 +77,7 @@ class IResponseGenerator(ABC):
         rag_chunks: Optional[List[RetrievedChunk]] = None,
         entities: Optional[EntityMap] = None,
         llm_answer: Optional[str] = None,
+        rag_llm_answer: Optional[str] = None,
     ) -> StructuredResponsePackage:
         """Synthesizes voice, LCD screen, and QR output."""
         pass
@@ -180,23 +185,28 @@ class ResponseGenerator(IResponseGenerator):
         rag_chunks: Optional[List[RetrievedChunk]] = None,
         entities: Optional[EntityMap] = None,
         llm_answer: Optional[str] = None,
+        rag_llm_answer: Optional[str] = None,
     ) -> StructuredResponsePackage:
         """
         Synthesizes a StructuredResponsePackage from Decision Layer outputs.
 
         Args:
-            intent_result:  IntentResult from IntentRecognizer.
-            classification: ClassificationResult from QueryClassifier.
-            rule_result:    Optional RuleEvaluationResult from RulesEngine.
-            kb_record:      Optional PortabilityRecord from SQLiteAccessLayer.
-            rag_chunks:     Optional retrieved passages from RAGRetriever,
-                             best match first (retrieve-then-TEMPLATE, never
-                             paraphrased by a generative model).
-            entities:       Optional EntityMap from EntityExtractor.
-            llm_answer:     Optional grounded answer from qwen_client.py,
-                             already sentinel-checked by the caller (workflow.py)
-                             - only ever populated when rule_result/rag_chunks/
-                             kb_record all found nothing usable.
+            intent_result:   IntentResult from IntentRecognizer.
+            classification:  ClassificationResult from QueryClassifier.
+            rule_result:     Optional RuleEvaluationResult from RulesEngine.
+            kb_record:       Optional PortabilityRecord from SQLiteAccessLayer.
+            rag_chunks:      Optional retrieved passages from RAGRetriever,
+                              best match first - used directly (Priority 2b)
+                              only if rag_llm_answer is empty.
+            entities:        Optional EntityMap from EntityExtractor.
+            llm_answer:      Optional grounded answer from qwen_client.py,
+                              already sentinel-checked by the caller (workflow.py)
+                              - only ever populated when rule_result/rag_chunks/
+                              kb_record all found nothing usable.
+            rag_llm_answer:  Optional grounded answer from qwen_client.py,
+                              generated from exactly the rag_chunks above
+                              (retrieve-then-GENERATE) - already sentinel-
+                              checked by the caller.
 
         Returns:
             StructuredResponsePackage for voice, LCD, and QR.
@@ -244,7 +254,21 @@ class ResponseGenerator(IResponseGenerator):
                 scheme_code=rule_result.scheme_code or (entities.scheme_code if entities else None),
             )
 
-        # ── Priority 2: RAG retrieval response (retrieve-then-template) ────
+        # ── Priority 2: RAG retrieve-then-GENERATE (qwen, grounded) ────────
+        if rag_llm_answer:
+            best = rag_chunks[0] if rag_chunks else None
+            top_hdr = f"{(best.scheme_code if best else None) or scheme_label} INFO"
+            voice_txt = self._cap_words(self._fmt_voice(rag_llm_answer))
+            return StructuredResponsePackage(
+                voice_text=voice_txt,
+                display_top_text=self._trunc(top_hdr, constants.DISPLAY_HEADER_MAX_LEN),
+                display_bottom_text=self._trunc(rag_llm_answer, constants.DISPLAY_BODY_MAX_LEN),
+                qr_payload=self._qr_payload(intent_code, "RAG_QWEN_HIT", rag_llm_answer),
+                severity=SeverityLevel.INFO,
+                scheme_code=(best.scheme_code if best else None) or (entities.scheme_code if entities else None),
+            )
+
+        # ── Priority 2b: RAG retrieve-then-TEMPLATE (qwen errored/sentinel) ─
         if rag_chunks:
             best = rag_chunks[0]
             voice_txt = self._cap_words(self._fmt_voice(best.text))

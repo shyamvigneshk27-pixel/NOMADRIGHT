@@ -42,7 +42,7 @@ def app_needs_ollama(app_name: str) -> bool:
     return "ollama" in app_cls.METADATA.get("models", {})
 
 
-def verify_ollama_model(model_name: str = "qwen3-vl:2b") -> bool:
+def verify_ollama_model(model_name: str = "hf.co/Qwen/Qwen3-VL-2B-Instruct-GGUF:Q4_K_M") -> bool:
     """Verify Ollama is reachable and asynchronously pre-warm model into RAM with keep_alive=-1."""
     logging.info(f"Verifying Ollama endpoint and pre-warming model '{model_name}'...")
     try:
@@ -116,7 +116,7 @@ def stop_conflicting_instances():
 def run_master():
     parser = argparse.ArgumentParser(description="PocketInfer Master Setup Command")
     parser.add_argument('--app', type=str, default="HearTheWorld", help="Application to launch")
-    parser.add_argument('--model', type=str, default="qwen3-vl:2b", help="Ollama model name")
+    parser.add_argument('--model', type=str, default="hf.co/Qwen/Qwen3-VL-2B-Instruct-GGUF:Q4_K_M", help="Ollama model name")
     parser.add_argument('--status', action='store_true', help="Check services and exit")
     parser.add_argument('--dummy-board', action='store_true', help="Run in dummy hardware mode")
     parser.add_argument('--log-level', type=str, default="INFO", help="Logging level")

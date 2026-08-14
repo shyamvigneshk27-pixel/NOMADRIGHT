@@ -29,6 +29,22 @@ sentinel-gated against confident hallucination, never free generation.
 Voice-bridge translation (TRANSLATION_REQUEST intent) is handled by
 app.py directly via BhashiniBridge, since it needs the previous answer
 text and the BHASHINI NMT model — both outside this controller's scope.
+
+Qwen (constants.LLM_FALLBACK_MODEL) enters the answer path in three
+explicitly-gated cases, always grounded and sentinel-gated against
+confident hallucination (see qwen_client.py):
+  1. Step 6.5a - RAG_PIPELINE retrieve-then-GENERATE: once RAGRetriever
+     has found chunks above RAG_MIN_SCORE, Qwen synthesizes the final
+     answer from exactly those chunks (never free generation). If Qwen
+     errors or returns the not-found sentinel, response.py falls back to
+     the raw top chunk (retrieve-then-TEMPLATE) so an answer is never
+     silently dropped.
+  2. Step 6.5b - text fallback: when RulesEngine, RAG, and the KB all find
+     nothing.
+  3. process_vision_query() - a worker photographs a form via the
+     touchscreen Camera button.
+RULES_ENGINE-routed queries (statutory eligibility/registration/benefit
+determinations) never touch Qwen - those stay 100% deterministic.
 """
 
 import uuid
@@ -152,13 +168,28 @@ class WorkflowController(IWorkflowController):
                 f"status={rule_res.status_code.value}  passed={rule_res.passed}"
             )
 
-        # ── Step 6: RAG retrieval (retrieve-then-template, no LLM) ─────────
+        # ── Step 6: RAG retrieval (ChromaDB, no LLM here) ───────────────────
         rag_chunks: List[RetrievedChunk] = []
         if classification.requires_rag:
             rag_chunks = self.rag_retriever.retrieve(transcribed_text)
-            self.logger.info(f"[{session_id}] RAG → {len(rag_chunks)} chunks retrieved")
+            self.logger.info(f"[RAG] [{session_id}] {len(rag_chunks)} chunks retrieved")
 
-        # ── Step 6.5: LLM fallback (qwen2.5vl:3b, grounded) ─────────────────
+        # ── Step 6.5a: RAG retrieve-then-GENERATE (qwen, grounded) ─────────
+        # Every RAG_PIPELINE hit gets its final answer synthesized by Qwen
+        # from exactly the chunks retrieved above (LLM_FALLBACK_MODEL) -
+        # never free generation. response.py falls back to the raw top
+        # chunk if this comes back empty (error or not-found sentinel).
+        rag_llm_answer: Optional[str] = None
+        if constants.LLM_FALLBACK_ENABLED and rag_chunks:
+            rag_llm_answer = self.qwen_client.answer_text(
+                transcribed_text, [c.text for c in rag_chunks]
+            )
+            self.logger.info(
+                f"[QWEN] [{session_id}] RAG-grounded generation → "
+                f"{'answered' if rag_llm_answer else 'no answer (sentinel/error) - template fallback'}"
+            )
+
+        # ── Step 6.5b: LLM text fallback (qwen, grounded) ───────────────────
         # Only reached when every higher-priority path in response.py's
         # chain (rule_result / rag_chunks / kb_record) found nothing -
         # mirrors that priority order exactly so a query response.py would
@@ -176,6 +207,7 @@ class WorkflowController(IWorkflowController):
             rag_chunks=rag_chunks,
             entities=entities,
             llm_answer=llm_answer,
+            rag_llm_answer=rag_llm_answer,
         )
         self.logger.info(
             f"[{session_id}] RESPONSE → severity={response_pkg.severity.value}  "
@@ -273,10 +305,17 @@ class WorkflowController(IWorkflowController):
             query_text, intent_res, context_scheme_code=context_scheme_code
         )
 
-        context = self._gather_llm_context(query_text, entities.scheme_code)
-        answer = self.qwen_client.answer_vision(query_text, image_jpg, context)
+        # CAMERA_FORM never touches RAG/ChromaDB/the scheme database - the
+        # image itself is the only source of truth Qwen is grounded against
+        # here (see qwen_client.answer_vision's system prompt). Previously
+        # this called the shared _gather_llm_context() helper, which does a
+        # ChromaDB vector search - a real violation reproduced on-device
+        # (photographing a form and asking about it silently cold-loaded
+        # the RAG embedder, adding ~25s of unnecessary latency and pulling
+        # ChromaDB into a pipeline that must be fully independent of it).
+        answer = self.qwen_client.answer_vision(query_text, image_jpg, context_snippets=None)
         self.logger.info(
-            f"[{session_id}] VISION_FORM_QUERY → "
+            f"[QWEN_VISION] [{session_id}] VISION_FORM_QUERY → "
             f"{'answered' if answer else 'no answer (sentinel/error)'}"
         )
 
