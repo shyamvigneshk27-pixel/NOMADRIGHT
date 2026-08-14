@@ -145,6 +145,7 @@ class QwenClient:
             "options": {
                 "num_gpu": constants.LLM_NUM_GPU,
                 "num_thread": constants.LLM_NUM_THREAD,
+                "num_ctx": constants.LLM_NUM_CTX,
                 "num_predict": num_predict,
                 "temperature": constants.LLM_TEMPERATURE,
             },

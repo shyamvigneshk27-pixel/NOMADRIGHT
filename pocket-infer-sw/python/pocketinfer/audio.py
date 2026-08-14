@@ -271,6 +271,22 @@ class AudioPlayer:
         self._proc.stdin.write(audio_bytes)
         self._proc.stdin.flush()
 
+    def stop(self) -> None:
+        """
+        Immediately kills the underlying ffplay process, stopping audio
+        output right away. Safe to call from a different thread than the
+        one running play()/the `with` block (e.g. a UI button-press
+        callback interrupting mid-playback) and safe to call more than
+        once or after playback already finished on its own - both are
+        no-ops. __exit__'s own proc.wait() then returns immediately since
+        the process is already gone, so this never causes a hang.
+        """
+        if self._proc is not None and self._proc.poll() is None:
+            try:
+                self._proc.terminate()
+            except Exception:
+                pass
+
     @staticmethod
     def is_available() -> bool:
         """Returns true if ffplay is available."""

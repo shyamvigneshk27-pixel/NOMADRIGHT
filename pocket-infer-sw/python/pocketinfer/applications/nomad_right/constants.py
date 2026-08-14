@@ -246,6 +246,21 @@ LLM_FALLBACK_ENABLED = True
 LLM_KEEP_ALIVE = "15m"
 LLM_NUM_GPU = 99
 LLM_NUM_THREAD = 6
+# The GGUF model natively supports up to 262144 tokens, but Ollama was
+# silently running every call at its own runtime default of 4096 (never
+# explicitly requested here before) - measured on-device: a single
+# photographed form alone consumes ~1096 of that (api/generate's
+# prompt_eval_count), before the system prompt, question, and answer
+# tokens are even added, and a higher-resolution real camera photo (this
+# device's webcam defaults to 1280x720, vs. the smaller image used for
+# that measurement) would consume more still. 8192 (2x the previous
+# ceiling) gives real headroom without the KV-cache memory cost of a much
+# larger window on this RAM-constrained Jetson. Changing this value forces
+# a one-time model reload the next time it's requested (measured ~43s,
+# similar in nature to a normal cold start) - NOT a recurring per-query
+# cost: confirmed on-device that repeated calls at a fixed num_ctx stay
+# resident and fast (~1-3s) exactly like before this was added.
+LLM_NUM_CTX = 8192
 LLM_NUM_PREDICT_TEXT = 60
 LLM_NUM_PREDICT_VISION = 80
 LLM_TEMPERATURE = 0.1

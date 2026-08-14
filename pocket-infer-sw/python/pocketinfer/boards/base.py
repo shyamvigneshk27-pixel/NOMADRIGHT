@@ -38,18 +38,83 @@ class CameraReader:
         self.running = True
         self.thread.start()
     
+    def _probe(self, idx: int) -> bool:
+        """Returns True if index idx actually opens AND yields a real frame -
+        not just isOpened(), which some V4L2 nodes report True for even
+        when they can't produce frames (e.g. a camera's metadata/still
+        node exposed alongside its real video-capture node - many USB
+        webcams expose two /dev/videoN devices for one physical camera).
+        Always releases the test handle before returning either way."""
+        test_cap = cv2.VideoCapture(idx)
+        try:
+            if not test_cap.isOpened():
+                return False
+            ret, _ = test_cap.read()
+            return bool(ret)
+        except Exception:
+            return False
+        finally:
+            test_cap.release()
+
     def _run(self):
-        for filename in glob('/dev/v4l/by-id/*'):
+        # Enumerate every USB video candidate (name, index) once - used
+        # both for the configured-name fast path below and as the probing
+        # order for the fallback, so a name change (a different physical
+        # camera swapped in - see boards/jetson.py's hardcoded
+        # V4L_CAMERA_NAME) doesn't require another code change to keep
+        # working.
+        candidates = []
+        for filename in sorted(glob('/dev/v4l/by-id/*')):
             match = re.match(r'(\S+)\-(\S+)\-\S+\-index(\d+)', filename)
             if match is None:
                 continue
             interface, name, idx = match.groups()
-            if self.camera_interface in interface and self.camera_name in name:
-                self.camera_idx = int(idx)
-                break
-        if self.camera_idx is None:
-            self.logger.warning(f"Camera '{self.camera_name}' with interface '{self.camera_interface}' not found, defaulting to index 0")
-            self.camera_idx = 0
+            candidates.append((interface, name, int(idx)))
+
+        named_match = next(
+            (idx for interface, name, idx in candidates
+             if self.camera_interface in interface and self.camera_name in name),
+            None,
+        )
+        if named_match is not None and self._probe(named_match):
+            self.camera_idx = named_match
+        else:
+            if named_match is not None:
+                self.logger.warning(
+                    f"Camera '{self.camera_name}' matched by name (index {named_match}) "
+                    f"but didn't produce a frame - probing other USB video devices instead."
+                )
+            else:
+                self.logger.warning(
+                    f"Camera '{self.camera_name}' with interface '{self.camera_interface}' "
+                    f"not found among {len(candidates)} USB video device(s) - the physical "
+                    f"camera may have been swapped for a different model. Probing all of "
+                    f"them for one that actually produces a frame."
+                )
+            # Try every other enumerated device, then fall back to raw
+            # indices 0-3 in case udev never created /dev/v4l/by-id
+            # symlinks at all for this device (some generic/no-name USB
+            # cameras don't get one) - the previous behavior of blindly
+            # trusting index 0 without checking could silently select a
+            # non-functional node and fail later with an opaque
+            # "Unable to open VideoCapture" error.
+            tried = {named_match} if named_match is not None else set()
+            fallback_order = [idx for _, _, idx in candidates if idx not in tried] + \
+                              [i for i in range(4) if i not in tried and i not in [idx for _, _, idx in candidates]]
+            self.camera_idx = None
+            for idx in fallback_order:
+                if self._probe(idx):
+                    self.camera_idx = idx
+                    self.logger.warning(f"Using USB video device at index {idx} instead.")
+                    break
+            if self.camera_idx is None:
+                self.logger.error(
+                    f"No working USB camera found (checked indices: "
+                    f"{[named_match] + fallback_order if named_match is not None else fallback_order}). "
+                    f"Falling back to index 0 - capture will likely fail; check the camera is "
+                    f"connected (`v4l2-ctl --list-devices`, `ls /dev/video*`)."
+                )
+                self.camera_idx = 0
         self.cap = cv2.VideoCapture(self.camera_idx)
         if not self.cap.isOpened():
             raise RuntimeError(f"Unable to open VideoCapture({self.camera_idx})")
@@ -89,6 +154,13 @@ class Board:
             camera_name=self.V4L_CAMERA_NAME,
             camera_interface=self.V4L_CAMERA_INTERFACE
         )
+        # Guards camera_frame()'s check-then-start below - a plain
+        # threading.Thread can only be started once, so two callers both
+        # seeing camera.running=False and both calling camera.start() (e.g.
+        # an app's startup camera pre-warm racing an early trigger-button
+        # capture) would have the second call raise "threads can only be
+        # started once". Rare in practice but cheap to close off properly.
+        self._camera_start_lock = threading.Lock()
         # Select audio playback device - try to use ALSA_PLAYBACK_NAME if provided, apply blacklist, fall back on any available playback device.
         # NOTE: playback is enumerated BEFORE capture on purpose - on this
         # hardware (two USB audio devices sharing a controller: the Arducam
@@ -164,10 +236,14 @@ class Board:
         self.trigger_button_up.wait(timeout=timeout)
 
     def camera_frame(self):
-        if not self.camera.running:
-            self.camera.frame_available.clear()
-            self.camera.start()
-            self.camera.frame_available.wait(timeout=5.0)
+        with self._camera_start_lock:
+            if not self.camera.running:
+                self.camera.frame_available.clear()
+                self.camera.start()
+        # Waiting for the frame happens outside the lock - CameraReader
+        # keeps streaming continuously once started, so multiple
+        # concurrent callers safely share the same wait()/latest frame.
+        self.camera.frame_available.wait(timeout=5.0)
         return self.camera.frame
 
     def camera_frames(self):

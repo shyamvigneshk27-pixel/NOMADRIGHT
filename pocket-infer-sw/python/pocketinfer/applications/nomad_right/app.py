@@ -67,6 +67,12 @@ class NomadRightApplication(BaseApplication):
     the WorkflowController Decision Layer.
     """
 
+    # Shared Home/ready-screen hint, kept short and reused everywhere it's
+    # shown (run()'s idle screen, _on_home_pressed()'s two branches) so
+    # there's exactly one string to keep within the display's safe line
+    # length rather than several independently-drifting copies.
+    HOME_HINT = "Hold: Voice Q&A  |  Camera: Scan Document"
+
     def __init__(self, board: Any, settings: Optional[Dict[str, Any]] = None):
         super().__init__(board, settings)
         # BaseApplication.__init__ sets self.logger to the generic
@@ -105,6 +111,49 @@ class NomadRightApplication(BaseApplication):
         # is never armed until the capture is actually confirmed on screen.
         self._camera_busy = threading.Event()
 
+        # ── Mode / navigation state (Home <-> Voice Translation <-> ────────
+        # Document Scanner) - see module docstring's "UI modes" section.
+        # Display-only label reflecting what the LCD's mode_text should
+        # currently read; not a hard state machine gate - the real branch
+        # logic still runs entirely on pending_form_image, exactly as
+        # before. "HOME" is the idle/ready screen (both options available);
+        # it switches to "VOICE TRANSLATION" or "DOCUMENT SCANNER" only for
+        # the duration of one active turn, then reverts to "HOME".
+        self._mode: str = "HOME"
+
+        # Cancellable audio playback (Home button, see _on_home_pressed/
+        # _stop_audio): the AudioPlayer currently on-air, if any. Written
+        # by the main thread (_play()) and read/killed by the UI callback
+        # thread, so access is lock-guarded even though CPython's GIL would
+        # likely make the bare reference swap safe anyway - explicit is
+        # cheap here and matches the existing _image_lock pattern.
+        self._current_player = None
+        self._player_lock = threading.Lock()
+        # Set by _stop_audio() right before killing the player, cleared at
+        # the start of every _play() call - lets _play() tell its caller
+        # apart a user-initiated stop from a normal finish or a genuine
+        # playback error (see _play()'s return value).
+        self._audio_stop_requested = threading.Event()
+        # Set by _on_home_pressed() (UI callback thread); polled by run()
+        # (main thread) at safe checkpoints - never mid-inference, since a
+        # live Qwen/RAG HTTP call can't be safely aborted once sent (see
+        # module docstring) - to drop back to the Home/ready screen instead
+        # of speaking out an answer the worker already tried to back out of.
+        self._home_requested = threading.Event()
+
+        # A "screen update" (mode_text + top_text + bottom_text + statusbar
+        # together, describing one coherent state) is 2-4 separate RPC
+        # calls to the UI subprocess (see ui/handheld.py's RemoteUI -
+        # each individual call is lock-serialized there, but a *sequence*
+        # of them is not atomic). run() (main thread) and
+        # _on_camera_pressed()/_on_home_pressed() (UI callback thread, see
+        # jetson.py's _process_ui_events) can call these concurrently -
+        # without this lock, a Camera/Home press landing mid-transition can
+        # interleave with the main loop's own update, leaving one field
+        # from the old state and another from the new one on screen at
+        # once - the intermittent "overlay" glitch this was added to fix.
+        self._screen_lock = threading.Lock()
+
     def start(self) -> None:
         """Application start hook. Instantiates the BHASHINI bridge and pipeline controller."""
         self.bridge = BhashiniBridge(config=self.app_config)
@@ -113,7 +162,29 @@ class NomadRightApplication(BaseApplication):
 
         if not os.path.exists(self.app_config.log_dir):
             os.makedirs(self.app_config.log_dir, exist_ok=True)
+
+        # Pre-warm the camera (device open + first-frame negotiation) at
+        # startup rather than leaving it lazy until the worker's first
+        # Camera press - CameraReader (boards/base.py) keeps streaming in
+        # the background once started, so only the *first* call ever pays
+        # this cost; every capture after it is already fast. Measured
+        # on-device: ~1.8s for that first open+negotiate. Backgrounded so
+        # a slow/unavailable camera can never delay reaching the ready
+        # screen, and any failure here is silently swallowed - a real
+        # failure surfaces normally (with its own error screen) the first
+        # time the worker actually presses Camera, exactly as before this
+        # existed; this is purely a latency head start, not new error
+        # handling.
+        threading.Thread(target=self._prewarm_camera, daemon=True).start()
+
         super().start()
+
+    def _prewarm_camera(self) -> None:
+        try:
+            self.board.camera_frame_jpg()
+            self.logger.info("[NomadRight] Camera pre-warmed at startup.")
+        except Exception as exc:
+            self.logger.debug(f"[NomadRight] Camera pre-warm skipped: {exc}")
 
     # ── Touchscreen Settings page: language selection ──────────────────────
 
@@ -136,43 +207,133 @@ class NomadRightApplication(BaseApplication):
                 self.logger.info(f"[NomadRight] Voice bridge language set to {code}")
         elif msg == "Camera":
             self._on_camera_pressed()
+        elif msg == "Home":
+            self._on_home_pressed()
 
     def _on_camera_pressed(self) -> None:
         """
         Touchscreen Camera button handler: captures a form photo via the
         board's existing camera_frame_jpg() (boards/base.py - Arducam CSI on
         real hardware / USB webcam on this dev box, no new camera-driver
-        code needed) and puts the app into "waiting for your query" state.
-        Runs on the UI subprocess's callback thread, not the main run()
-        loop thread - board.top_text/bottom_text/statusbar calls are
-        thread-safe (see ui/handheld.py's RemoteUI rpc_lock).
+        code needed) and puts the app into "waiting for your query" state -
+        this IS the Document Scanner mode's entry point (see module
+        docstring). Runs on the UI subprocess's callback thread, not the
+        main run() loop thread - board.top_text/bottom_text/statusbar calls
+        are thread-safe (see ui/handheld.py's RemoteUI rpc_lock).
+
+        Single-frame only, deliberately: neither camera_frame_jpg() nor
+        qwen_client.answer_vision() support multiple images per call, and
+        this device's memory budget doesn't comfortably support buffering
+        several full-resolution frames - see the multi-frame note in the
+        final report for why this was scoped out rather than half-built.
         """
+        # Any audio still playing from a *previous* turn must not keep
+        # talking over a fresh scan - matches Home's own "stop audio first"
+        # behavior for the same reason (see _on_home_pressed).
+        self._stop_audio()
         self._camera_busy.set()
         try:
+            with self._screen_lock:
+                self.board.mode_text("DOCUMENT SCANNER")
+                self.board.top_text("Capturing...")
+                self.board.bottom_text("Hold the document steady")
+                self.board.statusbar("[CAPTURING]")
             try:
                 image_jpg = self.board.camera_frame_jpg()
             except Exception as exc:
                 self.logger.error(f"[NomadRight] Camera capture failed: {exc}")
-                self.board.statusbar("[ERROR] Camera unavailable")
+                with self._screen_lock:
+                    self.board.top_text("CAMERA ERROR")
+                    self.board.bottom_text("Capture failed. Camera=retry, Home=cancel")
+                    self.board.statusbar("[ERROR] Camera unavailable")
+                self._mode = "HOME"
                 return
             if not image_jpg:
                 self.logger.warning("[NomadRight] Camera returned no frame.")
-                self.board.statusbar("[ERROR] Camera unavailable")
+                with self._screen_lock:
+                    self.board.top_text("CAMERA ERROR")
+                    self.board.bottom_text("No frame captured. Camera=retry, Home=cancel")
+                    self.board.statusbar("[ERROR] Camera unavailable")
+                self._mode = "HOME"
                 return
 
             with self._image_lock:
                 self.pending_form_image = bytes(image_jpg)
                 self.pending_form_image_ts = time.time()
             self.logger.info("[NomadRight] Form photo captured, awaiting follow-up query.")
-            self.board.top_text("Photo captured")
-            self.board.bottom_text("Waiting for your query....")
-            self.board.statusbar("[WAITING FOR QUERY] Hold button and ask about the form")
+            self._mode = "DOCUMENT SCANNER"
+            # No checkmark/symbol here on purpose: the LCD's bitmap font
+            # (NotoSansDevanagari-Regular-12.pcf) doesn't include a glyph
+            # for U+2713 (checkmark) - confirmed via get_glyph() returning
+            # None - an earlier version of this used one and it silently
+            # contributed 0 width to the text-wrap calculation while still
+            # occupying a character slot, which is the kind of thing that
+            # can desync wrapping from what's actually drawn. Plain ASCII
+            # only, matching every other screen in this app.
+            with self._screen_lock:
+                self.board.top_text("DOCUMENT CAPTURED")
+                self.board.bottom_text("Hold button to ask, or Home to cancel")
+                self.board.statusbar("[WAITING FOR QUERY] Ask about the form")
         finally:
             # Cleared last, after pending_form_image and the "Photo
             # captured" screen text are both fully in place (or on any
             # early-return error path above) - run() only starts listening
             # once this clears.
             self._camera_busy.clear()
+
+    def _on_home_pressed(self) -> None:
+        """
+        Touchscreen Home button handler - the app's single, always-
+        available cancel/back/stop control (see module docstring's UI
+        modes section). Runs on the UI callback thread, concurrently with
+        whatever the main run() loop is doing. Two jobs, in priority order:
+
+          1. If audio is currently playing, stop it immediately (see
+             _stop_audio()) - the most likely reason a worker presses Home
+             mid-turn is not wanting to hear the rest of an answer.
+          2. Either way, clear any pending document-scanner photo and
+             request a return to the Home/ready screen - run() checks
+             self._home_requested at safe checkpoints (never mid-inference;
+             a live Qwen/RAG call can't be safely aborted once sent) and
+             drops back to Home there instead of speaking a stale answer.
+        """
+        stopped_audio = self._stop_audio()
+        self._home_requested.set()
+        with self._image_lock:
+            had_pending_photo = self.pending_form_image is not None
+            self.pending_form_image = None
+        self._mode = "HOME"
+        if stopped_audio:
+            self.logger.info("[NomadRight] Home pressed - audio playback stopped.")
+            with self._screen_lock:
+                self.board.top_text("AUDIO STOPPED")
+                self.board.bottom_text(self.HOME_HINT)
+                self.board.statusbar("[READY]")
+        elif had_pending_photo:
+            self.logger.info("[NomadRight] Home pressed - Document Scanner cancelled.")
+            with self._screen_lock:
+                self.board.top_text("CANCELLED")
+                self.board.bottom_text(self.HOME_HINT)
+                self.board.statusbar("[READY]")
+        else:
+            self.logger.info("[NomadRight] Home pressed - already at Home.")
+
+    def _stop_audio(self) -> bool:
+        """
+        Immediately stops any in-progress speaker playback by killing the
+        underlying ffplay subprocess (see audio.py's AudioPlayer.stop()).
+        Safe to call from any thread, and safe to call when nothing is
+        playing (no-op, returns False). Used by both _on_home_pressed()
+        (Home button) and _on_camera_pressed() (a fresh scan shouldn't
+        have the previous turn's answer still talking over it).
+        """
+        with self._player_lock:
+            player = self._current_player
+        if player is None:
+            return False
+        self._audio_stop_requested.set()
+        player.stop()
+        return True
 
     @staticmethod
     def _lang_name_to_code(name: str, table: Dict[str, str]) -> Optional[str]:
@@ -185,30 +346,86 @@ class NomadRightApplication(BaseApplication):
 
     # ── Audio playout ───────────────────────────────────────────────────────
 
-    def _play(self, wav_bytes: bytes) -> None:
-        """Plays raw WAV bytes (as returned by BhashiniBridge.speak) on the speaker."""
+    def _play(self, wav_bytes: bytes) -> bool:
+        """
+        Plays raw WAV bytes (as returned by BhashiniBridge.speak) on the
+        speaker. Cancellable: _stop_audio() (Home button, see ui_cb) can
+        interrupt playback mid-clip from another thread by killing the
+        underlying ffplay subprocess - sound stops right away, and
+        AudioPlayer.__exit__'s own wait() returns immediately once the
+        process is gone, so this never hangs.
+
+        Returns True if playback completed normally, False if it was
+        stopped by the user or failed outright - run() uses this to avoid
+        overwriting the "AUDIO STOPPED" screen _on_home_pressed() already
+        showed with a normal "[READY]" message.
+        """
         if not wav_bytes:
-            return
+            return True
+        self._audio_stop_requested.clear()
         try:
             wave_obj = wave.open(BytesIO(wav_bytes), "rb")
             with AudioPlayer(wave_obj.getframerate(), self.board.alsa_playback_device) as player:
+                with self._player_lock:
+                    self._current_player = player
                 player.play(wave_obj.readframes(wave_obj.getnframes()))
+            return not self._audio_stop_requested.is_set()
         except Exception as exc:
             self.logger.error(f"[NomadRight] Audio playback failed: {exc}")
+            return False
+        finally:
+            with self._player_lock:
+                self._current_player = None
 
     # ── Main loop ────────────────────────────────────────────────────────────
 
     def run(self) -> None:
-        """Main application thread execution loop blocking on trigger button events."""
+        """
+        Main application thread execution loop blocking on trigger button
+        events.
+
+        UI modes (see also __init__'s mode/navigation state and ui_cb):
+          HOME               - idle/ready screen; both actions available:
+                                hold the trigger button for Voice
+                                Translation, or press the Camera icon for
+                                Document Scanner. This is the state at the
+                                top of every loop iteration unless a photo
+                                is still pending an answer.
+          VOICE TRANSLATION  - one voice-query turn, exactly the original
+                                pipeline (unchanged - see module docstring).
+          DOCUMENT SCANNER   - a photo is pending (or was just answered),
+                                entered via the Camera icon (_on_camera_pressed).
+        The Home icon (_on_home_pressed) is the single always-available
+        cancel/back/stop-audio control for both modes.
+        """
         self.board.clear_screen()
-        self.board.mode_text("Rights Navigator")
-        self.board.top_text("NomadRight")
-        self.board.bottom_text("Press & hold button to ask")
+        with self._screen_lock:
+            self.board.mode_text("HOME")
+            self.board.top_text("NomadRight")
+            self.board.bottom_text(self.HOME_HINT)
 
         while self.running:
             lang = self.settings.get("input_language", constants.DEFAULT_SOURCE_LANGUAGE)
             bridge_lang = self.settings.get("bridge_language", constants.DEFAULT_BRIDGE_LANGUAGE)
-            self.board.statusbar("[READY] Hold button to ask")
+            self._home_requested.clear()
+
+            with self._image_lock:
+                scanner_pending = self.pending_form_image is not None
+            if scanner_pending:
+                # A photo is still waiting on its follow-up question -
+                # Home hasn't cancelled it, so stay visibly in Document
+                # Scanner mode rather than reverting to the generic Home
+                # screen (_on_camera_pressed already set this text; this
+                # just keeps it correct if we looped back here via an
+                # ASR-empty retry - see step 1 below).
+                self._mode = "DOCUMENT SCANNER"
+                self.board.statusbar("[WAITING FOR QUERY] Ask about the form")
+            else:
+                self._mode = "HOME"
+                with self._screen_lock:
+                    self.board.mode_text("HOME")
+                    self.board.statusbar("[READY]")
+
             self.board.wait_for_trigger_button_down()
 
             if not self.running:
@@ -226,9 +443,10 @@ class NomadRightApplication(BaseApplication):
 
             try:
                 self.board.button_led(True)
-                self.board.statusbar("[LISTENING]")
-                self.board.top_text("")
-                self.board.bottom_text("")
+                with self._screen_lock:
+                    self.board.statusbar("[LISTENING]")
+                    self.board.top_text("")
+                    self.board.bottom_text("")
 
                 # Press & hold triggers the mic - matches the wired capacitive
                 # touch button on GPIO09 (see jetson_suno_sutra_expansion_pinout.png).
@@ -305,11 +523,17 @@ class NomadRightApplication(BaseApplication):
                         self.board.statusbar(f"[TRANSLATING] for official ({target_name})")
                         bridged_text = self.bridge.bridge_translate(self.last_answer_en, "EN", target_lang)
 
-                        self.board.top_text("VOICE BRIDGE")
-                        self.board.bottom_text(bridged_text[:100])
-                        self.board.statusbar("[SPEAKING]")
-                        self._play(self.bridge.speak(bridged_text, target_lang))
-                        self.board.statusbar("[READY] Hold button to ask")
+                        with self._screen_lock:
+                            self.board.top_text("VOICE BRIDGE")
+                            self.board.bottom_text(bridged_text[:100])
+                            self.board.statusbar("[SPEAKING] Home=stop")
+                        played_fully = self._play(self.bridge.speak(bridged_text, target_lang))
+                        if played_fully:
+                            with self._screen_lock:
+                                self.board.statusbar("[READY]")
+                                self.board.mode_text("HOME")
+                        # else: _on_home_pressed() already set the
+                        # "AUDIO STOPPED" screen - don't overwrite it here.
                         continue
 
                     # ── 4. Decision Layer: Intent -> Entity -> Rules/RAG -> Response ─
@@ -317,6 +541,7 @@ class NomadRightApplication(BaseApplication):
                     self.logger.info(f"[ASR] lang={lang} text='{native_query}'")
                     self.logger.info(f"[LANGUAGE] input={lang}")
                     self.logger.info(f"[TRANSLATION] EN: '{query_en}'")
+                    self.board.mode_text("VOICE TRANSLATION")
                     self.board.statusbar("[THINKING]")
                     response_pkg = self.workflow.process(
                         query_en, context_scheme_code=self.last_scheme_code
@@ -328,6 +553,16 @@ class NomadRightApplication(BaseApplication):
                     # EntityExtractor._CONTEXT_INHERITABLE_INTENTS).
                     if response_pkg.scheme_code:
                         self.last_scheme_code = response_pkg.scheme_code
+
+                # Home was pressed while the Qwen/RAG call above was in
+                # flight - it can't be safely aborted mid-request (see
+                # module docstring), but we can at least not speak an
+                # answer the worker already tried to back out of, and not
+                # clobber the "CANCELLED"/"AUDIO STOPPED" screen
+                # _on_home_pressed() already put up.
+                if self._home_requested.is_set():
+                    self.logger.info("[NomadRight] Home was pressed during processing - discarding this turn's answer.")
+                    continue
 
                 # ── 5. NMT: English answer -> worker's own language ─────────
                 self.board.statusbar("[TRANSLATING]")
@@ -341,20 +576,27 @@ class NomadRightApplication(BaseApplication):
                 # of the answer replacing the question the moment it arrives.
                 answer_line = f"{response_pkg.display_top_text}: {response_pkg.display_bottom_text}"
                 bottom_hint = f"{answer_line}  |  Say 'translate' for the officer"
-                self.board.bottom_text(bottom_hint[:180])
-
-                self.board.statusbar(f"[SPEAKING] {response_pkg.display_top_text}")
+                with self._screen_lock:
+                    self.board.bottom_text(bottom_hint[:180])
+                    self.board.statusbar(f"[SPEAKING] {response_pkg.display_top_text} Home=stop")
                 self.logger.info("[TTS] Synthesizing and playing speaker output")
-                self._play(self.bridge.speak(answer_native, lang))
+                played_fully = self._play(self.bridge.speak(answer_native, lang))
 
-                self.board.statusbar("[READY] Hold button to ask")
+                if played_fully:
+                    with self._screen_lock:
+                        self.board.statusbar("[READY] Hold=ask  Camera=scan  Home=menu")
+                        self.board.mode_text("HOME")
+                # else: _on_home_pressed() already put up the "AUDIO
+                # STOPPED" screen - don't overwrite it here. The answer
+                # text on bottom_text stays visible either way.
 
             except Exception as exc:
                 self.logger.error(f"[NomadRight] Error in application processing loop: {exc}", exc_info=True)
                 self.board.button_led(False)
-                self.board.statusbar("[ERROR]")
-                self.board.top_text("SYSTEM ERROR")
-                self.board.bottom_text("Please try again")
+                with self._screen_lock:
+                    self.board.statusbar("[ERROR]")
+                    self.board.top_text("SYSTEM ERROR")
+                    self.board.bottom_text("Please try again")
                 time.sleep(2.0)
 
     def stop(self) -> None:
