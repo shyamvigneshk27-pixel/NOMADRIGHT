@@ -1,0 +1,46 @@
+{
+  "scheme_id": "pm_vishwakarma",
+  "scheme_name": "PM Vishwakarma",
+  "scheme_type": "artisan_support",
+  "ministry_or_authority": "Ministry of MSME",
+  "description": "",
+  "objective": "",
+  "eligibility": [
+    "Artisan/craftsperson in one of 18 covered trades",
+    "18+",
+    "Self-employed/unorganised sector",
+    "One member per family",
+    "Government-service exclusion and other rules"
+  ],
+  "benefits": [
+    "Certificate/ID",
+    "Training",
+    "Toolkit",
+    "Collateral-free credit",
+    "Digital transaction incentive",
+    "Marketing support"
+  ],
+  "financial_benefits": [
+    "\u20b9500/day training stipend; \u20b915,000 toolkit grant; \u20b91L first loan + \u20b92L second loan; 5% beneficiary interest; \u20b91/eligible digital transaction up to 100/month"
+  ],
+  "application_process": {
+    "online": "UNKNOWN",
+    "offline": "UNKNOWN"
+  },
+  "portability": "UNKNOWN",
+  "state_specific_rules": "Benefits are staged/conditional",
+  "exceptions": [],
+  "limitations": [],
+  "faq": [],
+  "official_contacts": [],
+  "helpline_numbers": [],
+  "official_website": "UNKNOWN",
+  "official_sources": [
+    {
+      "url": "https://pmvishwakarma.gov.in/"
+    }
+  ],
+  "retrieved_date": "2026-08-13",
+  "verification_status": "OFFICIAL_SOURCE_SEEDED",
+  "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+}

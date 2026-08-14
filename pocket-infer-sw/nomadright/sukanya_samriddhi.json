@@ -1,0 +1,39 @@
+{
+  "scheme_id": "sukanya_samriddhi",
+  "scheme_name": "Sukanya Samriddhi Account (SSA)",
+  "scheme_type": "small_savings",
+  "ministry_or_authority": "Department of Economic Affairs / India Post",
+  "description": "",
+  "objective": "",
+  "eligibility": [
+    "Girl child below 10 years; guardian opens account subject to rules"
+  ],
+  "benefits": [
+    "Long-term savings",
+    "Tax benefits under applicable law",
+    "Maturity after 21 years subject to rules"
+  ],
+  "financial_benefits": [
+    "Minimum deposit \u20b9250; annual minimum \u20b9250; maximum \u20b91.5 lakh; interest rate must be stored with effective date"
+  ],
+  "application_process": {
+    "online": "UNKNOWN",
+    "offline": "UNKNOWN"
+  },
+  "portability": "UNKNOWN",
+  "state_specific_rules": "Interest rate is revised periodically",
+  "exceptions": [],
+  "limitations": [],
+  "faq": [],
+  "official_contacts": [],
+  "helpline_numbers": [],
+  "official_website": "UNKNOWN",
+  "official_sources": [
+    {
+      "url": "https://www.indiapost.gov.in/VAS/pages/pmodashboard/sukanyasamriddhiaccount.aspx"
+    }
+  ],
+  "retrieved_date": "2026-08-13",
+  "verification_status": "OFFICIAL_SOURCE_SEEDED",
+  "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+}

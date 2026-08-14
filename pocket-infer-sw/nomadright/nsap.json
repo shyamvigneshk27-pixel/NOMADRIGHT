@@ -1,0 +1,41 @@
+{
+  "scheme_id": "nsap",
+  "scheme_name": "National Social Assistance Programme (NSAP)",
+  "scheme_type": "social_assistance",
+  "ministry_or_authority": "Ministry of Rural Development",
+  "description": "",
+  "objective": "",
+  "eligibility": [
+    "BPL eligibility plus sub-scheme-specific age/condition rules"
+  ],
+  "benefits": [
+    "IGNOAPS",
+    "IGNWPS",
+    "IGNDPS",
+    "NFBS",
+    "Annapurna"
+  ],
+  "financial_benefits": [
+    "IGNOAPS \u20b9200/month 60\u201379, \u20b9500 80+; IGNWPS \u20b9300 40\u201379, \u20b9500 80+; IGNDPS \u20b9300, \u20b9500 at 80+; NFBS \u20b920k one-time; Annapurna 10kg foodgrains/month"
+  ],
+  "application_process": {
+    "online": "UNKNOWN",
+    "offline": "UNKNOWN"
+  },
+  "portability": "UNKNOWN",
+  "state_specific_rules": "States may add assistance from own resources",
+  "exceptions": [],
+  "limitations": [],
+  "faq": [],
+  "official_contacts": [],
+  "helpline_numbers": [],
+  "official_website": "UNKNOWN",
+  "official_sources": [
+    {
+      "url": "https://rural.gov.in/sites/default/files/NSAP_Guidelines_English.pdf"
+    }
+  ],
+  "retrieved_date": "2026-08-13",
+  "verification_status": "OFFICIAL_SOURCE_SEEDED",
+  "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+}

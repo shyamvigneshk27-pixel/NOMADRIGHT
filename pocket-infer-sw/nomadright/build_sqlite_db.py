@@ -11,7 +11,13 @@ import sqlite3
 
 DATASET_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(DATASET_DIR, "nomadright_kb.db")
-JSON_FILES = ["pds.json", "pmjay.json", "eshram_osh.json", "bocw.json", "mgnregs.json"]
+JSON_FILES = [
+    "pds.json", "pmjay.json", "eshram_osh.json", "bocw.json", "mgnregs.json",
+    "apy.json", "nsap.json", "pm_kisan.json", "pm_surya_ghar.json",
+    "pm_svanidhi.json", "pm_sym.json", "pm_vishwakarma.json", "pmay_g.json",
+    "pmfby.json", "pmjdy.json", "pmjjby.json", "pmmy.json", "pmsby.json",
+    "pmuy.json", "sukanya_samriddhi.json"
+]
 
 
 def create_schema(cursor: sqlite3.Cursor) -> None:
@@ -165,6 +171,8 @@ def ingest_scheme_data(cursor: sqlite3.Cursor, data: dict) -> None:
     """Ingests a single scheme JSON dictionary into the normalized database."""
     scheme_id = data["scheme_id"]
     port = data.get("portability", {})
+    if isinstance(port, str):
+        port = {"description": port}
 
     # 1. Ingest Master Scheme record
     cursor.execute("""
@@ -186,69 +194,120 @@ def ingest_scheme_data(cursor: sqlite3.Cursor, data: dict) -> None:
         port.get("partial_collection"),
         port.get("authentication_method"),
         port.get("description"),
-        data.get("last_updated"),
-        data.get("data_extraction_note")
+        data.get("last_updated") or data.get("retrieved_date") or "UNKNOWN",
+        data.get("data_extraction_note") or data.get("notes") or ""
     ))
 
     # 2. Ingest Eligibility
     for item in data.get("eligibility", []):
+        if isinstance(item, str):
+            criterion = item
+            source = "UNKNOWN"
+        else:
+            criterion = item.get("criterion")
+            source = item.get("source")
         cursor.execute("""
             INSERT INTO eligibility (scheme_id, criterion, source)
             VALUES (?, ?, ?)
-        """, (scheme_id, item.get("criterion"), item.get("source")))
+        """, (scheme_id, criterion, source))
 
     # 3. Ingest Beneficiary Categories
     for item in data.get("beneficiary_categories", []):
+        if isinstance(item, str):
+            category = item
+            desc = None
+            source = "UNKNOWN"
+        else:
+            category = item.get("category")
+            desc = item.get("description")
+            source = item.get("source")
         cursor.execute("""
             INSERT INTO beneficiary_categories (scheme_id, category, description, source)
             VALUES (?, ?, ?, ?)
-        """, (scheme_id, item.get("category"), item.get("description"), item.get("source")))
+        """, (scheme_id, category, desc, source))
 
     # 4. Ingest Documents
     for item in data.get("required_documents", []):
-        is_mand = 1 if item.get("mandatory") else 0
+        if isinstance(item, str):
+            doc = item
+            desc = None
+            is_mand = 0
+            source = "UNKNOWN"
+        else:
+            doc = item.get("document")
+            desc = item.get("description")
+            is_mand = 1 if item.get("mandatory") else 0
+            source = item.get("source")
         cursor.execute("""
             INSERT INTO documents (scheme_id, document_name, description, is_mandatory, source)
             VALUES (?, ?, ?, ?, ?)
-        """, (scheme_id, item.get("document"), item.get("description"), is_mand, item.get("source")))
+        """, (scheme_id, doc, desc, is_mand, source))
 
     # 5. Ingest General Benefits
     for item in data.get("benefits", []):
+        if isinstance(item, str):
+            benefit = item
+            source = "UNKNOWN"
+        else:
+            benefit = item.get("benefit")
+            source = item.get("source")
         cursor.execute("""
             INSERT INTO benefits (scheme_id, benefit_type, benefit_description, source)
             VALUES (?, 'General', ?, ?)
-        """, (scheme_id, item.get("benefit"), item.get("source")))
+        """, (scheme_id, benefit, source))
 
     # 6. Ingest Financial Benefits
     for item in data.get("financial_benefits", []):
-        details_val = item.get("details")
-        if isinstance(details_val, (dict, list)):
-            details_str = json.dumps(details_val)
+        if isinstance(item, str):
+            cursor.execute("""
+                INSERT INTO benefits (scheme_id, benefit_type, benefit_description, details, source, note)
+                VALUES (?, 'Financial', ?, NULL, 'UNKNOWN', NULL)
+            """, (scheme_id, item))
         else:
-            details_str = str(details_val) if details_val is not None else None
+            details_val = item.get("details")
+            if isinstance(details_val, (dict, list)):
+                details_str = json.dumps(details_val)
+            else:
+                details_str = str(details_val) if details_val is not None else None
 
-        cursor.execute("""
-            INSERT INTO benefits (scheme_id, benefit_type, benefit_description, details, source, note)
-            VALUES (?, 'Financial', ?, ?, ?, ?)
-        """, (
-            scheme_id,
-            item.get("benefit_type", "Financial Benefit"),
-            details_str,
-            item.get("source"),
-            item.get("note")
-        ))
+            cursor.execute("""
+                INSERT INTO benefits (scheme_id, benefit_type, benefit_description, details, source, note)
+                VALUES (?, 'Financial', ?, ?, ?, ?)
+            """, (
+                scheme_id,
+                item.get("benefit_type", "Financial Benefit"),
+                details_str,
+                item.get("source"),
+                item.get("note")
+            ))
 
     # 7. Ingest Application Process Steps
     app_proc = data.get("application_process", {})
-    for mode in ["online", "offline"]:
-        for step in app_proc.get(mode, []):
-            cursor.execute("""
-                INSERT INTO application_steps (scheme_id, mode, step_number, description, source)
-                VALUES (?, ?, ?, ?, ?)
-            """, (scheme_id, mode, step.get("step"), step.get("description"), step.get("source")))
+    if isinstance(app_proc, str):
+        cursor.execute("""
+            INSERT INTO application_steps (scheme_id, mode, step_number, description, source)
+            VALUES (?, 'offline', 1, ?, 'UNKNOWN')
+        """, (scheme_id, app_proc))
+    else:
+        for mode in ["online", "offline"]:
+            steps = app_proc.get(mode, [])
+            if isinstance(steps, str):
+                cursor.execute("""
+                    INSERT INTO application_steps (scheme_id, mode, step_number, description, source)
+                    VALUES (?, ?, 1, ?, 'UNKNOWN')
+                """, (scheme_id, mode, steps))
+            else:
+                for step in steps:
+                    cursor.execute("""
+                        INSERT INTO application_steps (scheme_id, mode, step_number, description, source)
+                        VALUES (?, ?, ?, ?, ?)
+                    """, (scheme_id, mode, step.get("step"), step.get("description"), step.get("source")))
 
     # 8. Ingest State Rules
-    for item in data.get("state_specific_rules", []):
+    state_rules = data.get("state_specific_rules", [])
+    if isinstance(state_rules, str):
+        state_rules = [{"note": state_rules, "source": "UNKNOWN"}]
+    for item in state_rules:
         cursor.execute("""
             INSERT INTO state_rules (scheme_id, rule_note, source)
             VALUES (?, ?, ?)
@@ -256,17 +315,29 @@ def ingest_scheme_data(cursor: sqlite3.Cursor, data: dict) -> None:
 
     # 9. Ingest Exceptions
     for item in data.get("exceptions", []):
+        if isinstance(item, str):
+            exc = item
+            source = "UNKNOWN"
+        else:
+            exc = item.get("exception")
+            source = item.get("source")
         cursor.execute("""
             INSERT INTO exceptions_and_limitations (scheme_id, entry_type, description, source)
             VALUES (?, 'exception', ?, ?)
-        """, (scheme_id, item.get("exception"), item.get("source")))
+        """, (scheme_id, exc, source))
 
     # 10. Ingest Limitations
     for item in data.get("limitations", []):
+        if isinstance(item, str):
+            lim = item
+            source = "UNKNOWN"
+        else:
+            lim = item.get("limitation")
+            source = item.get("source")
         cursor.execute("""
             INSERT INTO exceptions_and_limitations (scheme_id, entry_type, description, source)
             VALUES (?, 'limitation', ?, ?)
-        """, (scheme_id, item.get("limitation"), item.get("source")))
+        """, (scheme_id, lim, source))
 
     # 11. Ingest FAQ
     for item in data.get("faq", []):
@@ -284,11 +355,17 @@ def ingest_scheme_data(cursor: sqlite3.Cursor, data: dict) -> None:
 
     # 13. Ingest Official Contacts
     for item in data.get("official_contacts", []):
-        num_or_url = item.get("number") or item.get("url")
-        cursor.execute("""
-            INSERT INTO official_contacts (scheme_id, contact_type, number_or_url, description, source)
-            VALUES (?, ?, ?, ?, ?)
-        """, (scheme_id, item.get("type"), num_or_url, item.get("description"), item.get("source")))
+        if isinstance(item, str):
+            cursor.execute("""
+                INSERT INTO official_contacts (scheme_id, contact_type, number_or_url, description, source)
+                VALUES (?, 'Contact', ?, NULL, 'UNKNOWN')
+            """, (scheme_id, item))
+        else:
+            num_or_url = item.get("number") or item.get("url")
+            cursor.execute("""
+                INSERT INTO official_contacts (scheme_id, contact_type, number_or_url, description, source)
+                VALUES (?, ?, ?, ?, ?)
+            """, (scheme_id, item.get("type"), num_or_url, item.get("description"), item.get("source")))
 
     # 14. Ingest Sources
     for item in data.get("official_sources", []):

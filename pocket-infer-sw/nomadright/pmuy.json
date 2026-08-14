@@ -1,0 +1,40 @@
+{
+  "scheme_id": "pmuy",
+  "scheme_name": "Pradhan Mantri Ujjwala Yojana (PMUY)",
+  "scheme_type": "LPG_welfare",
+  "ministry_or_authority": "Ministry of Petroleum and Natural Gas",
+  "description": "",
+  "objective": "",
+  "eligibility": [
+    "Adult woman 18+",
+    "Poor household under current PMUY criteria",
+    "No other LPG connection in same household"
+  ],
+  "benefits": [
+    "Deposit-free LPG connection",
+    "First refill and stove/hotplate under official provision"
+  ],
+  "financial_benefits": [
+    "Official portal lists connection assistance; amounts can change and should be versioned"
+  ],
+  "application_process": {
+    "online": "UNKNOWN",
+    "offline": "UNKNOWN"
+  },
+  "portability": "UNKNOWN",
+  "state_specific_rules": "Distributor/state/district processes apply",
+  "exceptions": [],
+  "limitations": [],
+  "faq": [],
+  "official_contacts": [],
+  "helpline_numbers": [],
+  "official_website": "UNKNOWN",
+  "official_sources": [
+    {
+      "url": "https://www.pmuy.gov.in/index.aspx"
+    }
+  ],
+  "retrieved_date": "2026-08-13",
+  "verification_status": "OFFICIAL_SOURCE_SEEDED",
+  "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+}

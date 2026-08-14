@@ -1,0 +1,39 @@
+{
+  "scheme_id": "pmay_g",
+  "scheme_name": "Pradhan Mantri Awas Yojana \u2013 Gramin (PMAY-G)",
+  "scheme_type": "rural_housing",
+  "ministry_or_authority": "Ministry of Rural Development",
+  "description": "",
+  "objective": "",
+  "eligibility": [
+    "Eligible rural houseless/qualifying kutcha-house households subject to official selection/exclusion criteria"
+  ],
+  "benefits": [
+    "Pucca house assistance",
+    "Toilet/convergence assistance",
+    "MGNREGA labour convergence"
+  ],
+  "financial_benefits": [
+    "\u20b91.20 lakh plains; \u20b91.30 lakh hilly/NE/difficult/LWE areas; \u20b912,000 toilet convergence in cited official disclosure"
+  ],
+  "application_process": {
+    "online": "UNKNOWN",
+    "offline": "UNKNOWN"
+  },
+  "portability": "UNKNOWN",
+  "state_specific_rules": "Beneficiary selection and implementation are state/local",
+  "exceptions": [],
+  "limitations": [],
+  "faq": [],
+  "official_contacts": [],
+  "helpline_numbers": [],
+  "official_website": "UNKNOWN",
+  "official_sources": [
+    {
+      "url": "https://rural.gov.in/sites/default/files/PMAY-G_Suo_moto_disclosure_27012022_0.pdf"
+    }
+  ],
+  "retrieved_date": "2026-08-13",
+  "verification_status": "OFFICIAL_SOURCE_SEEDED",
+  "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+}

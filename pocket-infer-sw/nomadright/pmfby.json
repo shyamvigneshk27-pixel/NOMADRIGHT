@@ -1,0 +1,38 @@
+{
+  "scheme_id": "pmfby",
+  "scheme_name": "Pradhan Mantri Fasal Bima Yojana (PMFBY)",
+  "scheme_type": "crop_insurance",
+  "ministry_or_authority": "Ministry of Agriculture & Farmers Welfare",
+  "description": "",
+  "objective": "",
+  "eligibility": [
+    "Farmers including sharecroppers/tenant farmers growing notified crops in notified areas, subject to insurable interest and rules"
+  ],
+  "benefits": [
+    "Crop-loss insurance for notified risks",
+    "Standing-crop, localized calamity and post-harvest coverage under guidelines"
+  ],
+  "financial_benefits": [
+    "Farmer premium max 2% Kharif food/oilseed; 1.5% Rabi food/oilseed; 5% annual commercial/horticultural"
+  ],
+  "application_process": {
+    "online": "UNKNOWN",
+    "offline": "UNKNOWN"
+  },
+  "portability": "UNKNOWN",
+  "state_specific_rules": "Crop, area, season and dates are state/notification specific",
+  "exceptions": [],
+  "limitations": [],
+  "faq": [],
+  "official_contacts": [],
+  "helpline_numbers": [],
+  "official_website": "UNKNOWN",
+  "official_sources": [
+    {
+      "url": "https://pmfby.gov.in/pdf/Oprational_Guidelines.pdf"
+    }
+  ],
+  "retrieved_date": "2026-08-13",
+  "verification_status": "OFFICIAL_SOURCE_SEEDED",
+  "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+}
