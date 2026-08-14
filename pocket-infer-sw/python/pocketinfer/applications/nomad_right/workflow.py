@@ -81,6 +81,9 @@ class WorkflowController(IWorkflowController):
         # HTTP client. Ollama only loads qwen2.5vl:3b into memory on the
         # first actual answer_text()/answer_vision() call. See qwen_client.py.
         self.qwen_client = QwenClient()
+        
+        # Preload High-Performance L1 DB Cache
+        self.db_access.preload_cache()
 
     # ──────────────────────────────────────────────────────────────────────
     # Main pipeline
