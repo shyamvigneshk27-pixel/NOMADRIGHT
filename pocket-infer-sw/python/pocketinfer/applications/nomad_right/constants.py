@@ -51,7 +51,7 @@ MAX_VOICE_WORDS = 60
 # BHASHINI service itself, and always falls back to the unmodified audio if
 # ffmpeg is unavailable or fails, so this can never break playback.
 TTS_VOICE_STYLE_ENABLED = True
-TTS_PITCH_FACTOR = 0.85   # <1.0 = lower pitch (more male-leaning)
+TTS_PITCH_FACTOR = 0.50   # <1.0 = lower pitch (more male-leaning)
 # asetrate-based pitch shifting stretches duration by 1/TTS_PITCH_FACTOR as a
 # side effect (lowering pitch this way inherently slows playback down) - the
 # tempo factor must first cancel that out, then add extra on top for a
