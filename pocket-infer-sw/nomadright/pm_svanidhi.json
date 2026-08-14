@@ -1,0 +1,37 @@
+{
+  "scheme_id": "pm_svanidhi",
+  "scheme_name": "PM SVANidhi",
+  "scheme_type": "street_vendor_microcredit",
+  "ministry_or_authority": "Ministry of Housing & Urban Affairs",
+  "description": "",
+  "objective": "",
+  "eligibility": [
+    "Eligible street vendors under official identification/guidelines"
+  ],
+  "benefits": [
+    "Working-capital credit and related incentives/support"
+  ],
+  "financial_benefits": [
+    "2022 guideline: \u20b910k/\u20b920k/\u20b950k tranches; MUST revalidate against current 2026 Loan Operations Guidelines before production"
+  ],
+  "application_process": {
+    "online": "UNKNOWN",
+    "offline": "UNKNOWN"
+  },
+  "portability": "UNKNOWN",
+  "state_specific_rules": "ULB/vendor identification and lender rules",
+  "exceptions": [],
+  "limitations": [],
+  "faq": [],
+  "official_contacts": [],
+  "helpline_numbers": [],
+  "official_website": "UNKNOWN",
+  "official_sources": [
+    {
+      "url": "https://www.mohua.gov.in/documents/guidelines/guidelines-pradhan-mantri-street-vendors-atmanirbhar-nidhi-pm-svanidhi-scheme-UTM0EDNtQWa?pageTitle=Guidelines-%E2%80%93-Pradhan-Mantri-Street-Vendor%27s-AtmaNirbhar-Nidhi-%28PM-SVANidhi%29-Scheme"
+    }
+  ],
+  "retrieved_date": "2026-08-13",
+  "verification_status": "OFFICIAL_SOURCE_SEEDED",
+  "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+}

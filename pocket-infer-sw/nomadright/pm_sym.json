@@ -1,0 +1,40 @@
+{
+  "scheme_id": "pm_sym",
+  "scheme_name": "Pradhan Mantri Shram Yogi Maandhan (PM-SYM)",
+  "scheme_type": "unorganised_worker_pension",
+  "ministry_or_authority": "Ministry of Labour & Employment",
+  "description": "",
+  "objective": "",
+  "eligibility": [
+    "Unorganised worker",
+    "Entry age 18\u201340",
+    "Monthly income up to \u20b915,000",
+    "Official exclusion rules apply"
+  ],
+  "benefits": [
+    "Assured pension after age 60"
+  ],
+  "financial_benefits": [
+    "\u20b93,000 monthly assured pension after 60"
+  ],
+  "application_process": {
+    "online": "UNKNOWN",
+    "offline": "UNKNOWN"
+  },
+  "portability": "UNKNOWN",
+  "state_specific_rules": "Contribution-based; exact contribution must use official age-wise schedule",
+  "exceptions": [],
+  "limitations": [],
+  "faq": [],
+  "official_contacts": [],
+  "helpline_numbers": [],
+  "official_website": "UNKNOWN",
+  "official_sources": [
+    {
+      "url": "https://maandhan.in/show_content.php?lang=1&level=1&lid=28&ls_id=28&page=6"
+    }
+  ],
+  "retrieved_date": "2026-08-13",
+  "verification_status": "OFFICIAL_SOURCE_SEEDED",
+  "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+}

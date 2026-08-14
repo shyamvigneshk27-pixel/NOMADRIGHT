@@ -1,0 +1,39 @@
+{
+  "scheme_id": "pmsby",
+  "scheme_name": "Pradhan Mantri Suraksha Bima Yojana (PMSBY)",
+  "scheme_type": "accident_insurance",
+  "ministry_or_authority": "Department of Financial Services",
+  "description": "",
+  "objective": "",
+  "eligibility": [
+    "Participating bank/post-office account holder",
+    "Age 18\u201370"
+  ],
+  "benefits": [
+    "\u20b92 lakh death/permanent total disability",
+    "\u20b91 lakh specified partial disability"
+  ],
+  "financial_benefits": [
+    "\u20b920 annual premium"
+  ],
+  "application_process": {
+    "online": "UNKNOWN",
+    "offline": "UNKNOWN"
+  },
+  "portability": "UNKNOWN",
+  "state_specific_rules": "Multiple-account and renewal rules apply",
+  "exceptions": [],
+  "limitations": [],
+  "faq": [],
+  "official_contacts": [],
+  "helpline_numbers": [],
+  "official_website": "UNKNOWN",
+  "official_sources": [
+    {
+      "url": "https://www.financialservices.gov.in/index.php/pradhan-mantri-suraksha-bima-yojana-pmsby"
+    }
+  ],
+  "retrieved_date": "2026-08-13",
+  "verification_status": "OFFICIAL_SOURCE_SEEDED",
+  "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+}

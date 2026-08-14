@@ -1,0 +1,790 @@
+{
+  "dataset_id": "nomadright_government_schemes_seed20",
+  "version": "2026-08-13",
+  "count": 20,
+  "schemes": [
+    {
+      "scheme_id": "apy",
+      "scheme_name": "Atal Pension Yojana (APY)",
+      "scheme_type": "pension",
+      "ministry_or_authority": "PFRDA",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Indian citizen",
+        "Age 18–40",
+        "Savings bank/post-office account",
+        "New income-tax payers ineligible from 1 Oct 2022"
+      ],
+      "benefits": [
+        "Guaranteed minimum pension after 60",
+        "Spouse pension",
+        "Nominee pension wealth under rules"
+      ],
+      "financial_benefits": [
+        "₹1,000/₹2,000/₹3,000/₹4,000/₹5,000 monthly pension options"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "Contribution schedule depends on age and selected pension",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://www.pfrda.org.in/web/pfrda/schemes/atal-pension-yojana-apy"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "bocw",
+      "scheme_name": "Building and Other Construction Workers (BOCW) Welfare Schemes",
+      "scheme_type": "state_board_welfare",
+      "ministry_or_authority": "Ministry of Labour & Employment",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Eligible construction workers registered with applicable State/UT Welfare Board"
+      ],
+      "benefits": [
+        "Social-security/welfare benefits such as medical, education and accident/death assistance depending on Board"
+      ],
+      "financial_benefits": [
+        "UNKNOWN nationally; benefits/amounts must be modeled per State/UT Board"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "MANDATORY state-specific modeling",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://apps.labour.gov.in/bocw/"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "eshram",
+      "scheme_name": "e-Shram",
+      "scheme_type": "worker_registration_platform",
+      "ministry_or_authority": "Ministry of Labour & Employment",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Unorganised workers under official registration criteria"
+      ],
+      "benefits": [
+        "e-Shram registration/card",
+        "One-stop facilitation for linked social-security/employment services"
+      ],
+      "financial_benefits": [
+        "No universal cash benefit should be attributed to registration alone"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "Linked schemes have their own eligibility rules",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://eshram.gov.in/One-Stop-Solution"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "mgnregs",
+      "scheme_name": "MGNREGS / MGNREGA",
+      "scheme_type": "employment_guarantee",
+      "ministry_or_authority": "Ministry of Rural Development",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Rural households whose adult members volunteer for unskilled manual work"
+      ],
+      "benefits": [
+        "Legal guarantee of up to 100 days wage employment per rural household/year",
+        "Rural asset creation"
+      ],
+      "financial_benefits": [
+        "Wage rate varies by State/UT and financial year"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "State wage rates and implementation vary",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://nrega.nic.in/"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "nsap",
+      "scheme_name": "National Social Assistance Programme (NSAP)",
+      "scheme_type": "social_assistance",
+      "ministry_or_authority": "Ministry of Rural Development",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "BPL eligibility plus sub-scheme-specific age/condition rules"
+      ],
+      "benefits": [
+        "IGNOAPS",
+        "IGNWPS",
+        "IGNDPS",
+        "NFBS",
+        "Annapurna"
+      ],
+      "financial_benefits": [
+        "IGNOAPS ₹200/month 60–79, ₹500 80+; IGNWPS ₹300 40–79, ₹500 80+; IGNDPS ₹300, ₹500 at 80+; NFBS ₹20k one-time; Annapurna 10kg foodgrains/month"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "States may add assistance from own resources",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://rural.gov.in/sites/default/files/NSAP_Guidelines_English.pdf"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "onorc_pds",
+      "scheme_name": "One Nation One Ration Card (ONORC) / PDS",
+      "scheme_type": "portability_plan",
+      "ministry_or_authority": "DFPD",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "NFSA AAY/PHH beneficiaries subject to state/NFSA rules"
+      ],
+      "benefits": [
+        "Nationwide portability of entitled foodgrains via ePoS FPS",
+        "Same existing ration card can be used under ONORC"
+      ],
+      "financial_benefits": [
+        "No separate cost/new ration card for portability per DFPD FAQ"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "State/UT NFSA rules remain relevant",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://dfpd.gov.in/distribution-of-food-grains/en"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "pm_kisan",
+      "scheme_name": "Pradhan Mantri Kisan Samman Nidhi (PM-KISAN)",
+      "scheme_type": "farmer_income_support",
+      "ministry_or_authority": "Ministry of Agriculture & Farmers Welfare",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Eligible landholding farmer families subject to official exclusions"
+      ],
+      "benefits": [
+        "Direct income support"
+      ],
+      "financial_benefits": [
+        "₹6,000/year per eligible farmer family in three ₹2,000 instalments"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "State/UT land records and verification are used",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://pmkisan.gov.in/Documents/FAQPMKISAN.pdf"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "pm_surya_ghar",
+      "scheme_name": "Pradhan Mantri Surya Ghar: Muft Bijli Yojana",
+      "scheme_type": "rooftop_solar",
+      "ministry_or_authority": "Ministry of New and Renewable Energy",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Eligible residential electricity consumers under official portal/discom rules"
+      ],
+      "benefits": [
+        "Residential rooftop solar subsidy",
+        "Electricity-cost savings from solar generation"
+      ],
+      "financial_benefits": [
+        "Official PIB description: ₹30,000/kW up to 2kW; ₹18,000/kW for additional capacity up to 3kW; total subsidy capped at ₹78,000 for systems above 3kW"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "Discom/net-metering and technical rules apply",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2012168&lang=2&reg=3"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "pm_svanidhi",
+      "scheme_name": "PM SVANidhi",
+      "scheme_type": "street_vendor_microcredit",
+      "ministry_or_authority": "Ministry of Housing & Urban Affairs",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Eligible street vendors under official identification/guidelines"
+      ],
+      "benefits": [
+        "Working-capital credit and related incentives/support"
+      ],
+      "financial_benefits": [
+        "2022 guideline: ₹10k/₹20k/₹50k tranches; MUST revalidate against current 2026 Loan Operations Guidelines before production"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "ULB/vendor identification and lender rules",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://www.mohua.gov.in/documents/guidelines/guidelines-pradhan-mantri-street-vendors-atmanirbhar-nidhi-pm-svanidhi-scheme-UTM0EDNtQWa?pageTitle=Guidelines-%E2%80%93-Pradhan-Mantri-Street-Vendor%27s-AtmaNirbhar-Nidhi-%28PM-SVANidhi%29-Scheme"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "pm_sym",
+      "scheme_name": "Pradhan Mantri Shram Yogi Maandhan (PM-SYM)",
+      "scheme_type": "unorganised_worker_pension",
+      "ministry_or_authority": "Ministry of Labour & Employment",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Unorganised worker",
+        "Entry age 18–40",
+        "Monthly income up to ₹15,000",
+        "Official exclusion rules apply"
+      ],
+      "benefits": [
+        "Assured pension after age 60"
+      ],
+      "financial_benefits": [
+        "₹3,000 monthly assured pension after 60"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "Contribution-based; exact contribution must use official age-wise schedule",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://maandhan.in/show_content.php?lang=1&level=1&lid=28&ls_id=28&page=6"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "pm_vishwakarma",
+      "scheme_name": "PM Vishwakarma",
+      "scheme_type": "artisan_support",
+      "ministry_or_authority": "Ministry of MSME",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Artisan/craftsperson in one of 18 covered trades",
+        "18+",
+        "Self-employed/unorganised sector",
+        "One member per family",
+        "Government-service exclusion and other rules"
+      ],
+      "benefits": [
+        "Certificate/ID",
+        "Training",
+        "Toolkit",
+        "Collateral-free credit",
+        "Digital transaction incentive",
+        "Marketing support"
+      ],
+      "financial_benefits": [
+        "₹500/day training stipend; ₹15,000 toolkit grant; ₹1L first loan + ₹2L second loan; 5% beneficiary interest; ₹1/eligible digital transaction up to 100/month"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "Benefits are staged/conditional",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://pmvishwakarma.gov.in/"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "pmay_g",
+      "scheme_name": "Pradhan Mantri Awas Yojana – Gramin (PMAY-G)",
+      "scheme_type": "rural_housing",
+      "ministry_or_authority": "Ministry of Rural Development",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Eligible rural houseless/qualifying kutcha-house households subject to official selection/exclusion criteria"
+      ],
+      "benefits": [
+        "Pucca house assistance",
+        "Toilet/convergence assistance",
+        "MGNREGA labour convergence"
+      ],
+      "financial_benefits": [
+        "₹1.20 lakh plains; ₹1.30 lakh hilly/NE/difficult/LWE areas; ₹12,000 toilet convergence in cited official disclosure"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "Beneficiary selection and implementation are state/local",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://rural.gov.in/sites/default/files/PMAY-G_Suo_moto_disclosure_27012022_0.pdf"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "pmfby",
+      "scheme_name": "Pradhan Mantri Fasal Bima Yojana (PMFBY)",
+      "scheme_type": "crop_insurance",
+      "ministry_or_authority": "Ministry of Agriculture & Farmers Welfare",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Farmers including sharecroppers/tenant farmers growing notified crops in notified areas, subject to insurable interest and rules"
+      ],
+      "benefits": [
+        "Crop-loss insurance for notified risks",
+        "Standing-crop, localized calamity and post-harvest coverage under guidelines"
+      ],
+      "financial_benefits": [
+        "Farmer premium max 2% Kharif food/oilseed; 1.5% Rabi food/oilseed; 5% annual commercial/horticultural"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "Crop, area, season and dates are state/notification specific",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://pmfby.gov.in/pdf/Oprational_Guidelines.pdf"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "pmjay",
+      "scheme_name": "Ayushman Bharat – PM-JAY",
+      "scheme_type": "health_assurance",
+      "ministry_or_authority": "National Health Authority",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Eligible entitled PM-JAY beneficiaries; identification/entitlement rules apply"
+      ],
+      "benefits": [
+        "Cashless/paperless secondary and tertiary hospitalization",
+        "Portable benefits at empanelled hospitals"
+      ],
+      "financial_benefits": [
+        "Up to ₹5 lakh per family per year for covered hospitalization"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "State implementation/convergence can vary",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://nha.gov.in/img/pmjay-files/STG-Manual-Booklet-final.pdf"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "pmjdy",
+      "scheme_name": "Pradhan Mantri Jan-Dhan Yojana (PMJDY)",
+      "scheme_type": "financial_inclusion",
+      "ministry_or_authority": "Department of Financial Services",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Persons without another basic savings bank account, subject to KYC"
+      ],
+      "benefits": [
+        "Basic savings account",
+        "No minimum balance",
+        "RuPay card",
+        "Eligible accident cover",
+        "Eligible overdraft",
+        "DBT access"
+      ],
+      "financial_benefits": [
+        "Eligible overdraft up to ₹10,000; RuPay accident cover subject to rules"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "Bank-specific KYC/process",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://pmjdy.gov.in/scheme"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "pmjjby",
+      "scheme_name": "Pradhan Mantri Jeevan Jyoti Bima Yojana (PMJJBY)",
+      "scheme_type": "life_insurance",
+      "ministry_or_authority": "Department of Financial Services",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Participating bank/post-office account holder",
+        "Age 18–50"
+      ],
+      "benefits": [
+        "₹2 lakh life cover for death due to any cause"
+      ],
+      "financial_benefits": [
+        "₹436 annual premium; pro-rata first enrolment rules apply"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "30-day lien period for non-accidental death for first-time enrolment",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://www.financialservices.gov.in/pmjjby"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "pmmy",
+      "scheme_name": "Pradhan Mantri MUDRA Yojana (PMMY)",
+      "scheme_type": "microenterprise_credit",
+      "ministry_or_authority": "Department of Financial Services",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Eligible micro enterprises and permitted activities subject to lender rules"
+      ],
+      "benefits": [
+        "Collateral-free institutional credit",
+        "Term loan and working capital"
+      ],
+      "financial_benefits": [
+        "Shishu ≤₹50k; Kishore >₹50k–₹5L; Tarun >₹5L–₹10L; Tarun Plus >₹10L–₹20L for eligible prior-Tarun borrowers"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "Loan sanction depends on lender assessment",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://www.financialservices.gov.in/pradhan-mantri-mudra-yojana-pmmy"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "pmsby",
+      "scheme_name": "Pradhan Mantri Suraksha Bima Yojana (PMSBY)",
+      "scheme_type": "accident_insurance",
+      "ministry_or_authority": "Department of Financial Services",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Participating bank/post-office account holder",
+        "Age 18–70"
+      ],
+      "benefits": [
+        "₹2 lakh death/permanent total disability",
+        "₹1 lakh specified partial disability"
+      ],
+      "financial_benefits": [
+        "₹20 annual premium"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "Multiple-account and renewal rules apply",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://www.financialservices.gov.in/index.php/pradhan-mantri-suraksha-bima-yojana-pmsby"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "pmuy",
+      "scheme_name": "Pradhan Mantri Ujjwala Yojana (PMUY)",
+      "scheme_type": "LPG_welfare",
+      "ministry_or_authority": "Ministry of Petroleum and Natural Gas",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Adult woman 18+",
+        "Poor household under current PMUY criteria",
+        "No other LPG connection in same household"
+      ],
+      "benefits": [
+        "Deposit-free LPG connection",
+        "First refill and stove/hotplate under official provision"
+      ],
+      "financial_benefits": [
+        "Official portal lists connection assistance; amounts can change and should be versioned"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "Distributor/state/district processes apply",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://www.pmuy.gov.in/index.aspx"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    },
+    {
+      "scheme_id": "sukanya_samriddhi",
+      "scheme_name": "Sukanya Samriddhi Account (SSA)",
+      "scheme_type": "small_savings",
+      "ministry_or_authority": "Department of Economic Affairs / India Post",
+      "description": "",
+      "objective": "",
+      "eligibility": [
+        "Girl child below 10 years; guardian opens account subject to rules"
+      ],
+      "benefits": [
+        "Long-term savings",
+        "Tax benefits under applicable law",
+        "Maturity after 21 years subject to rules"
+      ],
+      "financial_benefits": [
+        "Minimum deposit ₹250; annual minimum ₹250; maximum ₹1.5 lakh; interest rate must be stored with effective date"
+      ],
+      "application_process": {
+        "online": "UNKNOWN",
+        "offline": "UNKNOWN"
+      },
+      "portability": "UNKNOWN",
+      "state_specific_rules": "Interest rate is revised periodically",
+      "exceptions": [],
+      "limitations": [],
+      "faq": [],
+      "official_contacts": [],
+      "helpline_numbers": [],
+      "official_website": "UNKNOWN",
+      "official_sources": [
+        {
+          "url": "https://www.indiapost.gov.in/VAS/pages/pmodashboard/sukanyasamriddhiaccount.aspx"
+        }
+      ],
+      "retrieved_date": "2026-08-13",
+      "verification_status": "OFFICIAL_SOURCE_SEEDED",
+      "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+    }
+  ]
+}

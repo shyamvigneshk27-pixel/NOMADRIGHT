@@ -1,0 +1,38 @@
+{
+  "scheme_id": "pmjjby",
+  "scheme_name": "Pradhan Mantri Jeevan Jyoti Bima Yojana (PMJJBY)",
+  "scheme_type": "life_insurance",
+  "ministry_or_authority": "Department of Financial Services",
+  "description": "",
+  "objective": "",
+  "eligibility": [
+    "Participating bank/post-office account holder",
+    "Age 18\u201350"
+  ],
+  "benefits": [
+    "\u20b92 lakh life cover for death due to any cause"
+  ],
+  "financial_benefits": [
+    "\u20b9436 annual premium; pro-rata first enrolment rules apply"
+  ],
+  "application_process": {
+    "online": "UNKNOWN",
+    "offline": "UNKNOWN"
+  },
+  "portability": "UNKNOWN",
+  "state_specific_rules": "30-day lien period for non-accidental death for first-time enrolment",
+  "exceptions": [],
+  "limitations": [],
+  "faq": [],
+  "official_contacts": [],
+  "helpline_numbers": [],
+  "official_website": "UNKNOWN",
+  "official_sources": [
+    {
+      "url": "https://www.financialservices.gov.in/pmjjby"
+    }
+  ],
+  "retrieved_date": "2026-08-13",
+  "verification_status": "OFFICIAL_SOURCE_SEEDED",
+  "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+}

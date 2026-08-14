@@ -1,0 +1,38 @@
+{
+  "scheme_id": "pm_surya_ghar",
+  "scheme_name": "Pradhan Mantri Surya Ghar: Muft Bijli Yojana",
+  "scheme_type": "rooftop_solar",
+  "ministry_or_authority": "Ministry of New and Renewable Energy",
+  "description": "",
+  "objective": "",
+  "eligibility": [
+    "Eligible residential electricity consumers under official portal/discom rules"
+  ],
+  "benefits": [
+    "Residential rooftop solar subsidy",
+    "Electricity-cost savings from solar generation"
+  ],
+  "financial_benefits": [
+    "Official PIB description: \u20b930,000/kW up to 2kW; \u20b918,000/kW for additional capacity up to 3kW; total subsidy capped at \u20b978,000 for systems above 3kW"
+  ],
+  "application_process": {
+    "online": "UNKNOWN",
+    "offline": "UNKNOWN"
+  },
+  "portability": "UNKNOWN",
+  "state_specific_rules": "Discom/net-metering and technical rules apply",
+  "exceptions": [],
+  "limitations": [],
+  "faq": [],
+  "official_contacts": [],
+  "helpline_numbers": [],
+  "official_website": "UNKNOWN",
+  "official_sources": [
+    {
+      "url": "https://www.pib.gov.in/PressReleasePage.aspx?PRID=2012168&lang=2&reg=3"
+    }
+  ],
+  "retrieved_date": "2026-08-13",
+  "verification_status": "OFFICIAL_SOURCE_SEEDED",
+  "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+}

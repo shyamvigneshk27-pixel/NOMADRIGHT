@@ -1,0 +1,38 @@
+{
+  "scheme_id": "pmmy",
+  "scheme_name": "Pradhan Mantri MUDRA Yojana (PMMY)",
+  "scheme_type": "microenterprise_credit",
+  "ministry_or_authority": "Department of Financial Services",
+  "description": "",
+  "objective": "",
+  "eligibility": [
+    "Eligible micro enterprises and permitted activities subject to lender rules"
+  ],
+  "benefits": [
+    "Collateral-free institutional credit",
+    "Term loan and working capital"
+  ],
+  "financial_benefits": [
+    "Shishu \u2264\u20b950k; Kishore >\u20b950k\u2013\u20b95L; Tarun >\u20b95L\u2013\u20b910L; Tarun Plus >\u20b910L\u2013\u20b920L for eligible prior-Tarun borrowers"
+  ],
+  "application_process": {
+    "online": "UNKNOWN",
+    "offline": "UNKNOWN"
+  },
+  "portability": "UNKNOWN",
+  "state_specific_rules": "Loan sanction depends on lender assessment",
+  "exceptions": [],
+  "limitations": [],
+  "faq": [],
+  "official_contacts": [],
+  "helpline_numbers": [],
+  "official_website": "UNKNOWN",
+  "official_sources": [
+    {
+      "url": "https://www.financialservices.gov.in/pradhan-mantri-mudra-yojana-pmmy"
+    }
+  ],
+  "retrieved_date": "2026-08-13",
+  "verification_status": "OFFICIAL_SOURCE_SEEDED",
+  "notes": "Compact seed record. Preserve UNKNOWNs and verify against the cited official source before production import."
+}
