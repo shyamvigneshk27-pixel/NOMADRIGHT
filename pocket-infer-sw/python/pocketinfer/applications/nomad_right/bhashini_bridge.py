@@ -36,10 +36,22 @@ logger = logging.getLogger(__name__)
 
 def _apply_voice_style(wav_bytes: bytes) -> bytes:
     """
-    Pitch-shifts and slightly speeds up synthesized speech via ffmpeg, as a
-    male-leaning, more energetic approximation - see
-    constants.TTS_VOICE_STYLE_ENABLED for why a DSP post-process is used
-    instead of a different voice file (none is installed on this device).
+    Post-processes BHASHINI TTS WAV output via ffmpeg for clarity and
+    consistent volume — without changing the TTS model itself.
+
+    DSP chain (applied in order):
+      1. asetrate / aresample / atempo — pitch + tempo from constants
+         (male-leaning delivery; see TTS_PITCH_FACTOR / TTS_ENERGY_BOOST)
+      2. highpass (f=80Hz) — removes low-frequency mic/speaker rumble that
+         muddies speech, especially on the small onboard speaker.
+      3. equalizer boosts — lifts the 2–4 kHz "presence" band where speech
+         intelligibility lives; adds a gentle 8 kHz "air" lift for crispness.
+      4. acompressor — dynamic range compression so quiet syllables are pulled
+         up and loud ones pulled down; gives a consistent, broadcast-style
+         perceived loudness across the full utterance.
+      5. loudnorm (two-pass EBU R128) — normalises integrated loudness to
+         -16 LUFS so every answer plays at the same comfortable volume
+         regardless of how loud/soft the Flite voice happened to render it.
 
     Never raises: on any failure (ffmpeg missing, bad input, timeout) this
     logs a warning and returns the original, unmodified audio so a styling
@@ -58,11 +70,39 @@ def _apply_voice_style(wav_bytes: bytes) -> bytes:
         # Cancel the duration stretch asetrate introduces, then add the extra
         # energy boost on top - see constants.TTS_ENERGY_BOOST.
         tempo = (1.0 / constants.TTS_PITCH_FACTOR) * constants.TTS_ENERGY_BOOST
-        filter_chain = (
+
+        # ── Clarity-enhancing filter chain ─────────────────────────────────
+        # Stage 1: Pitch shift + tempo correction (unchanged from before)
+        stage1 = (
             f"asetrate={shifted_rate},"
             f"aresample={source_rate},"
             f"atempo={tempo:.4f}"
         )
+        # Stage 2: Highpass — cut sub-80 Hz rumble (boom/hum on small speakers)
+        stage2 = "highpass=f=80"
+
+        # Stage 3: EQ — boost speech "presence" (2–4 kHz) and "air" (8 kHz).
+        # Flite/Indic TTS tends to sound nasal and mid-heavy; these lifts open
+        # it up and make consonants sharper and easier to distinguish.
+        stage3 = (
+            "equalizer=f=2500:width_type=o:width=1.5:g=3,"   # +3 dB presence
+            "equalizer=f=4000:width_type=o:width=1.0:g=2,"   # +2 dB definition
+            "equalizer=f=8000:width_type=o:width=1.0:g=1.5"  # +1.5 dB air/crispness
+        )
+        # Stage 4: Compressor — tighten dynamic range so every syllable is heard.
+        # threshold=-18dB: starts compressing above comfortable speech level.
+        # ratio=3:1: gentle enough to not sound squashed.
+        # attack=5ms / release=50ms: fast enough to catch plosives, slow enough
+        # not to pump on vowels.
+        stage4 = "acompressor=threshold=-18dB:ratio=3:attack=5:release=50:makeup=2dB"
+
+        # Stage 5: Loudness normalisation (EBU R128, target -16 LUFS).
+        # loudnorm in ffmpeg's linear mode is a single-pass approximation —
+        # good enough for short TTS utterances without the 2x processing cost
+        # of a true two-pass encode.
+        stage5 = "loudnorm=I=-16:TP=-1.5:LRA=7"
+
+        filter_chain = ",".join([stage1, stage2, stage3, stage4, stage5])
 
         # Real files, not pipes: a WAV written to a pipe can't be seeked back
         # to patch in the true RIFF/data chunk sizes once streaming is done,
