@@ -30,10 +30,13 @@ def check_and_start_service(service_name: str) -> bool:
 def app_needs_ollama(app_name: str) -> bool:
     """
     Returns True if the target application declares an 'ollama' model dependency
-    in its @RegisterApplication METADATA. Apps that never call Ollama (e.g.
-    NomadRight, which is BHASHINI-only) don't need it started or pre-warmed -
-    doing so anyway wastes ~2.4GB of RAM held forever (keep_alive=-1) and has
-    been observed to starve other processes on this 8GB device.
+    in its @RegisterApplication METADATA. NomadRight does declare one (see
+    applications/nomad_right/app.py's METADATA["models"]["ollama"] - it uses
+    Qwen for both the RAG-LLM fallback and camera vision queries), so this
+    starts/pre-warms Ollama for it. Apps that never call Ollama at all don't
+    need it started or pre-warmed - doing so anyway wastes ~2.4GB of RAM held
+    forever (keep_alive=-1) and has been observed to starve other processes
+    on this 8GB device.
     """
     app_cls = ApplicationRegistry.get_application(app_name)
     if app_cls is None:
@@ -101,8 +104,74 @@ def clean_system_caches():
         pass
 
 
+def _process_is_the_systemd_service() -> bool:
+    """
+    True when THIS process was started by systemd as pocketinfer.service.
+
+    stop_conflicting_instances() below exists to release hardware locks
+    (GPIO / SPI display / ALSA) held by a *background* copy of the app before
+    an interactive run grabs them. But pocketinfer.service's own ExecStart is
+    this very module (the unit runs .../bin/pocketinfer-service, whose entry
+    point is run_master), so without this check the service unconditionally
+    ran `systemctl stop pocketinfer.service` against ITSELF a couple of
+    seconds into every start and got SIGTERMed before ever reaching
+    service_main() - i.e. the application never launched from the service at
+    all, only from a manual terminal run (where the unit genuinely is
+    inactive and stopping it is a real no-op). Confirmed in the journal:
+    every `systemctl start pocketinfer.service` logged "Stopping active
+    background 'pocketinfer.service'..." from the service's own PID,
+    immediately followed by systemd stopping the unit; `Restart=on-failure`
+    never kicked in because a clean SIGTERM stop isn't a failure, so it just
+    stayed dead.
+    """
+    try:
+        # cgroup v2 (this device) and v1 both name the owning unit in the
+        # process's own cgroup path, and it is inherited by children.
+        with open("/proc/self/cgroup", "r") as fil:
+            if "pocketinfer.service" in fil.read():
+                return True
+    except OSError:
+        pass
+    # Fallback for setups whose cgroup path doesn't carry the unit name:
+    # systemd sets INVOCATION_ID for every unit it starts, and MainPID
+    # identifies the unit's own process. Walk our ancestry too, since we may
+    # be a multiprocessing/forkserver child of that main process.
+    if not os.environ.get("INVOCATION_ID"):
+        return False
+    try:
+        res = subprocess.run(
+            ["systemctl", "show", "pocketinfer.service", "--property=MainPID", "--value"],
+            capture_output=True, text=True, timeout=5.0,
+        )
+        main_pid = int(res.stdout.strip() or 0)
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return False
+    if main_pid <= 0:
+        return False
+    pid = os.getpid()
+    for _ in range(16):  # bounded - never spin on an odd/cyclic ppid chain
+        if pid == main_pid:
+            return True
+        try:
+            with open(f"/proc/{pid}/stat", "r") as fil:
+                # ppid is field 4, but field 2 (comm) can itself contain
+                # spaces and parentheses - split after the LAST ')'.
+                pid = int(fil.read().rpartition(")")[2].split()[1])
+        except (OSError, IndexError, ValueError):
+            return False
+        if pid <= 1:
+            return False
+    return False
+
+
 def stop_conflicting_instances():
     """Stop active systemd pocketinfer.service if running interactively to avoid hardware locks."""
+    if _process_is_the_systemd_service():
+        logging.info(
+            "Running as pocketinfer.service itself - skipping the background-instance "
+            "stop (it would SIGTERM this very process before the app ever starts)."
+        )
+        return
     try:
         res = subprocess.run(["systemctl", "is-active", "pocketinfer.service"], capture_output=True, text=True)
         if res.stdout.strip() == "active":
@@ -115,7 +184,13 @@ def stop_conflicting_instances():
 
 def run_master():
     parser = argparse.ArgumentParser(description="PocketInfer Master Setup Command")
-    parser.add_argument('--app', type=str, default="HearTheWorld", help="Application to launch")
+    # This device is a dedicated NomadRight kiosk, and pocketinfer.service's
+    # ExecStart passes no --app, so the default is what the service actually
+    # launches on boot. It used to be HearTheWorld, which meant that even
+    # once the self-stop bug above was fixed the service would have come up
+    # running the wrong application entirely. Pass --app explicitly to run
+    # anything else (e.g. --app HearTheWorld).
+    parser.add_argument('--app', type=str, default="NomadRight", help="Application to launch")
     parser.add_argument('--model', type=str, default="hf.co/Qwen/Qwen3-VL-2B-Instruct-GGUF:Q4_K_M", help="Ollama model name")
     parser.add_argument('--status', action='store_true', help="Check services and exit")
     parser.add_argument('--dummy-board', action='store_true', help="Run in dummy hardware mode")

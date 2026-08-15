@@ -154,14 +154,127 @@ class NomadRightApplication(BaseApplication):
         # once - the intermittent "overlay" glitch this was added to fix.
         self._screen_lock = threading.Lock()
 
+    # ── On-screen pipeline log ─────────────────────────────────────────────
+
+    def _log(self, msg: str) -> None:
+        """
+        Emit one line to BOTH the Python logger and the LCD's pipeline-log
+        page (topbar terminal icon, see ui/handheld.py).
+
+        This is what makes the kiosk usable with no terminal attached: every
+        stage boundary that previously only existed in the console scrollback
+        is now readable on the device itself, including whether the trigger
+        button actually registered and how long each stage took.
+
+        Lines are forced to ASCII because the log page renders in
+        terminalio.FONT, which has no Devanagari glyphs - a native-script
+        character would draw as nothing while still consuming a column. Log
+        *facts about* native text (its length, its language) here; the text
+        itself belongs on the main screen, which uses a font that can render
+        it.
+        """
+        line = f"{time.strftime('%H:%M:%S')} {msg}"
+        line = line.encode("ascii", "replace").decode("ascii")
+        self.logger.info("[NomadRight] %s", msg)
+        try:
+            self.board.log_line(line)
+        except Exception:
+            # Diagnostics must never be able to break a real turn - a failed
+            # log push is strictly less important than the answer in flight.
+            self.logger.debug("[NomadRight] on-screen log push failed", exc_info=True)
+
+    def _sync_language_buttons(self) -> None:
+        """
+        Make the Settings page's highlighted language match the language the
+        pipeline is actually configured to use.
+
+        The page's constructor default highlights 'ASR En' (correct for
+        HearTheWorld, whose default input_language really is "en"), but
+        NomadRight's SOURCE_LANGUAGES has no English entry at all - so on
+        this app the screen claimed English while every turn ran in Hindi,
+        and pressing that highlighted button did nothing whatsoever, because
+        _lang_name_to_code('En', SOURCE_LANGUAGES) returns None and the
+        setting is left untouched. Declaring the truth here fixes both the
+        wrong highlight and the "that button is dead" symptom.
+        """
+        lang = self.settings.get("input_language", constants.DEFAULT_SOURCE_LANGUAGE)
+        bridge_lang = self.settings.get("bridge_language", constants.DEFAULT_BRIDGE_LANGUAGE)
+        try:
+            # Button labels are the language code title-cased ('hi' ->
+            # 'ASR Hi', 'bho' -> 'ASR Bho'), matching ui/handheld.py.
+            self.board.select_radio("ASR ", f"ASR {lang.capitalize()}")
+            self.board.select_radio("Bridge ", f"Bridge {bridge_lang.capitalize()}")
+        except Exception:
+            self.logger.debug("[NomadRight] language button sync failed", exc_info=True)
+
+    def _startup_selfcheck(self) -> None:
+        """
+        Probe every subsystem a turn depends on and report each on the LCD
+        log, so "is this thing ready?" is answerable by looking at the
+        device instead of by pressing the button and waiting to see.
+
+        Deliberately synchronous (before the ready screen appears) and
+        tightly timed out: reaching "[READY]" should mean the checks
+        actually passed, not that they haven't run yet. Nothing here can
+        abort startup - a subsystem reported DOWN still surfaces its real
+        error later through the existing per-turn error handling, exactly as
+        it did before this existed.
+        """
+        import requests
+
+        degraded = []
+
+        def _probe(name: str, url: str) -> None:
+            try:
+                resp = requests.get(url, timeout=1.5)
+                if resp.status_code == 200:
+                    self._log(f"{name:<9} OK")
+                    return
+                self._log(f"{name:<9} DOWN (HTTP {resp.status_code})")
+            except Exception:
+                self._log(f"{name:<9} DOWN (no response)")
+            degraded.append(name)
+
+        _probe("BHASHINI", f"http://{self.app_config.bhashini_host}:"
+                           f"{self.app_config.bhashini_port}/health")
+        _probe("OLLAMA", "http://localhost:11434/api/tags")
+
+        mic = getattr(self.board, "alsa_capture_card", None)
+        spk = getattr(self.board, "alsa_playback_card", None)
+        self._log(f"MIC       {'card ' + str(mic) if mic is not None else 'NOT FOUND'}")
+        self._log(f"SPEAKER   {'card ' + str(spk) if spk is not None else 'NOT FOUND'}")
+        if mic is None:
+            degraded.append("MIC")
+        if spk is None:
+            degraded.append("SPEAKER")
+
+        try:
+            schemes = len(constants.SUPPORTED_SCHEME_CODES)
+            self._log(f"KB        {schemes} schemes  lang={self.settings.get('input_language')}")
+        except Exception:
+            self._log("KB        unavailable")
+
+        if degraded:
+            self._log(f"WARNING: degraded -> {','.join(degraded)}")
+        else:
+            self._log("All subsystems OK")
+
     def start(self) -> None:
         """Application start hook. Instantiates the BHASHINI bridge and pipeline controller."""
+        self._log(f"NomadRight v{constants.APP_VERSION} starting")
+
+        load_start = time.time()
         self.bridge = BhashiniBridge(config=self.app_config)
         self.workflow = WorkflowController(config=self.app_config)
+        self._log(f"Pipeline loaded  {time.time() - load_start:.1f}s")
+
         self.board.subscribe_to_ui(self.ui_cb)
 
         if not os.path.exists(self.app_config.log_dir):
             os.makedirs(self.app_config.log_dir, exist_ok=True)
+
+        self._sync_language_buttons()
+        self._startup_selfcheck()
 
         # Pre-warm the camera (device open + first-frame negotiation) at
         # startup rather than leaving it lazy until the worker's first
@@ -181,9 +294,14 @@ class NomadRightApplication(BaseApplication):
 
     def _prewarm_camera(self) -> None:
         try:
-            self.board.camera_frame_jpg()
-            self.logger.info("[NomadRight] Camera pre-warmed at startup.")
+            warm_start = time.time()
+            frame = self.board.camera_frame_jpg()
+            if frame:
+                self._log(f"CAMERA    OK  {time.time() - warm_start:.1f}s")
+            else:
+                self._log("CAMERA    NO FRAME")
         except Exception as exc:
+            self._log("CAMERA    UNAVAILABLE")
             self.logger.debug(f"[NomadRight] Camera pre-warm skipped: {exc}")
 
     # ── Touchscreen Settings page: language selection ──────────────────────
@@ -213,9 +331,11 @@ class NomadRightApplication(BaseApplication):
     def _on_camera_pressed(self) -> None:
         """
         Touchscreen Camera button handler: captures a form photo via the
-        board's existing camera_frame_jpg() (boards/base.py - Arducam CSI on
-        real hardware / USB webcam on this dev box, no new camera-driver
-        code needed) and puts the app into "waiting for your query" state -
+        board's existing camera_frame_jpg() (boards/base.py - USB webcam,
+        currently a SunplusIT "ABWB1002 PC WebCam", see boards/jetson.py's
+        V4L_CAMERA_NAME comment for the hardware history/probing fallback;
+        no new camera-driver code needed here) and puts the app into
+        "waiting for your query" state -
         this IS the Document Scanner mode's entry point (see module
         docstring). Runs on the UI subprocess's callback thread, not the
         main run() loop thread - board.top_text/bottom_text/statusbar calls
@@ -236,12 +356,15 @@ class NomadRightApplication(BaseApplication):
             with self._screen_lock:
                 self.board.mode_text("DOCUMENT SCANNER")
                 self.board.top_text("Capturing...")
-                self.board.bottom_text("Hold the document steady")
+                self.board.bottom_text("Hold camera steady")
                 self.board.statusbar("[CAPTURING]")
+            self._log("CAMERA pressed - capturing")
+            capture_start = time.time()
             try:
                 image_jpg = self.board.camera_frame_jpg()
             except Exception as exc:
                 self.logger.error(f"[NomadRight] Camera capture failed: {exc}")
+                self._log(f"CAMERA FAILED: {exc}"[:52])
                 with self._screen_lock:
                     self.board.top_text("CAMERA ERROR")
                     self.board.bottom_text("Capture failed. Camera=retry, Home=cancel")
@@ -250,6 +373,7 @@ class NomadRightApplication(BaseApplication):
                 return
             if not image_jpg:
                 self.logger.warning("[NomadRight] Camera returned no frame.")
+                self._log("CAMERA returned no frame")
                 with self._screen_lock:
                     self.board.top_text("CAMERA ERROR")
                     self.board.bottom_text("No frame captured. Camera=retry, Home=cancel")
@@ -260,7 +384,14 @@ class NomadRightApplication(BaseApplication):
             with self._image_lock:
                 self.pending_form_image = bytes(image_jpg)
                 self.pending_form_image_ts = time.time()
-            self.logger.info("[NomadRight] Form photo captured, awaiting follow-up query.")
+            self.logger.info(
+                f"[NomadRight] Photo captured ({len(image_jpg)} bytes JPEG), "
+                f"awaiting follow-up query."
+            )
+            self._log(
+                f"PHOTO CAPTURED {len(image_jpg) // 1024} KB  "
+                f"{time.time() - capture_start:.1f}s"
+            )
             self._mode = "DOCUMENT SCANNER"
             # No checkmark/symbol here on purpose: the LCD's bitmap font
             # (NotoSansDevanagari-Regular-12.pcf) doesn't include a glyph
@@ -271,9 +402,9 @@ class NomadRightApplication(BaseApplication):
             # can desync wrapping from what's actually drawn. Plain ASCII
             # only, matching every other screen in this app.
             with self._screen_lock:
-                self.board.top_text("DOCUMENT CAPTURED")
+                self.board.top_text("PHOTO CAPTURED")
                 self.board.bottom_text("Hold button to ask, or Home to cancel")
-                self.board.statusbar("[WAITING FOR QUERY] Ask about the form")
+                self.board.statusbar("[WAITING FOR QUERY] Ask about the photo")
         finally:
             # Cleared last, after pending_form_image and the "Photo
             # captured" screen text are both fully in place (or on any
@@ -403,6 +534,12 @@ class NomadRightApplication(BaseApplication):
             self.board.mode_text("HOME")
             self.board.top_text("NomadRight")
             self.board.bottom_text(self.HOME_HINT)
+        # The one line that answers "is it ready for me to press the
+        # button?" without a terminal attached. Logged once here rather than
+        # per loop iteration - every turn already ends with its own ANSWER
+        # line, so repeating this each time would only push real history off
+        # the top of the page.
+        self._log("READY - hold button to speak")
 
         while self.running:
             lang = self.settings.get("input_language", constants.DEFAULT_SOURCE_LANGUAGE)
@@ -419,12 +556,13 @@ class NomadRightApplication(BaseApplication):
                 # just keeps it correct if we looped back here via an
                 # ASR-empty retry - see step 1 below).
                 self._mode = "DOCUMENT SCANNER"
-                self.board.statusbar("[WAITING FOR QUERY] Ask about the form")
+                self.board.statusbar("[WAITING FOR QUERY] Ask about the photo")
             else:
                 self._mode = "HOME"
+                lang_name = constants.SOURCE_LANGUAGES.get(lang, lang.upper())
                 with self._screen_lock:
                     self.board.mode_text("HOME")
-                    self.board.statusbar("[READY]")
+                    self.board.statusbar(f"[READY] Lang:{lang_name}  Hold=ask")
 
             self.board.wait_for_trigger_button_down()
 
@@ -447,21 +585,34 @@ class NomadRightApplication(BaseApplication):
                     self.board.statusbar("[LISTENING]")
                     self.board.top_text("")
                     self.board.bottom_text("")
+                # Logged before audio.start() rather than after, so the log
+                # confirms the press registered even if opening the capture
+                # device is what goes wrong.
+                self._log("BTN DOWN - listening")
 
                 # Press & hold triggers the mic - matches the wired capacitive
                 # touch button on GPIO09 (see jetson_suno_sutra_expansion_pinout.png).
+                record_start = time.time()
                 self.board.audio.start()
                 self.board.wait_for_trigger_button_up()
                 self.board.button_led(False)
                 self.board.audio.stop()
+                record_s = time.time() - record_start
+                # Everything after the button is released counts against the
+                # end-to-end budget - the worker's own hold time doesn't.
+                turn_start = time.time()
+                self._log(f"BTN UP - recorded {record_s:.1f}s")
 
                 # ── 1. ASR: worker's spoken language -> native text ─────────
-                self.board.statusbar("Recognizing")
+                self.board.statusbar("[PROCESSING] Recognizing speech")
+                stage_start = time.time()
                 wav_bytes = self.board.audio.to_audio_data().get_wav_data()
                 native_query = self.bridge.listen(wav_bytes, lang)
+                self._log(f"ASR {lang} {len(native_query)} chars  {time.time() - stage_start:.1f}s")
 
                 if not native_query.strip():
                     self.logger.warning("[NomadRight] ASR returned empty text.")
+                    self._log("ASR empty - ask again")
                     self.board.statusbar("[ERROR]")
                     self.board.top_text("Could not hear you")
                     self.board.bottom_text("Please try again")
@@ -476,7 +627,9 @@ class NomadRightApplication(BaseApplication):
 
                 # ── 2. NMT: native language -> English for the Decision Layer ─
                 self.board.statusbar("[TRANSLATING]")
+                stage_start = time.time()
                 query_en = self.bridge.to_pipeline_language(native_query, lang)
+                self._log(f"NMT {lang}->EN  {time.time() - stage_start:.1f}s")
 
                 # ── 3. Camera follow-up short-circuit ────────────────────────
                 # A pending form photo (Camera button, see ui_cb/_on_camera_pressed)
@@ -500,10 +653,13 @@ class NomadRightApplication(BaseApplication):
                     self.logger.info(f"[LANGUAGE] input={lang}")
                     self.logger.info(f"[TRANSLATION] EN: '{query_en}'")
                     self.logger.info("[QWEN_VISION] RAG NOT called - image + question sent directly to Qwen")
-                    self.board.statusbar("[READING FORM] This may take a moment")
+                    self.board.statusbar("[ANALYZING PHOTO] This may take a moment")
+                    self._log("QWEN-VL analyzing photo...")
+                    stage_start = time.time()
                     response_pkg: StructuredResponsePackage = self.workflow.process_vision_query(
                         query_en, image_for_this_turn, context_scheme_code=self.last_scheme_code
                     )
+                    self._log(f"QWEN-VL done  {time.time() - stage_start:.1f}s")
                     self.last_answer_en = response_pkg.voice_text
                     if response_pkg.scheme_code:
                         self.last_scheme_code = response_pkg.scheme_code
@@ -542,9 +698,14 @@ class NomadRightApplication(BaseApplication):
                     self.logger.info(f"[LANGUAGE] input={lang}")
                     self.logger.info(f"[TRANSLATION] EN: '{query_en}'")
                     self.board.mode_text("VOICE TRANSLATION")
-                    self.board.statusbar("[THINKING]")
+                    self.board.statusbar("[PROCESSING] Finding your answer")
+                    stage_start = time.time()
                     response_pkg = self.workflow.process(
                         query_en, context_scheme_code=self.last_scheme_code
+                    )
+                    self._log(
+                        f"DECIDE {response_pkg.scheme_code or 'no-match'}  "
+                        f"{time.time() - stage_start:.1f}s"
                     )
                     self.last_answer_en = response_pkg.voice_text
                     # Only update on an actual scheme match this turn - keep the
@@ -562,11 +723,14 @@ class NomadRightApplication(BaseApplication):
                 # _on_home_pressed() already put up.
                 if self._home_requested.is_set():
                     self.logger.info("[NomadRight] Home was pressed during processing - discarding this turn's answer.")
+                    self._log("HOME pressed - turn discarded")
                     continue
 
                 # ── 5. NMT: English answer -> worker's own language ─────────
                 self.board.statusbar("[TRANSLATING]")
+                stage_start = time.time()
                 answer_native = self.bridge.from_pipeline_language(response_pkg.voice_text, lang)
+                self._log(f"NMT EN->{lang}  {time.time() - stage_start:.1f}s")
                 self.logger.info(f"[TRANSLATION_OUTPUT] {lang}: '{answer_native}'")
 
                 # ── 6. Display + Speak — conversation view ────────────────────
@@ -580,7 +744,15 @@ class NomadRightApplication(BaseApplication):
                     self.board.bottom_text(bottom_hint[:180])
                     self.board.statusbar(f"[SPEAKING] {response_pkg.display_top_text} Home=stop")
                 self.logger.info("[TTS] Synthesizing and playing speaker output")
-                played_fully = self._play(self.bridge.speak(answer_native, lang))
+                stage_start = time.time()
+                tts_wav = self.bridge.speak(answer_native, lang)
+                # Logged before playback, so the end-to-end number below
+                # measures time-to-first-sound (what the worker actually
+                # waits for) rather than including however long the answer
+                # takes to read out loud.
+                self._log(f"TTS {lang}  {time.time() - stage_start:.1f}s")
+                self._log(f"ANSWER after {time.time() - turn_start:.1f}s - speaking")
+                played_fully = self._play(tts_wav)
 
                 if played_fully:
                     with self._screen_lock:
@@ -592,6 +764,11 @@ class NomadRightApplication(BaseApplication):
 
             except Exception as exc:
                 self.logger.error(f"[NomadRight] Error in application processing loop: {exc}", exc_info=True)
+                # Put the failure on the LCD log too - the whole point of
+                # that page is that a failed turn is diagnosable from the
+                # device. Truncated to fit one log line; the untruncated
+                # traceback is in the logger call above.
+                self._log(f"ERROR {type(exc).__name__}: {exc}"[:52])
                 self.board.button_led(False)
                 with self._screen_lock:
                     self.board.statusbar("[ERROR]")

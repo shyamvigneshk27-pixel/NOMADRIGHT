@@ -228,11 +228,33 @@ class Board:
             self.ui_cbs.remove(func)
     
     def wait_for_trigger_button_down(self, timeout=None):
+        # Race: trig_cb() (a GPIO interrupt callback, its own thread) can set
+        # trigger_button_down between this caller's *previous* wait_for_up()
+        # returning and this call starting - clear()-then-wait() would wipe
+        # that already-fired edge and then block forever for a down-press
+        # that already happened. self.trigger_button is the same interrupt's
+        # always-current boolean state, set right before the Event, so
+        # checking it after clear() closes the window: any edge that landed
+        # before, during, or after clear() is caught by either the state
+        # check or the subsequent wait().
         self.trigger_button_down.clear()
+        if self.trigger_button:
+            return
         self.trigger_button_down.wait(timeout=timeout)
-    
+
     def wait_for_trigger_button_up(self, timeout=None):
+        # Same race as wait_for_trigger_button_down() above, mirrored for
+        # the release edge - this is the one that actually bit on real
+        # hardware: a worker's brief press-release (button up landing while
+        # audio.start() was still opening the recording device, before this
+        # call even began) had its "up" edge silently swallowed by
+        # clear(), leaving wait_for_trigger_button_up() blocked long after
+        # the button was physically released - the mic stayed "listening"
+        # for many extra seconds until the worker pressed and released
+        # again, which is exactly the "stuck in Listening" symptom.
         self.trigger_button_up.clear()
+        if not self.trigger_button:
+            return
         self.trigger_button_up.wait(timeout=timeout)
 
     def camera_frame(self):
@@ -338,6 +360,24 @@ class Board:
 
     def memory_text(self, text) -> bool:
         return True
+
+    def log_line(self, text) -> bool:
+        ''' Append one line to the on-screen pipeline log (see
+        ui/handheld.py's log page). Boards with no display fall through to
+        here: callers already emit the same line to the Python logger, so
+        this stays silent rather than double-printing every line to a
+        console that is showing it once already. '''
+        return True
+
+    def clear_log(self) -> bool:
+        ''' Blank the on-screen pipeline log. No-op without a display. '''
+        return True
+
+    def select_radio(self, prefix, name) -> bool:
+        ''' Highlight `name` within the Settings page radio group `prefix`,
+        so the page agrees with the setting the application is really using.
+        No-op without a display. '''
+        return False
 
 class DummyBoard(Board):
     def __init__(self, args):

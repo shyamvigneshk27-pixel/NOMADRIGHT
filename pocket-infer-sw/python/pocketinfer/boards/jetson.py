@@ -19,8 +19,18 @@ from threading import Thread
 
 
 class PocketInferDevboard(Board):
-    V4L_CAMERA_NAME = 'Arducam_8mp'
-    ALSA_CAPTURE_NAME = 'Arducam_8mp'
+    # Physical camera was swapped from the Arducam 8MP to a SunplusIT
+    # "ABWB1002 PC WebCam" (USB ID 0806:0806) - confirmed on-device via
+    # `ls /dev/v4l/by-id/` (usb-SunplusIT_Inc_ABWB1002_PC_WebCam_J-video-
+    # index0/1) and `arecord -l` (card 0: WebCam [ABWB1002 PC WebCam],
+    # device 0: USB Audio - this webcam has its own built-in mic, same as
+    # the old Arducam did). CameraReader._run() in boards/base.py already
+    # has a probe-everything fallback for when this name doesn't match
+    # (e.g. yet another camera swap), so this is a fast-path optimization,
+    # not a hard requirement - but keeping it accurate avoids a startup
+    # warning and a full device probe on every launch.
+    V4L_CAMERA_NAME = 'ABWB1002_PC_WebCam'
+    ALSA_CAPTURE_NAME = 'ABWB1002 PC WebCam'
     # Must match the real ALSA device name substring ('UACDemoV1.0: USB
     # Audio' per `aplay -l`) - the old value 'USB Audio Device' never
     # matched anything on this hardware, so Board.__init__'s "device not
@@ -117,6 +127,17 @@ class PocketInferDevboardUI(PocketInferDevboard):
     def memory_text(self, text):
         self.UI.memory_text(text)
         return True
+
+    def log_line(self, text):
+        self.UI.log_line(text)
+        return True
+
+    def clear_log(self):
+        self.UI.clear_log()
+        return True
+
+    def select_radio(self, prefix, name):
+        return self.UI.select_radio(prefix, name)
 
 class RaspiAIHat2Board(Board):
     V4L_CAMERA_NAME = 'Arducam_8mp'

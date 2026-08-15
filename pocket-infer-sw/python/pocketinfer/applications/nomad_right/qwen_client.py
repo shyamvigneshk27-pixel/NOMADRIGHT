@@ -52,7 +52,7 @@ _SYSTEM_PROMPT = (
     f"reply with exactly this text and nothing else: {constants.LLM_SENTINEL_NOT_FOUND}"
 )
 
-# Vision path (camera/form-reading) never receives text context - see
+# Vision path (camera button) never receives text context - see
 # workflow.py's process_vision_query and the module docstring above. The
 # text-fallback prompt's "context below" framing measurably biased the
 # model toward the not-found sentinel even with a clear, readable image in
@@ -60,14 +60,28 @@ _SYSTEM_PROMPT = (
 # correctly when (incorrectly) given RAG context returned the sentinel once
 # that context was correctly removed) - this prompt instead frames the
 # photographed image itself as the one and only source of truth.
+#
+# Deliberately NOT scoped to "reading a document" - the camera button is a
+# general capture ("let the camera be accessible to any frame... even if we
+# say describe the scene"), and the original document-only framing here
+# measurably caused the model to decline (sentinel) non-document photos
+# just because they weren't a form, even when the photo itself was
+# perfectly clear. Sentinel is now reserved for genuinely unusable images
+# (too blurry/dark/nothing recognizable) or a detail that truly isn't
+# visible, not for "this isn't a document."
 _VISION_SYSTEM_PROMPT = (
-    "You are a factual assistant for a welfare-rights kiosk used by migrant "
-    "workers in India, reading a photographed government form/document on "
-    "their behalf. Carefully look at the provided image and answer the "
-    "question using ONLY what is visible in it. Keep the answer under 40 "
-    "words, plain factual sentences, no speculation. If the image is "
-    "unclear, blurry, cropped, or the requested field/text is not visible, "
-    f"reply with exactly this text and nothing else: {constants.LLM_SENTINEL_NOT_FOUND}"
+    "You are a helpful visual assistant at an offline welfare-rights kiosk "
+    "for migrant workers in India. A worker has pointed the kiosk's camera "
+    "at something and asked a question about it. Carefully look at the "
+    "provided image and answer using ONLY what is visible in it. If the "
+    "image shows a government form or document, read the relevant text or "
+    "field precisely. If it shows anything else - a person, an object, a "
+    "place, a general scene - describe or answer about what is actually "
+    "visible instead of assuming it should be a document. Keep the answer "
+    "under 40 words, plain factual sentences, no speculation. Only if the "
+    "image is too blurry, dark, or unclear to make out anything "
+    "meaningful, or the requested detail genuinely isn't visible, reply "
+    f"with exactly this text and nothing else: {constants.LLM_SENTINEL_NOT_FOUND}"
 )
 
 # For a query that isn't about any welfare scheme at all (no scheme named,
@@ -211,7 +225,10 @@ class QwenClient:
         """
         if not image_jpg:
             return None
-        query = query or "Describe what this document says and how it's relevant to the worker."
+        query = query or (
+            "Describe what is visible in this photo - reading any document "
+            "text if present - and how it might be relevant to the worker."
+        )
         # CAMERA_FORM never passes context_snippets (see workflow.py) - the
         # branch on context_snippets here exists only so this method still
         # behaves sensibly if some future caller does supply grounding text
