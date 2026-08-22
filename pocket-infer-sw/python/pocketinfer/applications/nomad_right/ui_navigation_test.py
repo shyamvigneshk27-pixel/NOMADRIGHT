@@ -56,6 +56,10 @@ class MockBoard:
         self.top = t
         self.calls.append(("top", t))
 
+    def select_radio(self, prefix, name):
+        self.calls.append(("select_radio", prefix, name))
+        return True
+
     def bottom_text(self, t):
         self.bottom = t
         self.calls.append(("bottom", t))
@@ -183,6 +187,65 @@ class TestHomeButton(unittest.TestCase):
         app = _make_app()
         app._on_home_pressed()
         self.assertTrue(app._home_requested.is_set())
+
+
+class TestAsrLanguageGating(unittest.TestCase):
+    """Settings-page ASR language buttons: SOURCE_LANGUAGES (constants.py)
+    lists 7 codes the touchscreen renders buttons for, but BHASHINI only
+    ships ASR checkpoints for 2 of them (hi, ta - see infer.py). Selecting
+    one of the other 5 used to be accepted silently, leaving every
+    subsequent turn's /asr call 500 forever with the screen still
+    confidently highlighting the dead button (observed live: worker
+    language set to 'hne', every turn after logged 'ASR empty' with no
+    visible explanation). ui_cb() now gates on ASR_SUPPORTED_LANGUAGES."""
+
+    def test_supported_language_selection_is_applied(self):
+        app = _make_app()
+        app.ui_cb("ASR Hi")
+        self.assertEqual(app.settings["input_language"], "hi")
+        app.ui_cb("ASR Ta")
+        self.assertEqual(app.settings["input_language"], "ta")
+
+    def test_unsupported_language_selection_is_refused(self):
+        """The exact failure observed live: BHASHINI has no ASR model for
+        Chhattisgarhi, so selecting it must not take."""
+        app = _make_app()
+        app.ui_cb("ASR Hi")
+        app.ui_cb("ASR Hne")
+        self.assertEqual(
+            app.settings["input_language"], "hi",
+            "an unsupported ASR language must not overwrite a working one",
+        )
+
+    def test_unsupported_selection_snaps_the_highlight_back(self):
+        app = _make_app()
+        app.ui_cb("ASR Hi")
+        app.ui_cb("ASR Bho")
+        self.assertIn(("select_radio", "ASR ", "ASR Hi"), app.board.calls)
+
+    def test_unsupported_selection_survives_a_broken_select_radio(self):
+        """select_radio() goes over the UI subprocess RPC (ui/handheld.py) -
+        if that call itself fails, the refusal must still complete instead
+        of taking down the UI callback thread."""
+        app = _make_app()
+        app.board.select_radio = unittest.mock.MagicMock(side_effect=RuntimeError("rpc down"))
+        app.ui_cb("ASR Sat")  # must not raise
+        self.assertNotEqual(app.settings.get("input_language"), "sat")
+
+    def test_every_unsupported_language_is_refused(self):
+        app = _make_app()
+        app.ui_cb("ASR Hi")
+        for bad in ["ASR Or", "ASR Bho", "ASR Mai", "ASR Sat", "ASR Hne"]:
+            app.ui_cb(bad)
+            self.assertEqual(app.settings["input_language"], "hi", f"{bad!r} was wrongly accepted")
+
+    def test_asr_supported_languages_matches_real_bhashini_checkpoints(self):
+        """Locks the gating set to what infer.py actually loads, so this
+        test breaks (loudly, in CI) instead of the LCD (silently, live) the
+        next time someone edits one without the other."""
+        from pocketinfer.applications.nomad_right import constants
+        self.assertEqual(constants.ASR_SUPPORTED_LANGUAGES, {"hi", "ta"})
+        self.assertTrue(constants.ASR_SUPPORTED_LANGUAGES.issubset(constants.SOURCE_LANGUAGES.keys()))
 
 
 class TestStopAudio(unittest.TestCase):
@@ -515,6 +578,7 @@ def _run_all():
     print("=" * 60)
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCameraButton)
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestHomeButton))
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestAsrLanguageGating))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestStopAudio))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPlayCancellation))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestModeSwitchingSequence))

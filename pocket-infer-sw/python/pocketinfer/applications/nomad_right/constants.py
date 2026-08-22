@@ -189,6 +189,16 @@ SOURCE_LANGUAGES = {
 }
 DEFAULT_SOURCE_LANGUAGE = "hi"
 
+# Of SOURCE_LANGUAGES above, only these have an actual ASR checkpoint on the
+# BHASHINI side (~/bhashini_models/asr/checkpoints/{hi,ta}-conformer.onnx -
+# see infer.py's `self.sessions` dict). The rest are UI/roadmap entries the
+# touchscreen still renders buttons for; selecting one used to be accepted
+# silently and made every subsequent turn's /asr call 500 forever with no
+# on-screen explanation. app.py's ui_cb() gates on this set before honouring
+# a selection - add a code here only once its .onnx checkpoint actually
+# exists on disk.
+ASR_SUPPORTED_LANGUAGES = {"hi", "ta"}
+
 # Voice bridge target languages (destination-state official's language).
 BRIDGE_LANGUAGES = {
     "ta": "Tamil",

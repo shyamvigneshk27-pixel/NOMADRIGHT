@@ -371,9 +371,24 @@ class NomadRightApplication(BaseApplication):
         """
         if msg.startswith("ASR "):
             code = self._lang_name_to_code(msg[4:], constants.SOURCE_LANGUAGES)
-            if code:
+            if code and code in constants.ASR_SUPPORTED_LANGUAGES:
                 self.settings["input_language"] = code
                 self.logger.info(f"[NomadRight] Worker language set to {code}")
+            elif code:
+                # SOURCE_LANGUAGES lists this code, but BHASHINI has no ASR
+                # checkpoint for it (see constants.ASR_SUPPORTED_LANGUAGES) -
+                # accepting it used to leave every future turn's /asr call
+                # 500-ing with the screen still confidently highlighting the
+                # dead button. Refuse the switch and snap the highlight back
+                # to what's actually active instead.
+                current = self.settings.get("input_language", constants.DEFAULT_SOURCE_LANGUAGE)
+                self.logger.warning(
+                    f"[NomadRight] ASR {code} has no BHASHINI model - staying on {current}")
+                self._log(f"ASR {code} unavailable - staying on {current}")
+                try:
+                    self.board.select_radio("ASR ", f"ASR {current.capitalize()}")
+                except Exception:
+                    self.logger.debug("[NomadRight] language button re-sync failed", exc_info=True)
         elif msg.startswith("Bridge "):
             code = self._lang_name_to_code(msg[7:], constants.BRIDGE_LANGUAGES)
             if code:
